@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "kanban": {
+      ".read": "auth != null && root.child('authorizedUsers').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('authorizedUsers').child(auth.uid).val() === true"
+    },
+    "authorizedUsers": {
+      "$uid": {
+        ".read": "auth != null && root.child('authorizedUsers').child(auth.uid).val() === true",
+        ".write": false
+      }
+    }
+  }
+}

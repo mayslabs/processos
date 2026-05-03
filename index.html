@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -17,6 +17,28 @@
   --c1:#6366F1;--c2:#F59E0B;--c3:#3B82F6;--c4:#8B5CF6;--c5:#10B981;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex}
+
+/* ── AUTH ── */
+.auth-locked .sidebar,.auth-locked .main{display:none}
+.auth-view{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#E0F2FE 0%,#F8FAFC 45%,#EEF2FF 100%);z-index:500;align-items:center;justify-content:center;padding:24px}
+.auth-locked .auth-view{display:flex}
+.auth-card{width:min(420px,100%);background:#fff;border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:0 24px 60px rgba(15,23,42,.18)}
+.auth-brand{display:flex;gap:14px;align-items:center;margin-bottom:22px}
+.auth-mark{width:44px;height:44px;border-radius:12px;background:#EFF6FF;color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:23px;font-weight:800}
+.auth-brand h1{font-size:22px;line-height:1.2;margin-bottom:4px;color:var(--text)}
+.auth-brand p{font-size:13px;color:var(--muted)}
+.auth-label{display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 6px}
+.auth-input{width:100%;border:1px solid var(--border);border-radius:9px;padding:11px 12px;font-size:15px;color:var(--text);outline:none;font-family:inherit;background:#fff}
+.auth-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.auth-submit{width:100%;margin-top:18px;border:none;border-radius:9px;background:var(--primary);color:#fff;padding:11px 14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+.auth-submit:hover{background:var(--primary-dark)}
+.auth-submit:disabled{opacity:.65;cursor:wait}
+.auth-error{display:none;border:1px solid #FECACA;background:#FEF2F2;color:#B91C1C;border-radius:9px;padding:10px 12px;font-size:13px;margin-bottom:14px}
+.auth-error.on{display:block}
+.auth-help{font-size:12px;color:var(--muted);line-height:1.45;margin-top:14px;text-align:center}
+.user-menu{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.logout-btn{border:1px solid var(--border);background:#fff;color:var(--text);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.logout-btn:hover{border-color:var(--primary);color:var(--primary)}
 
 /* ── SIDEBAR ── */
 .sidebar{width:var(--sidebar);background:var(--sb-bg);display:flex;flex-direction:column;flex-shrink:0;border-right:1px solid var(--border)}
@@ -363,7 +385,27 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
 }
 </style>
 </head>
-<body>
+<body class="auth-locked">
+
+<!-- AUTH -->
+<div class="auth-view" id="auth-view">
+  <form class="auth-card" onsubmit="login(event)">
+    <div class="auth-brand">
+      <div class="auth-mark">⚖</div>
+      <div>
+        <h1>Gestão Jurídica</h1>
+        <p>Entre para acessar os processos.</p>
+      </div>
+    </div>
+    <div class="auth-error" id="auth-error"></div>
+    <label class="auth-label" for="auth-email">E-mail</label>
+    <input class="auth-input" id="auth-email" type="email" autocomplete="username" required>
+    <label class="auth-label" for="auth-password">Senha</label>
+    <input class="auth-input" id="auth-password" type="password" autocomplete="current-password" required>
+    <button class="auth-submit" id="auth-submit" type="submit">Entrar</button>
+    <p class="auth-help">O acesso precisa estar cadastrado no Firebase Authentication.</p>
+  </form>
+</div>
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
@@ -391,6 +433,10 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
     <span class="topbar-title" id="topbar-title">Kanban de Processos</span>
     <div class="topbar-right">
       <div id="sync-status"><span style="color:#F59E0B;font-size:11px;font-weight:600">🔄 Conectando...</span></div>
+      <div class="user-menu">
+        <span id="user-email"></span>
+        <button class="logout-btn" onclick="logout()">Sair</button>
+      </div>
       <input class="search" type="text" placeholder="🔍  Buscar cliente..." id="search-input" oninput="handleSearch(this.value)">
       <button class="btn-add" onclick="openModal()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -506,7 +552,6 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
       <div class="sec-title">Credenciais GOV.br</div>
       <div class="form-row">
         <div class="fg"><label>CPF / Usuário</label><input id="f-cpf" placeholder="000.000.000-00"></div>
-        <div class="fg"><label>Senha GOV</label><input id="f-pwd" type="password" placeholder="Senha"></div>
       </div>
 
       <div class="sec-title">Honorários</div>
@@ -525,6 +570,7 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script>
 // ─────────────────────────────────────────────
@@ -568,6 +614,7 @@ let calDate = new Date();
 let calSelected = null;
 let dragId = null;
 let editingClientId = null;
+let auth, currentUser = null;
 
 // ─────────────────────────────────────────────
 //  UTILS
@@ -624,42 +671,115 @@ function initFirebase(){
   const configured = Object.values(FIREBASE_CONFIG).every(v => v !== 'COLE_AQUI');
   if(!configured){
     showSetupBanner();
-    clients = getInitialData();
+    clients = [];
     renderAll();
     return;
   }
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
-    fbRef = firebase.database().ref('kanban');
-    setSyncStatus('connecting');
-    fbRef.on('value', snap => {
-      const raw = snap.val();
-      if(typeof raw === 'string'){
-        try {
-          const parsed = JSON.parse(raw);
-          if(Array.isArray(parsed)){
-            // Migração do formato antigo (só array de clients)
-            clients = parsed.map(normalizeClient).filter(Boolean);
-            globalTags = extractGlobalTags(clients);
-          } else {
-            clients = (parsed.clients||[]).map(normalizeClient).filter(Boolean);
-            globalTags = parsed.globalTags||[];
-          }
-        } catch(e){ clients = getInitialData(); globalTags = extractGlobalTags(clients); }
-      } else {
-        clients = getInitialData();
-        globalTags = extractGlobalTags(clients);
-        fbRef.set(JSON.stringify({clients, globalTags}));
-      }
-      fbReady = true;
-      setSyncStatus('synced');
-      renderAll();
-    }, err => { setSyncStatus('error'); console.error(err); });
+    auth = firebase.auth();
+    auth.onAuthStateChanged(user => {
+      if(user) enterApp(user);
+      else leaveApp();
+    });
   } catch(e){ setSyncStatus('error'); console.error(e); }
 }
 
+function enterApp(user){
+  currentUser = user;
+  document.body.classList.remove('auth-locked');
+  const emailEl = document.getElementById('user-email');
+  if(emailEl) emailEl.textContent = user.email || '';
+  listenKanban();
+}
+
+function leaveApp(){
+  currentUser = null;
+  fbReady = false;
+  if(fbRef) fbRef.off();
+  fbRef = null;
+  clients = [];
+  globalTags = [];
+  activeClientId = null;
+  closePanel();
+  document.body.classList.add('auth-locked');
+  setAuthError('');
+  renderAll();
+}
+
+function listenKanban(){
+  if(!currentUser) return;
+  if(fbRef) fbRef.off();
+  fbRef = firebase.database().ref('kanban');
+  setSyncStatus('connecting');
+  fbRef.on('value', snap => {
+    const raw = snap.val();
+    if(typeof raw === 'string'){
+      try {
+        const parsed = JSON.parse(raw);
+        if(Array.isArray(parsed)){
+          clients = parsed.map(normalizeClient).filter(Boolean);
+          globalTags = extractGlobalTags(clients);
+        } else {
+          clients = (parsed.clients||[]).map(normalizeClient).filter(Boolean);
+          globalTags = parsed.globalTags||[];
+        }
+      } catch(e){
+        clients = [];
+        globalTags = [];
+        console.error('Erro ao ler dados salvos:', e);
+      }
+    } else if(raw && typeof raw === 'object') {
+      clients = (raw.clients||[]).map(normalizeClient).filter(Boolean);
+      globalTags = raw.globalTags||extractGlobalTags(clients);
+    } else {
+      clients = [];
+      globalTags = [];
+    }
+    fbReady = true;
+    setSyncStatus('synced');
+    renderAll();
+  }, err => { setSyncStatus('error'); console.error(err); });
+}
+
+function login(e){
+  e.preventDefault();
+  if(!auth) return setAuthError('Firebase Authentication não foi inicializado.');
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const btn = document.getElementById('auth-submit');
+  btn.disabled = true;
+  btn.textContent = 'Entrando...';
+  setAuthError('');
+  auth.signInWithEmailAndPassword(email, password)
+    .catch(err => setAuthError(authMessage(err)))
+    .finally(() => {
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+    });
+}
+
+function logout(){
+  if(auth) auth.signOut();
+}
+
+function setAuthError(msg){
+  const el = document.getElementById('auth-error');
+  if(!el) return;
+  el.textContent = msg || '';
+  el.classList.toggle('on', !!msg);
+}
+
+function authMessage(err){
+  const code = err && err.code ? err.code : '';
+  if(code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential')) return 'E-mail ou senha inválidos.';
+  if(code.includes('too-many-requests')) return 'Muitas tentativas. Aguarde um pouco e tente novamente.';
+  if(code.includes('operation-not-allowed')) return 'Ative o provedor E-mail/Senha no Firebase Authentication.';
+  return 'Não foi possível entrar. Verifique o acesso e tente novamente.';
+}
+
 function save(){
-  if(fbReady && fbRef){
+  if(currentUser && fbReady && fbRef){
     setSyncStatus('saving');
     fbRef.set(JSON.stringify({clients, globalTags})).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error'));
   }
@@ -777,152 +897,9 @@ function normalizeClient(c){
 }
 
 function getInitialData(){
-  return [
-    mkClient({name:'Henry Vicente dos Santos Silva', benefitType:'BPC - Deficiência', via:'Judicial', column:'em_analise',
-      currentSituation:'Aguardando elaboração da peça judicial. Indeferido na via administrativa.',
-      summary:'BPC/LOAS à pessoa com deficiência. Menor representado pela mãe Maria Márcia da Silva Santos. Histórico de AVC secundário à trombose venosa cerebral (2024), com necessidade de acompanhamento contínuo por hematologia e neurologia pediátrica, uso de anticoagulante, diagnóstico de ansiedade e dificuldades importantes de aprendizagem, atenção, concentração, comportamento e controle emocional. O INSS indeferiu o benefício alegando que a criança não atenderia ao critério de deficiência para fins de BPC/LOAS.',
-      credentials:{cpf:'533.190.038-01',govUser:'',password:'Silv@2201'},
-      tasks:[mkTask('Solicitar contrato e procuração com assinatura para Letícia')],
-    }),
-    mkClient({name:'Paulo Leandro Cunha Cruz', benefitType:'Auxílio-doença', via:'Administrativa', column:'em_analise',
-      currentSituation:'Aguardando requerimento administrativo. Vínculo empregatício encerrado em outubro de 2025.',
-      summary:'Caso de auxílio-doença. Segurado teve vínculo empregatício encerrado em outubro de 2025 e possui ação trabalhista com Letícia. Quadro de coxartrose bilateral dos quadris (CID M16) com dor crônica, progressiva e incapacitante, marcha claudicante, severa restrição de mobilidade e indicação de tratamento cirúrgico (artroplastia total). Laudo caracterizando deficiência física com limitação para permanecer em pé e caminhar longas distâncias.',
-      credentials:{cpf:'087.899.344-40',govUser:'',password:'Deus1996.'},
-      tasks:[
-        mkTask('Retirar verificação em 2 etapas do GOV.br'),
-        mkTask('Solicitar contrato e procuração assinados'),
-        mkTask('Dar entrada no requerimento administrativo'),
-      ],
-    }),
-    mkClient({name:'Simone da Costa Silva', benefitType:'Benefício Rural / BPC', via:'Administrativa', column:'em_analise',
-      currentSituation:'Aguardando documentação e informações adicionais.',
-      summary:'Caso relacionado ao garimpo (benefício rural). Possível BPC. Possui HIV. Há poucos arquivos: apenas contrato, documentos pessoais e comprovante de endereço.',
-      tasks:[mkTask('Solicitar documentação adicional, informações e senha do GOV.br')],
-    }),
-    mkClient({name:'Vanessa de Paula da Silva', benefitType:'Salário-maternidade rural', via:'Administrativa', column:'em_analise',
-      currentSituation:'Verificar existência de requerimento administrativo. Nascimento ocorreu em 23/02/2024.',
-      summary:'Caso de salário-maternidade rural. Nascimento ocorrido em 23/02/2024. Possui ampla documentação rural.',
-      tasks:[
-        mkTask('Solicitar senha do GOV.br'),
-        mkTask('Verificar se há requerimento administrativo já protocolado'),
-      ],
-    }),
-    mkClient({name:'Ernando Alves Coelho', benefitType:'Auxílio-acidente', via:'Administrativa', column:'req_administrativo',
-      currentSituation:'Em trâmite na via administrativa. Aguardando análise do INSS. Protocolado em 03/02/2026.',
-      summary:'Acidente de trabalho típico ocorrido em 19/12/2024 nas dependências do empregador. Aprisionamento do membro superior direito em máquina, resultando em lesão traumática grave no dedo indicador da mão direita com amputação da falange distal.',
-      credentials:{cpf:'035.787.221-54',govUser:'',password:'Albeniza12?'},
-    }),
-    mkClient({name:'Ewyllyn Janini Rosa Ferreira', benefitType:'Salário-maternidade rural', via:'Judicial', column:'processo_judicial',
-      processNumber:'0000376-16.2026.4.05.8304', tribunal:'TRF5',
-      currentSituation:'Aguardando instrução concentrada. Sem contato com a cliente.',
-      summary:'Caso de salário-maternidade rural na via judicial (TRF5). Havia manifestado interesse na instrução concentrada, mas não há contato com a cliente para confirmar. Necessário manifestar preferência por audiência de instrução.',
-      credentials:{cpf:'131.379.124-58',govUser:'',password:'Ewyllyn@2022'},
-      tasks:[mkTask('Manifestar no processo solicitando audiência de instrução ao invés de instrução concentrada','2026-05-01')],
-    }),
-    mkClient({name:'Gleice Kelli Oliveira da Silva', benefitType:'Salário-maternidade rural', via:'Judicial', column:'processo_judicial',
-      processNumber:'1000096-77.2026.4.01.3700', tribunal:'TRF1',
-      currentSituation:'Aguardando despacho. Prazo para manifestar sobre instrução.',
-      summary:'Caso de salário-maternidade rural na via judicial (TRF1). Prazo para informar se deseja aderir ao fluxo de instrução concentrada ou fazer audiência de instrução.',
-      credentials:{cpf:'010.396.512-24',govUser:'',password:'Vermelho@22'},
-      tasks:[
-        mkTask('Responder prazo sobre instrução concentrada ou audiência','2026-05-15'),
-        mkTask('Verificar o que a cliente deseja fazer'),
-      ],
-    }),
-    mkClient({name:'Iury Matheus de Souza Francelino', benefitType:'BPC - Deficiência', via:'Administrativa', column:'req_administrativo',
-      currentSituation:'Aguardando análise do INSS. Problema com verificação em 2 etapas.',
-      summary:'Caso de BPC/Deficiência na via administrativa aguardando análise do INSS. Há poucos documentos na pasta. A verificação em 2 etapas está impedindo o acesso ao GOV.br.',
-      credentials:{cpf:'087.899.344-40',govUser:'',password:'Deus1996.'},
-      tasks:[mkTask('Solicitar que o cliente retire a verificação em 2 etapas do GOV.br')],
-    }),
-    mkClient({name:'João Guilherme da Silva Souza', benefitType:'BPC - Deficiência', via:'Judicial', column:'processo_judicial',
-      processNumber:'0000313-76.2026.4.05.8308', tribunal:'TRF5',
-      currentSituation:'Aguardando manifestação sobre perícia médica. Perícia social designada.',
-      summary:'Caso de BPC/Deficiência (TEA) na via judicial (TRF5). Perícia social designada para 29/04/2026. Prazo para manifestação da perícia médica até 25/05/2026.',
-      credentials:{cpf:'184.530.364-46',govUser:'',password:'@Deus99167815'},
-      tasks:[
-        mkTask('Comparecer/acompanhar perícia social','2026-04-29'),
-        mkTask('Elaborar manifestação sobre a perícia médica','2026-05-25'),
-      ],
-    }),
-    mkClient({name:'Lorrane Cristiele Meireles da Boanova', benefitType:'Salário-maternidade urbano', via:'Administrativa', column:'req_administrativo',
-      currentSituation:'Aguardando análise do INSS. Protocolado em 07/04/2026.',
-      credentials:{cpf:'055.502.520-90',govUser:'',password:'Peppah23!?'},
-    }),
-    mkClient({name:'Lorrayne de Sá Almeida', benefitType:'Salário-maternidade urbano', via:'Administrativa', column:'finalizado',
-      currentSituation:'Benefício concedido em 24/04/2026. Acompanhando cronograma de pagamento.',
-      summary:'Salário-maternidade urbano concedido pelo INSS em 24/04/2026. Honorários equivalem a 40% do montante total a ser recebido.',
-      credentials:{cpf:'071.137.995-58',govUser:'',password:'Concurso14@'},
-      honorarios:{valorCausa:'',valorHonorarios:'',percentual:'',observacao:'40% do montante total a ser recebido'},
-      tasks:[mkTask('Verificar se o INSS inseriu as datas de pagamento no sistema','2026-05-01')],
-    }),
-    mkClient({name:'Lueli Souza Rodrigues', benefitType:'Salário-maternidade urbano', via:'Administrativa', column:'req_administrativo',
-      currentSituation:'Aguardando análise do INSS. Protocolado em 21/03/2026.',
-      credentials:{cpf:'403.516.978-10',govUser:'',password:'Gild@sio9418'},
-    }),
-    mkClient({name:'Maria Clara de Lima Pereira', benefitType:'Salário-maternidade rural', via:'Judicial', column:'processo_judicial',
-      processNumber:'1013778-30.2025.4.01.3314', tribunal:'TRF1',
-      currentSituation:'Processo parado desde janeiro. Advogada não habilitada no processo.',
-      summary:'Caso de salário-maternidade rural na via judicial (TRF1). Processo parado desde janeiro de 2025. Habilitação no processo já foi solicitada mas ainda não concluída.',
-      credentials:{cpf:'069.920.875-09',govUser:'',password:'Familia2025@'},
-      tasks:[mkTask('Ligar na vara judicial para solicitar habilitação','2026-06-08')],
-    }),
-    mkClient({name:'Marilia Farias da Silva', benefitType:'Salário-maternidade rural', via:'Administrativa', column:'req_administrativo',
-      currentSituation:'Aguardando análise do INSS. Protocolado em 21/03/2026.',
-      credentials:{cpf:'096.718.311-17',govUser:'',password:'@Lby0597'},
-    }),
-    mkClient({name:'Selma Silva Santos', benefitType:'BPC - Deficiência', via:'Administrativa', column:'em_analise',
-      currentSituation:'Aguardando retorno da cliente. Não há documentação suficiente.',
-      summary:'Caso de BPC/Deficiência com problemas ortopédicos (coluna). Cliente sumiu há algum tempo. Não há documentação suficiente para protocolar.',
-      credentials:{cpf:'113.575.287-79',govUser:'',password:'Mh.200272'},
-      tasks:[mkTask('Enviar mensagem perguntando se vai dar prosseguimento e solicitar documentos','2026-05-01')],
-    }),
-    mkClient({name:'Natali Lopes de Araújo', benefitType:'', via:'', column:'em_analise',
-      currentSituation:'Sem informações no sistema.',
-      tasks:[mkTask('Levantar informações sobre o caso')],
-    }),
-    // ENCERRADOS
-    mkClient({name:'André Fernando de Oliveira', benefitType:'Aposentadoria por invalidez', via:'Administrativa', column:'finalizado',
-      currentSituation:'Processo encerrado.',
-      credentials:{cpf:'928.896.110-00',govUser:'',password:'Nova123!'},
-      tasks:[mkTask('Solicitar retirada de autenticação em 2 fatores do GOV.br')],
-    }),
-    mkClient({name:'Débora Rute Malheiros', benefitType:'Salário-maternidade rural', via:'Administrativa', column:'finalizado',
-      currentSituation:'Benefício indeferido.',
-      credentials:{cpf:'713.392.901-54',govUser:'',password:'@Cachinhos21'},
-      honorarios:{valorCausa:'R$ 6.072,00',valorHonorarios:'R$ 2.428,80',percentual:'',observacao:''},
-    }),
-    mkClient({name:'Fernanda Torres Claudino', benefitType:'Salário-maternidade rural', via:'Judicial', column:'finalizado',
-      processNumber:'0013410-10.2025.4.05.8202', tribunal:'TRF5',
-      currentSituation:'Processo encerrado.',
-      credentials:{cpf:'095.201.374-67',govUser:'',password:'Vermelho@22'},
-      honorarios:{valorCausa:'R$ 6.072,00',valorHonorarios:'R$ 2.428,80',percentual:'',observacao:''},
-    }),
-    mkClient({name:'Lanna Mariana Ramos Puresa', benefitType:'Salário-maternidade rural', via:'Administrativa', column:'finalizado',
-      currentSituation:'Cliente não respondeu. Criança já nasceu. Processo encerrado.',
-      summary:'Cliente não respondeu e aparentemente não é trabalhadora rural. A criança já nasceu. Não foram encontrados contrato e procuração.',
-      credentials:{cpf:'055.950.772-04',govUser:'',password:''},
-      honorarios:{valorCausa:'R$ 6.072,00',valorHonorarios:'R$ 2.428,80',percentual:'',observacao:''},
-    }),
-    mkClient({name:'Taynara Pereira Aguiar', benefitType:'Salário-maternidade urbano', via:'Administrativa', column:'finalizado',
-      currentSituation:'Cliente sumiu. Processo encerrado.',
-      credentials:{cpf:'097.166.401-37',govUser:'',password:''},
-      honorarios:{valorCausa:'R$ 6.072,00',valorHonorarios:'R$ 2.428,80',percentual:'',observacao:''},
-    }),
-    mkClient({name:'Ingrid Beatriz Pereira Nunes', benefitType:'Salário-maternidade urbano', via:'Administrativa', column:'em_analise',
-      currentSituation:'Aguardando recuperação de senha do GOV.br.',
-      summary:'Estava grávida de 6 meses no último registro.',
-      credentials:{cpf:'064.720.141-08',govUser:'',password:''},
-      tasks:[mkTask('Solicitar recuperação de senha do GOV.br')],
-    }),
-    mkClient({name:'Senaria da Costa Silva', benefitType:'Salário-maternidade urbano', via:'Administrativa', column:'finalizado',
-      currentSituation:'Benefício concedido. Processo encerrado.',
-      credentials:{cpf:'016.205.302-95',govUser:'',password:'Vermelho@22'},
-    }),
-  ];
+  return [];
 }
 
-// ─────────────────────────────────────────────
 //  NAVIGATE
 // ─────────────────────────────────────────────
 function navigate(page){
@@ -1420,45 +1397,21 @@ function tabCredenciais(c){
         <div class="cred-label">CPF / Usuário GOV.br</div>
         <div class="cred-val">${cr.cpf||cr.govUser||'<span style="color:var(--muted);font-style:italic">Não informado</span>'}</div>
       </div>
-      <div class="cred-box">
-        <div class="cred-label">Senha GOV.br</div>
-        <div class="pwd-row">
-          <span class="pwd-mask" id="pwd-mask">••••••••</span>
-          <span class="pwd-val" id="pwd-val" style="display:none;font-size:13px;font-weight:700;color:var(--text);word-break:break-all">${esc(cr.password||'')}</span>
-          <button class="reveal-btn" id="reveal-btn" onclick="togglePwd('${c.id}')">${cr.password?'Revelar':'Não informada'}</button>
-        </div>
-      </div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.55">Senhas de clientes não são exibidas nem cadastradas neste painel. Guarde esse tipo de credencial em um gerenciador de senhas próprio.</div>
     </div>
     <div class="case-section">
       <div class="case-section-title">Editar acesso</div>
       <div class="fl"><span class="fl-label">CPF / Usuário</span><input class="fi" id="edit-cpf" value="${esc(cr.cpf||cr.govUser||'')}"></div>
-      <div class="fl"><span class="fl-label">Senha</span><input class="fi" id="edit-pwd" type="password" value="${esc(cr.password||'')}"></div>
       <div class="btn-row" style="margin-top:4px">
         <button class="btn-s p" onclick="saveCredentials('${c.id}')">Salvar</button>
       </div>
     </div>
   </div>`;
 }
-function togglePwd(clientId){
-  const c = clients.find(x=>x.id===clientId);
-  if(!c||!c.credentials.password) return;
-  const mask = document.getElementById('pwd-mask');
-  const val = document.getElementById('pwd-val');
-  const btn = document.getElementById('reveal-btn');
-  if(val.style.display==='none'){
-    const entered = prompt('🔒 Digite a senha para revelar:');
-    if(entered===null) return;
-    if(entered!=='0301'){ alert('Senha incorreta.'); return; }
-    mask.style.display='none'; val.style.display='inline'; btn.textContent='Ocultar';
-  } else {
-    mask.style.display='inline'; val.style.display='none'; btn.textContent='Revelar';
-  }
-}
 function saveCredentials(clientId){
   const c = clients.find(x=>x.id===clientId);
   if(!c) return;
   c.credentials.cpf = document.getElementById('edit-cpf').value;
-  c.credentials.password = document.getElementById('edit-pwd').value;
   addHistory(c,'Credenciais atualizadas','GOV.br','default');
   save();
   renderPanelBody();
@@ -1837,7 +1790,6 @@ function openModal(){
   document.getElementById('f-column').value='em_analise';
   document.getElementById('f-via').value='';
   document.getElementById('f-tribunal').value='';
-  document.getElementById('f-pwd').value='';
   document.getElementById('modal-bg').classList.add('on');
 }
 function closeModal(){ document.getElementById('modal-bg').classList.remove('on'); }
@@ -1857,7 +1809,7 @@ function saveClient(){
     credentials:{
       cpf: document.getElementById('f-cpf').value.trim(),
       govUser:'',
-      password: document.getElementById('f-pwd').value,
+      password:'',
     },
     honorarios:{
       valorCausa: document.getElementById('f-causa').value.trim(),
