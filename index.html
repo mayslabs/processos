@@ -78,9 +78,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .kanban-alert-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
 .kanban-alert-item{min-width:230px;max-width:320px;border:1px solid #FECACA;background:#FEF2F2;border-radius:10px;padding:9px 10px;cursor:pointer}
 .kanban-alert-item:hover{border-color:#EF4444;background:#FEE2E2}
+.kanban-alert-item.payment{border-color:#BBF7D0;background:#F0FDF4}
+.kanban-alert-item.payment:hover{border-color:#22C55E;background:#DCFCE7}
 .kanban-alert-client{font-size:12px;font-weight:900;color:#7F1D1D;margin-bottom:4px}
 .kanban-alert-desc{font-size:12px;color:#991B1B;line-height:1.35;margin-bottom:5px}
 .kanban-alert-date{font-size:11px;font-weight:900;color:#B91C1C}
+.kanban-alert-item.payment .kanban-alert-client{color:#14532D}
+.kanban-alert-item.payment .kanban-alert-desc{color:#166534}
+.kanban-alert-item.payment .kanban-alert-date{color:#15803D}
+.kanban-alert-section + .kanban-alert-section{margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
 .kanban-alert-empty{font-size:12px;color:var(--muted)}
 .col{flex-shrink:0;width:255px;display:flex;flex-direction:column;max-height:100%}
 .col-head{display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-bottom:3px solid var(--cc);border-radius:10px 10px 0 0}
@@ -109,6 +115,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .card-deadline.warning{color:var(--warn);font-weight:600}
 .card-process-deadline{margin-top:8px;border:1px solid #FECACA;background:#FEF2F2;color:#991B1B;border-radius:8px;padding:7px 8px;font-size:11px;font-weight:800;line-height:1.35}
 .card-process-label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;color:#B91C1C}
+.card-payment-deadline{margin-top:8px;border:1px solid #BBF7D0;background:#F0FDF4;color:#14532D;border-radius:8px;padding:7px 8px;font-size:11px;font-weight:800;line-height:1.35}
+.card-payment-label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;color:#15803D}
 .card-via{margin-top:5px}
 .via-pill{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px}
 .via-pill.j{background:#EDE9FE;color:#7C3AED}
@@ -129,9 +137,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .ti.warning{border-left:3px solid var(--warn)}
 .ti.done-item{opacity:.6}
 .ti.process-deadline{border-left:4px solid #DC2626;background:#FFFBFB}
+.ti.payment-deadline{border-left:4px solid #16A34A;background:#F0FDF4}
 .task-kind{display:inline-flex;align-items:center;width:max-content;max-width:100%;border-radius:999px;padding:2px 8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-top:6px}
 .task-kind.process{background:#FEE2E2;color:#B91C1C}
 .task-kind.internal{background:#E0F2FE;color:#0369A1}
+.task-kind.payment{background:#DCFCE7;color:#166534}
 .ti-check{width:18px;height:18px;border:2px solid var(--border);border-radius:50%;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .ti-check:hover{border-color:var(--primary)}
 .ti-check.done{background:var(--ok);border-color:var(--ok)}
@@ -161,6 +171,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .cal-day.today{background:var(--primary);color:#fff;font-weight:700}
 .cal-day.has-task::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--alert)}
 .cal-day.has-process::after{width:7px;height:7px;background:#DC2626}
+.cal-day.has-payment::after{width:7px;height:7px;background:#16A34A}
 .cal-day.today.has-task::after{background:#fff}
 .cal-day.selected:not(.today){background:#EEF2FF;color:var(--primary);font-weight:700}
 .cal-preview{margin-top:16px;border-top:1px solid var(--border);padding-top:14px}
@@ -207,7 +218,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .next-task-date.overdue{background:#FEE2E2;color:#B91C1C}
 .next-task-date.urgent{background:#FFE4E6;color:#BE123C}
 .next-task-date.warning{background:#FEF3C7;color:#92400E}
-.case-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.case-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
 .metric-tile{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;min-width:0}
 .metric-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
 .metric-value{font-size:14px;font-weight:800;color:var(--text);line-height:1.3;word-break:break-word}
@@ -483,6 +494,7 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
       <button class="tf-btn" data-filter="week" onclick="setFilter(this,'week')">Esta Semana</button>
       <button class="tf-btn" data-filter="overdue" onclick="setFilter(this,'overdue')">Atrasadas</button>
       <button class="tf-btn" data-filter="process" onclick="setFilter(this,'process')">Prazos Processuais</button>
+      <button class="tf-btn" data-filter="payment" onclick="setFilter(this,'payment')">Pagamentos</button>
       <button class="tf-btn" data-filter="internal" onclick="setFilter(this,'internal')">Tarefas Internas</button>
       <button class="tf-btn" data-filter="done" onclick="setFilter(this,'done')">Concluídas</button>
     </div>
@@ -670,7 +682,22 @@ function dayStatus(dateStr){
 }
 function esc(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
 function isProcessDeadline(t){ return t && t.kind === 'process_deadline'; }
-function taskKindLabel(t){ return isProcessDeadline(t) ? 'Prazo processual' : 'Tarefa interna'; }
+function isPaymentDeadline(t){ return t && t.kind === 'payment_deadline'; }
+function taskKindLabel(t){
+  if(isProcessDeadline(t)) return 'Prazo processual';
+  if(isPaymentDeadline(t)) return 'Pagamento do cliente';
+  return 'Tarefa interna';
+}
+function taskKindClass(t){
+  if(isProcessDeadline(t)) return 'process';
+  if(isPaymentDeadline(t)) return 'payment';
+  return 'internal';
+}
+function nextKindActionLabel(t){
+  if(isProcessDeadline(t)) return 'Pagamento';
+  if(isPaymentDeadline(t)) return 'Tarefa';
+  return 'Prazo';
+}
 function hasAlert(c){
   return c.tasks.some(t=>{
     if(t.done) return false;
@@ -685,6 +712,10 @@ function nextDeadline(c){
 }
 function nextProcessDeadline(c){
   const active = c.tasks.filter(t=>isProcessDeadline(t)&&!t.done&&t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
+  return active.length ? active[0] : null;
+}
+function nextPaymentDeadline(c){
+  const active = c.tasks.filter(t=>isPaymentDeadline(t)&&!t.done&&t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
   return active.length ? active[0] : null;
 }
 function pendingCount(){
@@ -992,20 +1023,37 @@ function getProcessDeadlineItems(clientList=clients){
   return items.sort((a,b)=>a.deadline.localeCompare(b.deadline));
 }
 
+function getPaymentDeadlineItems(clientList=clients){
+  const items = [];
+  clientList.forEach(c=>{
+    (c.tasks||[]).forEach(t=>{
+      if(isPaymentDeadline(t) && !t.done && t.deadline){
+        items.push({...t, clientId:c.id, clientName:c.name});
+      }
+    });
+  });
+  return items.sort((a,b)=>a.deadline.localeCompare(b.deadline));
+}
+
 function renderKanbanDeadlineAlerts(clientList=clients){
   const el = document.getElementById('kanban-alerts');
   if(!el) return;
-  const items = getProcessDeadlineItems(clientList);
-  if(!items.length){
+  const processItems = getProcessDeadlineItems(clientList);
+  const paymentItems = getPaymentDeadlineItems(clientList);
+  if(!processItems.length && !paymentItems.length){
     el.className = 'kanban-alerts empty';
-    el.innerHTML = `<div class="kanban-alert-head"><div class="kanban-alert-title">Prazos processuais</div></div><div class="kanban-alert-empty">Nenhum prazo processual ativo no Kanban.</div>`;
+    el.innerHTML = `<div class="kanban-alert-head"><div class="kanban-alert-title">Alertas importantes</div></div><div class="kanban-alert-empty">Nenhum prazo processual ou pagamento ativo no Kanban.</div>`;
     return;
   }
-  const urgentCount = items.filter(t=>{
+  const processUrgent = processItems.filter(t=>{
     const s = dayStatus(t.deadline);
     return s==='overdue'||s==='urgent'||s==='warning';
   }).length;
-  const list = items.slice(0,8).map(t=>{
+  const paymentAttention = paymentItems.filter(t=>{
+    const s = dayStatus(t.deadline);
+    return s==='overdue'||s==='urgent'||s==='warning';
+  }).length;
+  const processList = processItems.slice(0,8).map(t=>{
     const s = dayStatus(t.deadline);
     const suffix = s==='overdue'?'Vencido':s==='urgent'?'Urgente':s==='warning'?'Em breve':'Prazo';
     return `<div class="kanban-alert-item" onclick="openPanel('${t.clientId}')">
@@ -1014,17 +1062,37 @@ function renderKanbanDeadlineAlerts(clientList=clients){
       <div class="kanban-alert-date">${suffix}: ${fmtDate(t.deadline)}</div>
     </div>`;
   }).join('');
+  const paymentList = paymentItems.slice(0,8).map(t=>{
+    const s = dayStatus(t.deadline);
+    const suffix = s==='overdue'?'Pagamento vencido':s==='urgent'?'Cobrar agora':s==='warning'?'Cobrar em breve':'Pagamento';
+    return `<div class="kanban-alert-item payment" onclick="openPanel('${t.clientId}')">
+      <div class="kanban-alert-client">${esc(t.clientName)}</div>
+      <div class="kanban-alert-desc">${esc(t.description)}</div>
+      <div class="kanban-alert-date">${suffix}: ${fmtDate(t.deadline)}</div>
+    </div>`;
+  }).join('');
   el.className = 'kanban-alerts';
-  el.innerHTML = `<div class="kanban-alert-head">
-    <div class="kanban-alert-title">Prazos processuais ativos</div>
-    <div class="kanban-alert-count">${urgentCount ? urgentCount+' exigem atenção' : items.length+' cadastrados'}</div>
-  </div>
-  <div class="kanban-alert-row">${list}</div>`;
+  el.innerHTML = `
+    <div class="kanban-alert-section">
+      <div class="kanban-alert-head">
+        <div class="kanban-alert-title">Prazos processuais ativos</div>
+        <div class="kanban-alert-count">${processUrgent ? processUrgent+' exigem atenção' : processItems.length+' cadastrados'}</div>
+      </div>
+      ${processItems.length?`<div class="kanban-alert-row">${processList}</div>`:'<div class="kanban-alert-empty">Nenhum prazo processual ativo.</div>'}
+    </div>
+    <div class="kanban-alert-section">
+      <div class="kanban-alert-head">
+        <div class="kanban-alert-title" style="color:#166534">Pagamentos para cobrar</div>
+        <div class="kanban-alert-count" style="color:#166534;background:#DCFCE7">${paymentAttention ? paymentAttention+' exigem cobrança' : paymentItems.length+' cadastrados'}</div>
+      </div>
+      ${paymentItems.length?`<div class="kanban-alert-row">${paymentList}</div>`:'<div class="kanban-alert-empty">Nenhum pagamento ativo.</div>'}
+    </div>`;
 }
 
 function renderCard(c){
   const alert = hasAlert(c);
   const processTask = nextProcessDeadline(c);
+  const paymentTask = nextPaymentDeadline(c);
   const nd = nextDeadline(c);
   const ds = nd ? dayStatus(nd) : null;
   const tagsHtml = c.tags.map(t=>`<span class="tag" style="background:${esc(t.color)}">${esc(t.label)}</span>`).join('');
@@ -1039,6 +1107,10 @@ function renderCard(c){
     <span class="card-process-label">Prazo processual</span>
     ${esc(processTask.description)} — ${fmtDate(processTask.deadline)}
   </div>` : '';
+  const paymentHtml = paymentTask ? `<div class="card-payment-deadline">
+    <span class="card-payment-label">Pagamento do cliente</span>
+    ${esc(paymentTask.description)} — ${fmtDate(paymentTask.deadline)}
+  </div>` : '';
   const colorStyle = c.cardColor ? `border-left-color:${c.cardColor}` : '';
   return `<div class="card${c.cardColor?' has-color':''}" id="card-${c.id}" style="${colorStyle}" draggable="true"
     onclick="openPanel('${c.id}')"
@@ -1052,6 +1124,7 @@ function renderCard(c){
     ${tagsHtml?`<div class="card-tags">${tagsHtml}</div>`:''}
     ${viaHtml}
     ${processHtml}
+    ${paymentHtml}
     ${deadlineHtml}
   </div>`;
 }
@@ -1151,6 +1224,8 @@ function getNextTask(c){
   const pending = getPendingTasks(c);
   const process = pending.filter(t=>isProcessDeadline(t)&&t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
   if(process.length) return process[0];
+  const payments = pending.filter(t=>isPaymentDeadline(t)&&t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
+  if(payments.length) return payments[0];
   const withDate = pending.filter(t=>t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
   return withDate[0] || pending[0] || null;
 }
@@ -1160,7 +1235,7 @@ function getCaseStatusMeta(c){
   const col = COLS.find(x=>x.id===c.column);
   if(next && next.deadline){
     const status = dayStatus(next.deadline);
-    const prefix = isProcessDeadline(next) ? 'Prazo processual' : 'Prazo';
+    const prefix = isProcessDeadline(next) ? 'Prazo processual' : isPaymentDeadline(next) ? 'Pagamento do cliente' : 'Prazo';
     if(status==='overdue') return {title:`${prefix} vencido`, detail:`${next.description} venceu em ${fmtDate(next.deadline)}`, color:'#EF4444'};
     if(status==='urgent') return {title:`${prefix} urgente`, detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#F43F5E'};
     if(status==='warning') return {title:`${prefix} próximo`, detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#F59E0B'};
@@ -1194,11 +1269,12 @@ function tabResumo(c){
   const pending = getPendingTasks(c);
   const doneCount = (c.tasks||[]).filter(t=>t.done).length;
   const processPending = pending.filter(isProcessDeadline);
-  const internalPending = pending.filter(t=>!isProcessDeadline(t));
+  const paymentPending = pending.filter(isPaymentDeadline);
+  const internalPending = pending.filter(t=>!isProcessDeadline(t)&&!isPaymentDeadline(t));
   const next = getNextTask(c);
   const meta = getCaseStatusMeta(c);
   const dateStatus = next && next.deadline ? dayStatus(next.deadline) : '';
-  const nextLabel = next && isProcessDeadline(next) ? 'Próximo prazo processual' : 'Próximo passo';
+  const nextLabel = next && isProcessDeadline(next) ? 'Próximo prazo processual' : next && isPaymentDeadline(next) ? 'Próximo pagamento' : 'Próximo passo';
   const swatches = CARD_COLORS.map(color=>{
     const sel = c.cardColor===color?' sel':'';
     return `<div class="cc-swatch${sel}" style="background:${color}" onclick="setCardColor('${c.id}','${color}')" title="${color}"></div>`;
@@ -1243,6 +1319,7 @@ function tabResumo(c){
     <div class="case-metrics">
       ${metric('Status', col?esc(col.label):'Não definido', !col)}
       ${metric('Prazos processuais', String(processPending.length))}
+      ${metric('Pagamentos', String(paymentPending.length))}
       ${metric('Tarefas internas', String(internalPending.length))}
       ${metric('Concluídas', String(doneCount))}
     </div>
@@ -1383,22 +1460,23 @@ function tabTarefas(c){
   const pending = tasks.filter(t=>!t.done).length;
   const done = tasks.filter(t=>t.done).length;
   const processPending = tasks.filter(t=>!t.done&&isProcessDeadline(t)).length;
-  const internalPending = tasks.filter(t=>!t.done&&!isProcessDeadline(t)).length;
+  const paymentPending = tasks.filter(t=>!t.done&&isPaymentDeadline(t)).length;
+  const internalPending = tasks.filter(t=>!t.done&&!isProcessDeadline(t)&&!isPaymentDeadline(t)).length;
   const html = tasks.length===0 ? '<div style="color:var(--muted);font-size:13px;padding:8px 0">Nenhuma tarefa cadastrada.</div>' :
     tasks.map(t=>{
       const ds = t.deadline ? dayStatus(t.deadline) : null;
       const dateCls = !t.deadline?'none':ds==='overdue'?'overdue':ds==='urgent'?'urgent':ds==='warning'?'warning':'ok';
       const dateLabel = t.deadline ? `${fmtDate(t.deadline)}${ds==='overdue'?' (vencida)':ds==='urgent'?' (urgente)':ds==='warning'?' (em breve)':''}` : 'Sem prazo';
-      return `<div class="task-pi ${isProcessDeadline(t)?'process-deadline':''}">
+      return `<div class="task-pi ${isProcessDeadline(t)?'process-deadline':isPaymentDeadline(t)?'payment-deadline':''}">
         <div class="task-pcheck ${t.done?'done':''}" onclick="toggleTask('${c.id}','${t.id}')"></div>
         <div class="task-pbody">
           <div class="task-pdesc ${t.done?'done':''}">${esc(t.description)}</div>
-          <div class="task-kind ${isProcessDeadline(t)?'process':'internal'}">${taskKindLabel(t)}</div>
+          <div class="task-kind ${taskKindClass(t)}">${taskKindLabel(t)}</div>
           <div class="task-pdate ${dateCls}">${dateLabel}</div>
           ${t.done&&t.doneAt?`<div style="font-size:11px;color:var(--muted)">Concluída em ${fmtDateTime(t.doneAt)}</div>`:''}
         </div>
         ${!t.done?`<div style="display:flex;flex-direction:column;gap:2px">
-          <button class="task-pdel" style="font-size:12px" onclick="toggleTaskKind('${c.id}','${t.id}')" title="Alternar tipo">${isProcessDeadline(t)?'Tarefa':'Prazo'}</button>
+          <button class="task-pdel" style="font-size:12px" onclick="toggleTaskKind('${c.id}','${t.id}')" title="Alternar tipo">${nextKindActionLabel(t)}</button>
           <button class="task-pdel" style="font-size:13px" onclick="editTask('${c.id}','${t.id}')" title="Editar tarefa">Editar</button>
           <button class="task-pdel" onclick="deleteTask('${c.id}','${t.id}')" title="Remover tarefa">×</button>
         </div>`:''}
@@ -1408,6 +1486,7 @@ function tabTarefas(c){
     <div class="case-metrics">
       <div class="metric-tile"><div class="metric-label">Pendentes</div><div class="metric-value">${pending}</div></div>
       <div class="metric-tile"><div class="metric-label">Prazos processuais</div><div class="metric-value">${processPending}</div></div>
+      <div class="metric-tile"><div class="metric-label">Pagamentos</div><div class="metric-value">${paymentPending}</div></div>
       <div class="metric-tile"><div class="metric-label">Tarefas internas</div><div class="metric-value">${internalPending}</div></div>
       <div class="metric-tile"><div class="metric-label">Concluídas</div><div class="metric-value">${done}</div></div>
       <div class="metric-tile"><div class="metric-label">Total</div><div class="metric-value">${tasks.length}</div></div>
@@ -1421,6 +1500,7 @@ function tabTarefas(c){
       <select class="fi-select" id="new-task-kind" style="margin-bottom:8px">
         <option value="internal">Tarefa interna</option>
         <option value="process_deadline">Prazo processual</option>
+        <option value="payment_deadline">Pagamento do cliente</option>
       </select>
       <input class="fi" id="new-task-desc" placeholder="Descrição da tarefa..." style="margin-bottom:8px;resize:none">
       <input class="fi" id="new-task-date" type="date" style="margin-bottom:8px">
@@ -1481,8 +1561,9 @@ function addTask(clientId){
   const kind = document.getElementById('new-task-kind').value;
   if(!desc){ alert('Informe a descrição da tarefa.'); return; }
   if(kind==='process_deadline' && !date){ alert('Prazo processual precisa ter data.'); return; }
+  if(kind==='payment_deadline' && !date){ alert('Pagamento do cliente precisa ter data.'); return; }
   c.tasks.push(mkTask(desc, date, false, kind));
-  addHistory(c, kind==='process_deadline'?'Prazo processual adicionado':'Tarefa adicionada', desc+(date?' — prazo: '+fmtDate(date):''), 'task');
+  addHistory(c, kind==='process_deadline'?'Prazo processual adicionado':kind==='payment_deadline'?'Pagamento do cliente adicionado':'Tarefa adicionada', desc+(date?' — data: '+fmtDate(date):''), 'task');
   save();
   renderPanelBody();
   renderBoard();
@@ -1492,13 +1573,16 @@ function toggleTaskKind(clientId, taskId){
   if(!c) return;
   const t = c.tasks.find(x=>x.id===taskId);
   if(!t) return;
-  if(!isProcessDeadline(t)){
+  if(!isProcessDeadline(t) && !isPaymentDeadline(t)){
     if(!t.deadline){ alert('Para marcar como prazo processual, informe uma data de prazo.'); return; }
     t.kind = 'process_deadline';
     addHistory(c,'Tarefa marcada como prazo processual',t.description,'warn');
+  } else if(isProcessDeadline(t)) {
+    t.kind = 'payment_deadline';
+    addHistory(c,'Prazo convertido em pagamento do cliente',t.description,'task');
   } else {
     t.kind = 'internal';
-    addHistory(c,'Prazo convertido em tarefa interna',t.description,'task');
+    addHistory(c,'Pagamento convertido em tarefa interna',t.description,'task');
   }
   save();
   renderPanelBody();
@@ -1768,7 +1852,8 @@ function filterTasks(tasks){
   if(taskFilter==='done') return tasks.filter(t=>t.done);
   if(taskFilter==='overdue') return tasks.filter(t=>!t.done&&t.deadline&&new Date(t.deadline+'T00:00:00')<today);
   if(taskFilter==='process') return tasks.filter(t=>!t.done&&isProcessDeadline(t));
-  if(taskFilter==='internal') return tasks.filter(t=>!t.done&&!isProcessDeadline(t));
+  if(taskFilter==='payment') return tasks.filter(t=>!t.done&&isPaymentDeadline(t));
+  if(taskFilter==='internal') return tasks.filter(t=>!t.done&&!isProcessDeadline(t)&&!isPaymentDeadline(t));
   if(taskFilter==='today'){
     return tasks.filter(t=>{
       if(t.done||!t.deadline) return false;
@@ -1791,6 +1876,7 @@ function renderTasksList(){
   let tasks = filterTasks(all);
   tasks.sort((a,b)=>{
     if(isProcessDeadline(a)!==isProcessDeadline(b)) return isProcessDeadline(a) ? -1 : 1;
+    if(isPaymentDeadline(a)!==isPaymentDeadline(b)) return isPaymentDeadline(a) ? -1 : 1;
     if(!a.deadline&&!b.deadline) return 0;
     if(!a.deadline) return 1;
     if(!b.deadline) return -1;
@@ -1823,14 +1909,14 @@ function renderTasksList(){
     html+=`<div class="tgroup-title">${label}</div>`;
     groups[key].forEach(t=>{
       const ds = t.deadline?dayStatus(t.deadline):null;
-      const cls = `${t.done?'done-item':ds==='overdue'?'overdue':ds==='urgent'?'urgent':ds==='warning'?'warning':''} ${isProcessDeadline(t)?'process-deadline':''}`;
+      const cls = `${t.done?'done-item':ds==='overdue'?'overdue':ds==='urgent'?'urgent':ds==='warning'?'warning':''} ${isProcessDeadline(t)?'process-deadline':isPaymentDeadline(t)?'payment-deadline':''}`;
       const dateCls = !t.deadline?'none':ds==='overdue'?'overdue':ds==='urgent'?'urgent':ds==='warning'?'warning':'ok';
       html+=`<div class="ti ${cls}">
         <div class="ti-check ${t.done?'done':''}" onclick="toggleTaskGlobal('${t.clientId}','${t.id}')"></div>
         <div class="ti-body">
           <div class="ti-client" onclick="openPanel('${t.clientId}')">${esc(t.clientName)}</div>
           <div class="ti-desc">${esc(t.description)}</div>
-          <div class="task-kind ${isProcessDeadline(t)?'process':'internal'}">${taskKindLabel(t)}</div>
+          <div class="task-kind ${taskKindClass(t)}">${taskKindLabel(t)}</div>
           ${t.deadline?`<div class="ti-date ${dateCls}">📅 ${fmtDate(t.deadline)}</div>`:'<div class="ti-date none">Sem prazo</div>'}
           ${t.done&&t.doneAt?`<div style="font-size:11px;color:var(--muted);margin-top:2px">Concluída em ${fmtDateTime(t.doneAt)}</div>`:''}
         </div>
@@ -1879,8 +1965,9 @@ function renderCalendar(){
     const isToday = dateStr===todayStr;
     const hasTasks = taskDays[dateStr]&&taskDays[dateStr].length>0;
     const hasProcess = hasTasks && taskDays[dateStr].some(isProcessDeadline);
+    const hasPayment = hasTasks && taskDays[dateStr].some(isPaymentDeadline);
     const isSel = calSelected===dateStr;
-    grid+=`<div class="cal-day${isToday?' today':''}${hasTasks?' has-task':''}${hasProcess?' has-process':''}${isSel&&!isToday?' selected':''}" onclick="selectCalDay('${dateStr}')">${d}</div>`;
+    grid+=`<div class="cal-day${isToday?' today':''}${hasTasks?' has-task':''}${hasProcess?' has-process':''}${hasPayment?' has-payment':''}${isSel&&!isToday?' selected':''}" onclick="selectCalDay('${dateStr}')">${d}</div>`;
   }
   cal.innerHTML = `
     <div class="cal-nav">
@@ -1890,7 +1977,11 @@ function renderCalendar(){
     </div>
     <div class="cal-grid">${grid}</div>`;
   if(calSelected && taskDays[calSelected] && taskDays[calSelected].length){
-    const items = taskDays[calSelected].sort((a,b)=>isProcessDeadline(a)===isProcessDeadline(b)?0:(isProcessDeadline(a)?-1:1)).map(t=>`<div class="cal-pi"><div class="cal-pi-client">${esc(t.clientName)}</div><div class="task-kind ${isProcessDeadline(t)?'process':'internal'}">${taskKindLabel(t)}</div><div class="cal-pi-desc">${esc(t.description)}</div></div>`).join('');
+    const items = taskDays[calSelected].sort((a,b)=>{
+      if(isProcessDeadline(a)!==isProcessDeadline(b)) return isProcessDeadline(a)?-1:1;
+      if(isPaymentDeadline(a)!==isPaymentDeadline(b)) return isPaymentDeadline(a)?-1:1;
+      return 0;
+    }).map(t=>`<div class="cal-pi"><div class="cal-pi-client">${esc(t.clientName)}</div><div class="task-kind ${taskKindClass(t)}">${taskKindLabel(t)}</div><div class="cal-pi-desc">${esc(t.description)}</div></div>`).join('');
     preview.innerHTML = `<div class="cal-preview"><div class="cal-preview-title">Tarefas em ${fmtDate(calSelected)}</div>${items}</div>`;
   } else if(calSelected){
     preview.innerHTML = `<div class="cal-preview"><div style="font-size:12px;color:var(--muted)">Sem tarefas neste dia.</div></div>`;
