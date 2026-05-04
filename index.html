@@ -69,6 +69,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
 /* ── KANBAN ── */
 .board{flex:1;display:flex;gap:14px;padding:18px 20px;overflow-x:auto;overflow-y:hidden;align-items:flex-start}
+.kanban-alerts{flex-shrink:0;margin:0 20px 16px;background:#fff;border:1px solid #FECACA;border-left:4px solid #DC2626;border-radius:12px;padding:12px 14px;box-shadow:0 8px 24px rgba(153,27,27,.08)}
+.kanban-alerts.empty{border-color:var(--border);border-left-color:#94A3B8;background:#F8FAFC;box-shadow:none}
+.kanban-alert-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.kanban-alert-title{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#991B1B}
+.kanban-alerts.empty .kanban-alert-title{color:var(--muted)}
+.kanban-alert-count{font-size:11px;font-weight:800;color:#991B1B;background:#FEE2E2;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.kanban-alert-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.kanban-alert-item{min-width:230px;max-width:320px;border:1px solid #FECACA;background:#FEF2F2;border-radius:10px;padding:9px 10px;cursor:pointer}
+.kanban-alert-item:hover{border-color:#EF4444;background:#FEE2E2}
+.kanban-alert-client{font-size:12px;font-weight:900;color:#7F1D1D;margin-bottom:4px}
+.kanban-alert-desc{font-size:12px;color:#991B1B;line-height:1.35;margin-bottom:5px}
+.kanban-alert-date{font-size:11px;font-weight:900;color:#B91C1C}
+.kanban-alert-empty{font-size:12px;color:var(--muted)}
 .col{flex-shrink:0;width:255px;display:flex;flex-direction:column;max-height:100%}
 .col-head{display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-bottom:3px solid var(--cc);border-radius:10px 10px 0 0}
 .col-dot{width:9px;height:9px;border-radius:50%;background:var(--cc);flex-shrink:0}
@@ -459,6 +472,7 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
   <!-- KANBAN PAGE -->
   <div class="page active" id="page-kanban">
     <div class="board" id="board"></div>
+    <div class="kanban-alerts empty" id="kanban-alerts"></div>
   </div>
 
   <!-- TASKS PAGE -->
@@ -962,7 +976,50 @@ function renderBoard(){
       </div>
     </div>`;
   }).join('');
+  renderKanbanDeadlineAlerts(filtered);
   updateCounts();
+}
+
+function getProcessDeadlineItems(clientList=clients){
+  const items = [];
+  clientList.forEach(c=>{
+    (c.tasks||[]).forEach(t=>{
+      if(isProcessDeadline(t) && !t.done && t.deadline){
+        items.push({...t, clientId:c.id, clientName:c.name});
+      }
+    });
+  });
+  return items.sort((a,b)=>a.deadline.localeCompare(b.deadline));
+}
+
+function renderKanbanDeadlineAlerts(clientList=clients){
+  const el = document.getElementById('kanban-alerts');
+  if(!el) return;
+  const items = getProcessDeadlineItems(clientList);
+  if(!items.length){
+    el.className = 'kanban-alerts empty';
+    el.innerHTML = `<div class="kanban-alert-head"><div class="kanban-alert-title">Prazos processuais</div></div><div class="kanban-alert-empty">Nenhum prazo processual ativo no Kanban.</div>`;
+    return;
+  }
+  const urgentCount = items.filter(t=>{
+    const s = dayStatus(t.deadline);
+    return s==='overdue'||s==='urgent'||s==='warning';
+  }).length;
+  const list = items.slice(0,8).map(t=>{
+    const s = dayStatus(t.deadline);
+    const suffix = s==='overdue'?'Vencido':s==='urgent'?'Urgente':s==='warning'?'Em breve':'Prazo';
+    return `<div class="kanban-alert-item" onclick="openPanel('${t.clientId}')">
+      <div class="kanban-alert-client">${esc(t.clientName)}</div>
+      <div class="kanban-alert-desc">${esc(t.description)}</div>
+      <div class="kanban-alert-date">${suffix}: ${fmtDate(t.deadline)}</div>
+    </div>`;
+  }).join('');
+  el.className = 'kanban-alerts';
+  el.innerHTML = `<div class="kanban-alert-head">
+    <div class="kanban-alert-title">Prazos processuais ativos</div>
+    <div class="kanban-alert-count">${urgentCount ? urgentCount+' exigem atenção' : items.length+' cadastrados'}</div>
+  </div>
+  <div class="kanban-alert-row">${list}</div>`;
 }
 
 function renderCard(c){
