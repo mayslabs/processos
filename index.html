@@ -94,13 +94,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .card-deadline.overdue{color:var(--alert);font-weight:700}
 .card-deadline.urgent{color:var(--alert);font-weight:600}
 .card-deadline.warning{color:var(--warn);font-weight:600}
+.card-process-deadline{margin-top:8px;border:1px solid #FECACA;background:#FEF2F2;color:#991B1B;border-radius:8px;padding:7px 8px;font-size:11px;font-weight:800;line-height:1.35}
+.card-process-label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;color:#B91C1C}
 .card-via{margin-top:5px}
 .via-pill{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px}
 .via-pill.j{background:#EDE9FE;color:#7C3AED}
 .via-pill.a{background:#DBEAFE;color:#1D4ED8}
 
 /* ── TASKS PAGE ── */
-.tasks-bar{display:flex;gap:2px;padding:12px 20px 0;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.tasks-bar{display:flex;gap:2px;padding:12px 20px 0;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;overflow-x:auto}
 .tf-btn{padding:8px 14px;border-radius:8px 8px 0 0;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);border:1px solid transparent;border-bottom:none;background:none;transition:all .15s;font-family:inherit}
 .tf-btn.active{background:var(--surface);color:var(--primary);border-color:var(--border);font-weight:700}
 .tasks-layout{flex:1;display:flex;overflow:hidden}
@@ -113,6 +115,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .ti.urgent{border-left:3px solid var(--alert)}
 .ti.warning{border-left:3px solid var(--warn)}
 .ti.done-item{opacity:.6}
+.ti.process-deadline{border-left:4px solid #DC2626;background:#FFFBFB}
+.task-kind{display:inline-flex;align-items:center;width:max-content;max-width:100%;border-radius:999px;padding:2px 8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-top:6px}
+.task-kind.process{background:#FEE2E2;color:#B91C1C}
+.task-kind.internal{background:#E0F2FE;color:#0369A1}
 .ti-check{width:18px;height:18px;border:2px solid var(--border);border-radius:50%;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .ti-check:hover{border-color:var(--primary)}
 .ti-check.done{background:var(--ok);border-color:var(--ok)}
@@ -141,6 +147,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .cal-day.other{color:#CBD5E1}
 .cal-day.today{background:var(--primary);color:#fff;font-weight:700}
 .cal-day.has-task::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--alert)}
+.cal-day.has-process::after{width:7px;height:7px;background:#DC2626}
 .cal-day.today.has-task::after{background:#fff}
 .cal-day.selected:not(.today){background:#EEF2FF;color:var(--primary);font-weight:700}
 .cal-preview{margin-top:16px;border-top:1px solid var(--border);padding-top:14px}
@@ -187,7 +194,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .next-task-date.overdue{background:#FEE2E2;color:#B91C1C}
 .next-task-date.urgent{background:#FFE4E6;color:#BE123C}
 .next-task-date.warning{background:#FEF3C7;color:#92400E}
-.case-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.case-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .metric-tile{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;min-width:0}
 .metric-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
 .metric-value{font-size:14px;font-weight:800;color:var(--text);line-height:1.3;word-break:break-word}
@@ -208,6 +215,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .notes-list{display:flex;flex-direction:column;gap:10px}
 .empty-note{color:var(--muted);font-size:13px;padding:2px 0}
 .history-list{background:#fff;border:1px solid var(--border);border-radius:12px;padding:6px 16px}
+.process-alert-panel{background:#FEF2F2;border:1px solid #FECACA;border-left:4px solid #DC2626;border-radius:12px;padding:14px;color:#991B1B}
+.process-alert-label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.process-alert-title{font-size:15px;font-weight:900;line-height:1.35}
 
 /* ── PANEL FIELDS ── */
 .fl{margin-bottom:16px}
@@ -253,6 +263,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
 /* ── TASKS IN PANEL ── */
 .task-pi{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.task-pi.process-deadline{border-left:4px solid #DC2626;background:#FFFBFB;border-bottom-color:#FECACA;padding-left:10px;padding-right:8px;border-radius:8px;margin-bottom:6px}
 .task-pi:last-child{border-bottom:none}
 .task-pcheck{width:17px;height:17px;border:2px solid var(--border);border-radius:50%;cursor:pointer;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .task-pcheck:hover{border-color:var(--ok)}
@@ -457,6 +468,8 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
       <button class="tf-btn" data-filter="today" onclick="setFilter(this,'today')">Hoje</button>
       <button class="tf-btn" data-filter="week" onclick="setFilter(this,'week')">Esta Semana</button>
       <button class="tf-btn" data-filter="overdue" onclick="setFilter(this,'overdue')">Atrasadas</button>
+      <button class="tf-btn" data-filter="process" onclick="setFilter(this,'process')">Prazos Processuais</button>
+      <button class="tf-btn" data-filter="internal" onclick="setFilter(this,'internal')">Tarefas Internas</button>
       <button class="tf-btn" data-filter="done" onclick="setFilter(this,'done')">Concluídas</button>
     </div>
     <div class="tasks-layout">
@@ -642,6 +655,8 @@ function dayStatus(dateStr){
   return 'ok';
 }
 function esc(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function isProcessDeadline(t){ return t && t.kind === 'process_deadline'; }
+function taskKindLabel(t){ return isProcessDeadline(t) ? 'Prazo processual' : 'Tarefa interna'; }
 function hasAlert(c){
   return c.tasks.some(t=>{
     if(t.done) return false;
@@ -653,6 +668,10 @@ function hasAlert(c){
 function nextDeadline(c){
   const active = c.tasks.filter(t=>!t.done&&t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
   return active.length ? active[0].deadline : null;
+}
+function nextProcessDeadline(c){
+  const active = c.tasks.filter(t=>isProcessDeadline(t)&&!t.done&&t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
+  return active.length ? active[0] : null;
 }
 function pendingCount(){
   let n=0;
@@ -847,8 +866,8 @@ function mkClient(fields){
   if(!c.history.length) c.history=[{id:uid(),date:n,action:'Cliente cadastrado',details:'Cadastro inicial do sistema',type:'default'}];
   return c;
 }
-function mkTask(desc, deadline='', done=false){
-  return {id:uid(), description:desc, deadline, done, doneAt:'', createdAt:now()};
+function mkTask(desc, deadline='', done=false, kind='internal'){
+  return {id:uid(), description:desc, deadline, done, kind, doneAt:'', createdAt:now()};
 }
 function normalizeClient(c){
   if(!c || typeof c !== 'object') return null;
@@ -872,6 +891,7 @@ function normalizeClient(c){
     if(!t.id) t.id = uid();
     if(!t.description) t.description = '';
     if(typeof t.done !== 'boolean') t.done = false;
+    if(!t.kind) t.kind = 'internal';
     if(!t.deadline) t.deadline = '';
     if(!t.doneAt) t.doneAt = '';
     if(!t.createdAt) t.createdAt = now();
@@ -947,6 +967,7 @@ function renderBoard(){
 
 function renderCard(c){
   const alert = hasAlert(c);
+  const processTask = nextProcessDeadline(c);
   const nd = nextDeadline(c);
   const ds = nd ? dayStatus(nd) : null;
   const tagsHtml = c.tags.map(t=>`<span class="tag" style="background:${esc(t.color)}">${esc(t.label)}</span>`).join('');
@@ -957,6 +978,10 @@ function renderCard(c){
     const prefix = ds==='overdue'?'⚠️ Vencido: ':ds==='urgent'?'🔴 ':ds==='warning'?'⚠️ ':'📅 ';
     deadlineHtml = `<div class="card-deadline ${cls}">${prefix}${fmtDate(nd)}</div>`;
   }
+  const processHtml = processTask ? `<div class="card-process-deadline">
+    <span class="card-process-label">Prazo processual</span>
+    ${esc(processTask.description)} — ${fmtDate(processTask.deadline)}
+  </div>` : '';
   const colorStyle = c.cardColor ? `border-left-color:${c.cardColor}` : '';
   return `<div class="card${c.cardColor?' has-color':''}" id="card-${c.id}" style="${colorStyle}" draggable="true"
     onclick="openPanel('${c.id}')"
@@ -969,6 +994,7 @@ function renderCard(c){
     <div class="card-benefit">${esc(c.benefitType)||'<em>Tipo não definido</em>'}</div>
     ${tagsHtml?`<div class="card-tags">${tagsHtml}</div>`:''}
     ${viaHtml}
+    ${processHtml}
     ${deadlineHtml}
   </div>`;
 }
@@ -1066,6 +1092,8 @@ function getPendingTasks(c){
 }
 function getNextTask(c){
   const pending = getPendingTasks(c);
+  const process = pending.filter(t=>isProcessDeadline(t)&&t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
+  if(process.length) return process[0];
   const withDate = pending.filter(t=>t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
   return withDate[0] || pending[0] || null;
 }
@@ -1075,9 +1103,10 @@ function getCaseStatusMeta(c){
   const col = COLS.find(x=>x.id===c.column);
   if(next && next.deadline){
     const status = dayStatus(next.deadline);
-    if(status==='overdue') return {title:'Prazo vencido', detail:`${next.description} venceu em ${fmtDate(next.deadline)}`, color:'#EF4444'};
-    if(status==='urgent') return {title:'Prazo urgente', detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#F43F5E'};
-    if(status==='warning') return {title:'Prazo próximo', detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#F59E0B'};
+    const prefix = isProcessDeadline(next) ? 'Prazo processual' : 'Prazo';
+    if(status==='overdue') return {title:`${prefix} vencido`, detail:`${next.description} venceu em ${fmtDate(next.deadline)}`, color:'#EF4444'};
+    if(status==='urgent') return {title:`${prefix} urgente`, detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#F43F5E'};
+    if(status==='warning') return {title:`${prefix} próximo`, detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#F59E0B'};
   }
   if(pending.length) return {title:`${pending.length} tarefa${pending.length>1?'s':''} pendente${pending.length>1?'s':''}`, detail:next?next.description:'Há atividades em aberto.', color:'#2563EB'};
   if(c.column==='finalizado') return {title:'Caso finalizado', detail:'Não há tarefas pendentes para este cliente.', color:'#10B981'};
@@ -1107,9 +1136,12 @@ function tabResumo(c){
   const col = COLS.find(x=>x.id===c.column);
   const pending = getPendingTasks(c);
   const doneCount = (c.tasks||[]).filter(t=>t.done).length;
+  const processPending = pending.filter(isProcessDeadline);
+  const internalPending = pending.filter(t=>!isProcessDeadline(t));
   const next = getNextTask(c);
   const meta = getCaseStatusMeta(c);
   const dateStatus = next && next.deadline ? dayStatus(next.deadline) : '';
+  const nextLabel = next && isProcessDeadline(next) ? 'Próximo prazo processual' : 'Próximo passo';
   const swatches = CARD_COLORS.map(color=>{
     const sel = c.cardColor===color?' sel':'';
     return `<div class="cc-swatch${sel}" style="background:${color}" onclick="setCardColor('${c.id}','${color}')" title="${color}"></div>`;
@@ -1145,7 +1177,7 @@ function tabResumo(c){
       </div>
       <div class="next-task-card">
         <div>
-          <div class="next-task-label">Próximo passo</div>
+          <div class="next-task-label">${nextLabel}</div>
           <div class="next-task-title">${next?esc(next.description):'Nenhuma tarefa pendente'}</div>
         </div>
         <div class="next-task-date ${dateStatus}">${next&&next.deadline?fmtDate(next.deadline):(next?'Sem prazo definido':'Tudo em dia')}</div>
@@ -1153,7 +1185,8 @@ function tabResumo(c){
     </div>
     <div class="case-metrics">
       ${metric('Status', col?esc(col.label):'Não definido', !col)}
-      ${metric('Tarefas pendentes', String(pending.length))}
+      ${metric('Prazos processuais', String(processPending.length))}
+      ${metric('Tarefas internas', String(internalPending.length))}
       ${metric('Concluídas', String(doneCount))}
     </div>
     <div class="case-section">
@@ -1292,19 +1325,23 @@ function tabTarefas(c){
   const tasks = c.tasks;
   const pending = tasks.filter(t=>!t.done).length;
   const done = tasks.filter(t=>t.done).length;
+  const processPending = tasks.filter(t=>!t.done&&isProcessDeadline(t)).length;
+  const internalPending = tasks.filter(t=>!t.done&&!isProcessDeadline(t)).length;
   const html = tasks.length===0 ? '<div style="color:var(--muted);font-size:13px;padding:8px 0">Nenhuma tarefa cadastrada.</div>' :
     tasks.map(t=>{
       const ds = t.deadline ? dayStatus(t.deadline) : null;
       const dateCls = !t.deadline?'none':ds==='overdue'?'overdue':ds==='urgent'?'urgent':ds==='warning'?'warning':'ok';
       const dateLabel = t.deadline ? `${fmtDate(t.deadline)}${ds==='overdue'?' (vencida)':ds==='urgent'?' (urgente)':ds==='warning'?' (em breve)':''}` : 'Sem prazo';
-      return `<div class="task-pi">
+      return `<div class="task-pi ${isProcessDeadline(t)?'process-deadline':''}">
         <div class="task-pcheck ${t.done?'done':''}" onclick="toggleTask('${c.id}','${t.id}')"></div>
         <div class="task-pbody">
           <div class="task-pdesc ${t.done?'done':''}">${esc(t.description)}</div>
+          <div class="task-kind ${isProcessDeadline(t)?'process':'internal'}">${taskKindLabel(t)}</div>
           <div class="task-pdate ${dateCls}">${dateLabel}</div>
           ${t.done&&t.doneAt?`<div style="font-size:11px;color:var(--muted)">Concluída em ${fmtDateTime(t.doneAt)}</div>`:''}
         </div>
         ${!t.done?`<div style="display:flex;flex-direction:column;gap:2px">
+          <button class="task-pdel" style="font-size:12px" onclick="toggleTaskKind('${c.id}','${t.id}')" title="Alternar tipo">${isProcessDeadline(t)?'Tarefa':'Prazo'}</button>
           <button class="task-pdel" style="font-size:13px" onclick="editTask('${c.id}','${t.id}')" title="Editar tarefa">Editar</button>
           <button class="task-pdel" onclick="deleteTask('${c.id}','${t.id}')" title="Remover tarefa">×</button>
         </div>`:''}
@@ -1313,6 +1350,8 @@ function tabTarefas(c){
   return `<div class="case-stack">
     <div class="case-metrics">
       <div class="metric-tile"><div class="metric-label">Pendentes</div><div class="metric-value">${pending}</div></div>
+      <div class="metric-tile"><div class="metric-label">Prazos processuais</div><div class="metric-value">${processPending}</div></div>
+      <div class="metric-tile"><div class="metric-label">Tarefas internas</div><div class="metric-value">${internalPending}</div></div>
       <div class="metric-tile"><div class="metric-label">Concluídas</div><div class="metric-value">${done}</div></div>
       <div class="metric-tile"><div class="metric-label">Total</div><div class="metric-value">${tasks.length}</div></div>
     </div>
@@ -1322,6 +1361,10 @@ function tabTarefas(c){
     </div>
     <div class="case-section">
       <div class="case-section-title">Nova tarefa</div>
+      <select class="fi-select" id="new-task-kind" style="margin-bottom:8px">
+        <option value="internal">Tarefa interna</option>
+        <option value="process_deadline">Prazo processual</option>
+      </select>
       <input class="fi" id="new-task-desc" placeholder="Descrição da tarefa..." style="margin-bottom:8px;resize:none">
       <input class="fi" id="new-task-date" type="date" style="margin-bottom:8px">
       <div class="btn-row">
@@ -1378,12 +1421,32 @@ function addTask(clientId){
   if(!c) return;
   const desc = document.getElementById('new-task-desc').value.trim();
   const date = document.getElementById('new-task-date').value;
+  const kind = document.getElementById('new-task-kind').value;
   if(!desc){ alert('Informe a descrição da tarefa.'); return; }
-  c.tasks.push(mkTask(desc, date));
-  addHistory(c,'Tarefa adicionada', desc+(date?' — prazo: '+fmtDate(date):''), 'task');
+  if(kind==='process_deadline' && !date){ alert('Prazo processual precisa ter data.'); return; }
+  c.tasks.push(mkTask(desc, date, false, kind));
+  addHistory(c, kind==='process_deadline'?'Prazo processual adicionado':'Tarefa adicionada', desc+(date?' — prazo: '+fmtDate(date):''), 'task');
   save();
   renderPanelBody();
   renderBoard();
+}
+function toggleTaskKind(clientId, taskId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c) return;
+  const t = c.tasks.find(x=>x.id===taskId);
+  if(!t) return;
+  if(!isProcessDeadline(t)){
+    if(!t.deadline){ alert('Para marcar como prazo processual, informe uma data de prazo.'); return; }
+    t.kind = 'process_deadline';
+    addHistory(c,'Tarefa marcada como prazo processual',t.description,'warn');
+  } else {
+    t.kind = 'internal';
+    addHistory(c,'Prazo convertido em tarefa interna',t.description,'task');
+  }
+  save();
+  renderPanelBody();
+  renderBoard();
+  if(document.getElementById('page-tasks').classList.contains('active')) renderTasksPage();
 }
 
 // ── TAB: CREDENCIAIS ──
@@ -1647,6 +1710,8 @@ function filterTasks(tasks){
   if(taskFilter==='pending') return tasks.filter(t=>!t.done);
   if(taskFilter==='done') return tasks.filter(t=>t.done);
   if(taskFilter==='overdue') return tasks.filter(t=>!t.done&&t.deadline&&new Date(t.deadline+'T00:00:00')<today);
+  if(taskFilter==='process') return tasks.filter(t=>!t.done&&isProcessDeadline(t));
+  if(taskFilter==='internal') return tasks.filter(t=>!t.done&&!isProcessDeadline(t));
   if(taskFilter==='today'){
     return tasks.filter(t=>{
       if(t.done||!t.deadline) return false;
@@ -1668,6 +1733,7 @@ function renderTasksList(){
   const all = getAllTasks();
   let tasks = filterTasks(all);
   tasks.sort((a,b)=>{
+    if(isProcessDeadline(a)!==isProcessDeadline(b)) return isProcessDeadline(a) ? -1 : 1;
     if(!a.deadline&&!b.deadline) return 0;
     if(!a.deadline) return 1;
     if(!b.deadline) return -1;
@@ -1700,13 +1766,14 @@ function renderTasksList(){
     html+=`<div class="tgroup-title">${label}</div>`;
     groups[key].forEach(t=>{
       const ds = t.deadline?dayStatus(t.deadline):null;
-      const cls = t.done?'done-item':ds==='overdue'?'overdue':ds==='urgent'?'urgent':ds==='warning'?'warning':'';
+      const cls = `${t.done?'done-item':ds==='overdue'?'overdue':ds==='urgent'?'urgent':ds==='warning'?'warning':''} ${isProcessDeadline(t)?'process-deadline':''}`;
       const dateCls = !t.deadline?'none':ds==='overdue'?'overdue':ds==='urgent'?'urgent':ds==='warning'?'warning':'ok';
       html+=`<div class="ti ${cls}">
         <div class="ti-check ${t.done?'done':''}" onclick="toggleTaskGlobal('${t.clientId}','${t.id}')"></div>
         <div class="ti-body">
           <div class="ti-client" onclick="openPanel('${t.clientId}')">${esc(t.clientName)}</div>
           <div class="ti-desc">${esc(t.description)}</div>
+          <div class="task-kind ${isProcessDeadline(t)?'process':'internal'}">${taskKindLabel(t)}</div>
           ${t.deadline?`<div class="ti-date ${dateCls}">📅 ${fmtDate(t.deadline)}</div>`:'<div class="ti-date none">Sem prazo</div>'}
           ${t.done&&t.doneAt?`<div style="font-size:11px;color:var(--muted);margin-top:2px">Concluída em ${fmtDateTime(t.doneAt)}</div>`:''}
         </div>
@@ -1754,8 +1821,9 @@ function renderCalendar(){
     const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday = dateStr===todayStr;
     const hasTasks = taskDays[dateStr]&&taskDays[dateStr].length>0;
+    const hasProcess = hasTasks && taskDays[dateStr].some(isProcessDeadline);
     const isSel = calSelected===dateStr;
-    grid+=`<div class="cal-day${isToday?' today':''}${hasTasks?' has-task':''}${isSel&&!isToday?' selected':''}" onclick="selectCalDay('${dateStr}')">${d}</div>`;
+    grid+=`<div class="cal-day${isToday?' today':''}${hasTasks?' has-task':''}${hasProcess?' has-process':''}${isSel&&!isToday?' selected':''}" onclick="selectCalDay('${dateStr}')">${d}</div>`;
   }
   cal.innerHTML = `
     <div class="cal-nav">
@@ -1765,7 +1833,7 @@ function renderCalendar(){
     </div>
     <div class="cal-grid">${grid}</div>`;
   if(calSelected && taskDays[calSelected] && taskDays[calSelected].length){
-    const items = taskDays[calSelected].map(t=>`<div class="cal-pi"><div class="cal-pi-client">${esc(t.clientName)}</div><div class="cal-pi-desc">${esc(t.description)}</div></div>`).join('');
+    const items = taskDays[calSelected].sort((a,b)=>isProcessDeadline(a)===isProcessDeadline(b)?0:(isProcessDeadline(a)?-1:1)).map(t=>`<div class="cal-pi"><div class="cal-pi-client">${esc(t.clientName)}</div><div class="task-kind ${isProcessDeadline(t)?'process':'internal'}">${taskKindLabel(t)}</div><div class="cal-pi-desc">${esc(t.description)}</div></div>`).join('');
     preview.innerHTML = `<div class="cal-preview"><div class="cal-preview-title">Tarefas em ${fmtDate(calSelected)}</div>${items}</div>`;
   } else if(calSelected){
     preview.innerHTML = `<div class="cal-preview"><div style="font-size:12px;color:var(--muted)">Sem tarefas neste dia.</div></div>`;
