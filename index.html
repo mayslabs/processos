@@ -681,6 +681,7 @@ function dayStatus(dateStr){
   return 'ok';
 }
 function esc(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function tagKey(label){ return (label||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 function isProcessDeadline(t){ return t && t.kind === 'process_deadline'; }
 function isPaymentDeadline(t){ return t && t.kind === 'payment_deadline'; }
 function taskKindLabel(t){
@@ -853,8 +854,9 @@ function extractGlobalTags(clientList){
   const result = [];
   (clientList||[]).forEach(c=>{
     (c.tags||[]).forEach(t=>{
-      if(t && typeof t==='object' && t.label && !seen[t.label+t.color]){
-        seen[t.label+t.color] = true;
+      const key = t && typeof t==='object' ? tagKey(t.label) : '';
+      if(t && typeof t==='object' && t.label && !seen[key]){
+        seen[key] = true;
         result.push({id:t.id||uid(), label:t.label, color:t.color||'#3B82F6'});
       }
     });
@@ -958,6 +960,13 @@ function normalizeClient(c){
     if(!t.color) t.color = '#6366F1';
     return t;
   }).filter(Boolean);
+  const tagSeen = {};
+  c.tags = c.tags.filter(t=>{
+    const key = tagKey(t.label);
+    if(!key || tagSeen[key]) return false;
+    tagSeen[key] = true;
+    return true;
+  });
   return c;
 }
 
@@ -1667,7 +1676,7 @@ const ALL_PRESET_COLORS = ['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#E
 function tabEtiquetas(c){
   const presets = ALL_PRESET_COLORS.map(pc=>`<div class="pc" style="background:${pc}" data-color="${pc}" onclick="selectPreset(this)" title="${pc}"></div>`).join('');
   const globalTagsHtml = globalTags.length ? globalTags.map(t=>{
-    const applied = c.tags.some(ct=>ct.id===t.id);
+    const applied = c.tags.some(ct=>ct.id===t.id || tagKey(ct.label)===tagKey(t.label));
     return `<div class="global-tag-item">
       <div class="tag-ed" style="background:${esc(t.color)};opacity:${applied?'1':'0.4'};cursor:pointer;user-select:none"
            onclick="${applied?`removeTagById('${c.id}','${t.id}')`:`applyGlobalTag('${c.id}','${t.id}')`}"
@@ -1705,7 +1714,7 @@ function applyGlobalTag(clientId, tagId){
   const c = clients.find(x=>x.id===clientId);
   const tag = globalTags.find(t=>t.id===tagId);
   if(!c||!tag) return;
-  if(c.tags.some(t=>t.id===tagId)) return;
+  if(c.tags.some(t=>t.id===tagId || tagKey(t.label)===tagKey(tag.label))) return;
   c.tags.push({...tag});
   addHistory(c,'Etiqueta aplicada',tag.label,'default');
   save(); renderPanelBody(); renderBoard();
@@ -1713,9 +1722,12 @@ function applyGlobalTag(clientId, tagId){
 function removeTagById(clientId, tagId){
   const c = clients.find(x=>x.id===clientId);
   if(!c) return;
-  const t = c.tags.find(x=>x.id===tagId);
+  const globalTag = globalTags.find(x=>x.id===tagId);
+  const key = globalTag ? tagKey(globalTag.label) : '';
+  const t = c.tags.find(x=>x.id===tagId || (key && tagKey(x.label)===key));
   if(!t) return;
-  c.tags = c.tags.filter(x=>x.id!==tagId);
+  const removeKey = tagKey(t.label);
+  c.tags = c.tags.filter(x=>x.id!==tagId && tagKey(x.label)!==removeKey);
   addHistory(c,'Etiqueta removida',t.label,'default');
   save(); renderPanelBody(); renderBoard();
 }
@@ -1727,9 +1739,10 @@ function addGlobalTag(clientId){
   const label = document.getElementById('tag-label').value.trim();
   const color = document.getElementById('tag-color').value;
   if(!label) return;
-  const existing = globalTags.find(t=>t.label.toLowerCase()===label.toLowerCase());
+  const labelKey = tagKey(label);
+  const existing = globalTags.find(t=>tagKey(t.label)===labelKey);
   if(existing){
-    if(!c.tags.some(t=>t.id===existing.id)){
+    if(!c.tags.some(t=>t.id===existing.id || tagKey(t.label)===labelKey)){
       c.tags.push({...existing});
       addHistory(c,'Etiqueta aplicada',existing.label,'default');
       save(); renderPanelBody(); renderBoard();
@@ -1747,8 +1760,19 @@ function editGlobalTag(tagId){
   if(!tag) return;
   const newLabel = prompt('Nome da etiqueta:', tag.label);
   if(!newLabel||newLabel.trim()===tag.label) return;
+  const oldKey = tagKey(tag.label);
   tag.label = newLabel.trim();
-  clients.forEach(c=>{ const ct=c.tags.find(t=>t.id===tagId); if(ct) ct.label=tag.label; });
+  clients.forEach(c=>{
+    const ct=c.tags.find(t=>t.id===tagId || tagKey(t.label)===oldKey);
+    if(ct) ct.label=tag.label;
+    const seen = {};
+    c.tags = c.tags.filter(t=>{
+      const key = tagKey(t.label);
+      if(!key || seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
+  });
   save(); renderPanelBody(); renderBoard();
 }
 function deleteGlobalTag(tagId){
@@ -1756,7 +1780,8 @@ function deleteGlobalTag(tagId){
   if(!tag) return;
   if(!confirm(`Excluir etiqueta "${tag.label}" de todos os clientes?`)) return;
   globalTags = globalTags.filter(t=>t.id!==tagId);
-  clients.forEach(c=>{ c.tags=c.tags.filter(t=>t.id!==tagId); });
+  const key = tagKey(tag.label);
+  clients.forEach(c=>{ c.tags=c.tags.filter(t=>t.id!==tagId && tagKey(t.label)!==key); });
   save(); renderPanelBody(); renderBoard();
 }
 // legacy addTag (não usada no novo fluxo mas mantida por segurança)
