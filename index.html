@@ -595,8 +595,8 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
 
       <div class="sec-title">Honorários</div>
       <div class="form-row">
-        <div class="fg"><label>Valor da Causa</label><input id="f-causa" placeholder="R$ 0,00"></div>
-        <div class="fg"><label>Honorários</label><input id="f-hon" placeholder="R$ 0,00 ou %"></div>
+        <div class="fg"><label>Valor da Causa</label><input id="f-causa" placeholder="R$ 0,00" oninput="formatMoneyInput(this)"></div>
+        <div class="fg"><label>Honorários</label><input id="f-hon" placeholder="R$ 0,00 ou %" oninput="formatNewClientHonorariosInput(this)"></div>
       </div>
       <div class="fg"><label>Observação sobre Honorários</label><input id="f-hon-obs" placeholder="Ex: 40% do montante total a receber"></div>
     </div>
@@ -669,6 +669,31 @@ function fmtDateTime(iso){
   if(!iso) return '';
   const d = new Date(iso);
   return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+function parseMoney(value){
+  const raw = String(value||'').trim();
+  if(!raw) return 0;
+  const clean = raw.replace(/[^\d,.-]/g,'');
+  if(!clean) return 0;
+  const normalized = clean.includes(',')
+    ? clean.replace(/\./g,'').replace(',','.')
+    : (/^\d{1,3}(\.\d{3})+$/.test(clean) ? clean.replace(/\./g,'') : clean);
+  const n = parseFloat(normalized);
+  return Number.isFinite(n) ? n : 0;
+}
+function formatMoney(value){
+  const n = typeof value === 'number' ? value : parseMoney(value);
+  if(!n) return '';
+  return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+function parsePercent(value){
+  const n = parseFloat(String(value||'').replace('%','').replace(',','.'));
+  return Number.isFinite(n) ? n : 0;
+}
+function formatPercent(value){
+  const n = parsePercent(value);
+  if(!n) return '';
+  return `${String(n).replace('.',',')}%`;
 }
 function dayStatus(dateStr){
   if(!dateStr) return null;
@@ -933,6 +958,18 @@ function normalizeClient(c){
   if(!Array.isArray(c.history)) c.history = [];
   if(!c.credentials || typeof c.credentials !== 'object') c.credentials = {cpf:'',govUser:'',password:''};
   if(!c.honorarios || typeof c.honorarios !== 'object') c.honorarios = {valorCausa:'',valorHonorarios:'',percentual:'',observacao:''};
+  if(!c.honorarios.percentual && String(c.honorarios.valorHonorarios||'').includes('%')){
+    c.honorarios.percentual = c.honorarios.valorHonorarios;
+    c.honorarios.valorHonorarios = '';
+  }
+  c.honorarios.valorCausa = formatMoney(c.honorarios.valorCausa) || c.honorarios.valorCausa || '';
+  c.honorarios.percentual = formatPercent(c.honorarios.percentual) || '';
+  if(c.honorarios.percentual){
+    const calc = parseMoney(c.honorarios.valorCausa) * parsePercent(c.honorarios.percentual) / 100;
+    if(calc) c.honorarios.valorHonorarios = formatMoney(calc);
+  } else {
+    c.honorarios.valorHonorarios = formatMoney(c.honorarios.valorHonorarios) || c.honorarios.valorHonorarios || '';
+  }
   c.tasks = c.tasks.map(t => {
     if(!t || typeof t !== 'object') return null;
     if(!t.id) t.id = uid();
@@ -1633,6 +1670,10 @@ function saveCredentials(clientId){
 // ── TAB: HONORÁRIOS ──
 function tabHonorarios(c){
   const h = c.honorarios;
+  const causa = formatMoney(h.valorCausa) || h.valorCausa;
+  const percentual = formatPercent(h.percentual);
+  const honorariosCalculados = percentual ? formatMoney(parseMoney(causa) * parsePercent(percentual) / 100) : '';
+  const honorariosValor = honorariosCalculados || formatMoney(h.valorHonorarios) || h.valorHonorarios;
   return `
   <div class="case-stack">
     <div class="case-section">
@@ -1640,19 +1681,24 @@ function tabHonorarios(c){
       <div class="hon-grid">
         <div class="hon-card">
           <div class="hon-lbl">Valor da Causa</div>
-          <div class="hon-val ${!h.valorCausa?'empty':''}">${esc(h.valorCausa)||'Não informado'}</div>
+          <div class="hon-val ${!causa?'empty':''}">${esc(causa)||'Não informado'}</div>
         </div>
         <div class="hon-card">
-          <div class="hon-lbl">Honorários</div>
-          <div class="hon-val ${!h.valorHonorarios&&!h.percentual?'empty':''}">${esc(h.valorHonorarios||h.percentual)||'Não informado'}</div>
+          <div class="hon-lbl">Percentual</div>
+          <div class="hon-val ${!percentual?'empty':''}">${esc(percentual)||'Não informado'}</div>
+        </div>
+        <div class="hon-card">
+          <div class="hon-lbl">Valor dos Honorários</div>
+          <div class="hon-val ${!honorariosValor?'empty':''}">${esc(honorariosValor)||'Não informado'}</div>
         </div>
       </div>
       ${h.observacao?`<div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);margin-bottom:2px">${esc(h.observacao)}</div>`:''}
     </div>
     <div class="case-section">
       <div class="case-section-title">Editar financeiro</div>
-      <div class="fl"><span class="fl-label">Valor da Causa</span><input class="fi" id="h-causa" value="${esc(h.valorCausa||'')}"></div>
-      <div class="fl"><span class="fl-label">Honorários (R$ ou %)</span><input class="fi" id="h-hon" value="${esc(h.valorHonorarios||'')}"></div>
+      <div class="fl"><span class="fl-label">Valor da Causa</span><input class="fi" id="h-causa" value="${esc(causa||'')}" oninput="formatMoneyInput(this); updateHonorariosCalc()"></div>
+      <div class="fl"><span class="fl-label">Honorários (%)</span><input class="fi" id="h-percent" value="${esc(percentual||'')}" placeholder="Ex: 40%" oninput="formatPercentInput(this); updateHonorariosCalc()"></div>
+      <div class="fl"><span class="fl-label">Valor dos Honorários</span><input class="fi" id="h-hon" value="${esc(honorariosValor||'')}" oninput="formatMoneyInput(this)"></div>
       <div class="fl"><span class="fl-label">Observação</span><input class="fi" id="h-obs" value="${esc(h.observacao||'')}"></div>
       <div class="btn-row">
         <button class="btn-s p" onclick="saveHonorarios('${c.id}')">Salvar</button>
@@ -1660,11 +1706,39 @@ function tabHonorarios(c){
     </div>
   </div>`;
 }
+function formatMoneyInput(input){
+  const value = input.value;
+  const digits = value.replace(/\D/g,'');
+  if(!digits){ input.value=''; return; }
+  input.value = (Number(digits)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+function formatPercentInput(input){
+  let value = input.value.replace(/[^\d,.]/g,'').replace(',','.');
+  if(!value){ input.value=''; updateHonorariosCalc(); return; }
+  const parts = value.split('.');
+  if(parts.length>2) value = `${parts[0]}.${parts.slice(1).join('')}`;
+  const n = parseFloat(value);
+  input.value = Number.isFinite(n) ? `${String(n).replace('.',',')}%` : '';
+}
+function updateHonorariosCalc(){
+  const causaEl = document.getElementById('h-causa');
+  const percentEl = document.getElementById('h-percent');
+  const honEl = document.getElementById('h-hon');
+  if(!causaEl || !percentEl || !honEl) return;
+  const causa = parseMoney(causaEl.value);
+  const percent = parsePercent(percentEl.value);
+  if(causa && percent) honEl.value = formatMoney(causa * percent / 100);
+}
+function formatNewClientHonorariosInput(input){
+  if(input.value.includes('%')) formatPercentInput(input);
+  else formatMoneyInput(input);
+}
 function saveHonorarios(clientId){
   const c = clients.find(x=>x.id===clientId);
   if(!c) return;
-  c.honorarios.valorCausa = document.getElementById('h-causa').value;
-  c.honorarios.valorHonorarios = document.getElementById('h-hon').value;
+  c.honorarios.valorCausa = formatMoney(document.getElementById('h-causa').value);
+  c.honorarios.percentual = formatPercent(document.getElementById('h-percent').value);
+  c.honorarios.valorHonorarios = formatMoney(document.getElementById('h-hon').value);
   c.honorarios.observacao = document.getElementById('h-obs').value;
   addHistory(c,'Honorários atualizados','','default');
   save();
@@ -2039,6 +2113,13 @@ function saveClient(){
   if(!name){ alert('Informe o nome do cliente.'); return; }
   const benefit = document.getElementById('f-benefit').value;
   if(!benefit){ alert('Selecione o tipo de benefício.'); return; }
+  const causaValue = formatMoney(document.getElementById('f-causa').value);
+  const honRaw = document.getElementById('f-hon').value.trim();
+  const honIsPercent = honRaw.includes('%');
+  const honPercent = honIsPercent ? formatPercent(honRaw) : '';
+  const honValue = honIsPercent && causaValue
+    ? formatMoney(parseMoney(causaValue) * parsePercent(honPercent) / 100)
+    : formatMoney(honRaw);
   const c = mkClient({
     name,
     benefitType: benefit,
@@ -2053,9 +2134,9 @@ function saveClient(){
       password:'',
     },
     honorarios:{
-      valorCausa: document.getElementById('f-causa').value.trim(),
-      valorHonorarios: document.getElementById('f-hon').value.trim(),
-      percentual:'',
+      valorCausa: causaValue,
+      valorHonorarios: honValue,
+      percentual: honPercent,
       observacao: document.getElementById('f-hon-obs').value.trim(),
     },
   });
