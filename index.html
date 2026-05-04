@@ -1170,6 +1170,15 @@ function tabResumo(c){
       <div class="summary-text ${!(c.summary||c.currentSituation)?'empty':''}">${c.summary||c.currentSituation?esc(c.summary||c.currentSituation):'Nenhum resumo cadastrado.'}</div>
     </div>
     <div class="case-section">
+      <div class="case-section-title">Anotações recentes</div>
+      <div class="notes-list">${notesHtml}</div>
+      <div class="note-input-wrap">
+        <textarea class="fi" id="note-input" placeholder="Escreva uma observação..." rows="2"></textarea>
+        <button class="btn-s p" onclick="addNote('${c.id}')">Enviar</button>
+      </div>
+      ${notes.length>3?`<button class="btn-s g" style="margin-top:10px" onclick="document.querySelector('[data-tab=historico]').click()">Ver todas as anotações</button>`:''}
+    </div>
+    <div class="case-section">
       <div class="case-section-title">Ações rápidas</div>
       <div class="case-actions">
         <div class="action-block">
@@ -1189,15 +1198,6 @@ function tabResumo(c){
       <div style="margin-top:12px">
         <button class="btn-panel-action" onclick="enterResumoEdit()">Editar dados do cliente</button>
       </div>
-    </div>
-    <div class="case-section">
-      <div class="case-section-title">Anotações recentes</div>
-      <div class="notes-list">${notesHtml}</div>
-      <div class="note-input-wrap">
-        <textarea class="fi" id="note-input" placeholder="Escreva uma observação..." rows="2"></textarea>
-        <button class="btn-s p" onclick="addNote('${c.id}')">Enviar</button>
-      </div>
-      ${notes.length>3?`<button class="btn-s g" style="margin-top:10px" onclick="document.querySelector('[data-tab=historico]').click()">Ver todas as anotações</button>`:''}
     </div>
     <div class="delete-zone panel-danger">
       <button class="btn-delete-card" onclick="deleteClient('${c.id}')">Remover este cliente</button>
