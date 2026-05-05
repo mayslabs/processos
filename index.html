@@ -96,12 +96,17 @@ body.sidebar-collapsed .sidebar-toggle svg{transform:rotate(180deg)}
 .kanban-alert-item:hover{border-color:#EF4444;background:#FEE2E2}
 .kanban-alert-item.payment{border-color:#BBF7D0;background:#F0FDF4}
 .kanban-alert-item.payment:hover{border-color:#22C55E;background:#DCFCE7}
+.kanban-alert-item.task{border-color:#FED7AA;background:#FFF7ED}
+.kanban-alert-item.task:hover{border-color:#F97316;background:#FFEDD5}
 .kanban-alert-client{font-size:11px;font-weight:900;color:#7F1D1D;margin-bottom:3px;line-height:1.25}
 .kanban-alert-desc{font-size:10px;color:#991B1B;line-height:1.25;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .kanban-alert-date{font-size:10px;font-weight:900;color:#B91C1C;line-height:1.2}
 .kanban-alert-item.payment .kanban-alert-client{color:#14532D}
 .kanban-alert-item.payment .kanban-alert-desc{color:#166534}
 .kanban-alert-item.payment .kanban-alert-date{color:#15803D}
+.kanban-alert-item.task .kanban-alert-client{color:#7C2D12}
+.kanban-alert-item.task .kanban-alert-desc{color:#9A3412}
+.kanban-alert-item.task .kanban-alert-date{color:#C2410C}
 .kanban-alert-section + .kanban-alert-section{margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
 .kanban-alert-empty{font-size:11px;color:var(--muted);line-height:1.35}
 .col{flex-shrink:0;width:255px;display:flex;flex-direction:column;max-height:100%}
@@ -478,11 +483,6 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
       <span class="nav-label">Kanban</span>
       <span class="sb-count" id="cnt-kanban">0</span>
     </button>
-    <button class="nav-btn" id="nav-tasks" onclick="navigate('tasks')" title="Tarefas e Prazos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-      <span class="nav-label">Tarefas e Prazos</span>
-      <span class="sb-count" id="cnt-tasks" style="background:#EF4444">0</span>
-    </button>
   </div>
   <div class="kanban-alerts empty" id="kanban-alerts"></div>
 </nav>
@@ -515,26 +515,6 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
     <div class="board" id="board"></div>
   </div>
 
-  <!-- TASKS PAGE -->
-  <div class="page" id="page-tasks">
-    <div class="tasks-bar" id="tasks-bar">
-      <button class="tf-btn active" data-filter="pending" onclick="setFilter(this,'pending')">Pendentes</button>
-      <button class="tf-btn" data-filter="today" onclick="setFilter(this,'today')">Hoje</button>
-      <button class="tf-btn" data-filter="week" onclick="setFilter(this,'week')">Esta Semana</button>
-      <button class="tf-btn" data-filter="overdue" onclick="setFilter(this,'overdue')">Atrasadas</button>
-      <button class="tf-btn" data-filter="process" onclick="setFilter(this,'process')">Prazos Processuais</button>
-      <button class="tf-btn" data-filter="payment" onclick="setFilter(this,'payment')">Pagamentos</button>
-      <button class="tf-btn" data-filter="internal" onclick="setFilter(this,'internal')">Tarefas Internas</button>
-      <button class="tf-btn" data-filter="done" onclick="setFilter(this,'done')">Concluídas</button>
-    </div>
-    <div class="tasks-layout">
-      <div class="tasks-list" id="tasks-list"></div>
-      <div class="tasks-cal">
-        <div id="calendar"></div>
-        <div id="cal-preview"></div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- OVERLAY + PANEL -->
@@ -921,7 +901,7 @@ function extractGlobalTags(clientList){
 function renderAll(){
   renderBoard();
   if(activeClientId) renderPanel();
-  if(document.getElementById('page-tasks').classList.contains('active')) renderTasksPage();
+  if(isTasksPageActive()) renderTasksPage();
   updateCounts();
 }
 
@@ -1062,17 +1042,22 @@ function initSidebar(){
   try { collapsed = localStorage.getItem('sidebarCollapsed') === '1'; } catch(e){}
   applySidebarState(collapsed);
 }
+function isTasksPageActive(){
+  const page = document.getElementById('page-tasks');
+  return !!page && page.classList.contains('active');
+}
 
 //  NAVIGATE
 // ─────────────────────────────────────────────
 function navigate(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
-  document.getElementById('nav-'+page).classList.add('active');
-  const titles = {kanban:'Kanban de Processos', tasks:'Tarefas e Prazos'};
+  const pageEl = document.getElementById('page-'+page);
+  const navEl = document.getElementById('nav-'+page);
+  if(pageEl) pageEl.classList.add('active');
+  if(navEl) navEl.classList.add('active');
+  const titles = {kanban:'Kanban de Processos'};
   document.getElementById('topbar-title').textContent = titles[page];
-  if(page==='tasks') renderTasksPage();
 }
 
 // ─────────────────────────────────────────────
@@ -1133,14 +1118,36 @@ function getPaymentDeadlineItems(clientList=clients){
   return items.sort((a,b)=>a.deadline.localeCompare(b.deadline));
 }
 
+function getSidebarTaskItems(clientList=clients){
+  const items = [];
+  clientList.forEach(c=>{
+    (c.tasks||[]).forEach(t=>{
+      if(!t.done && !isProcessDeadline(t) && !isPaymentDeadline(t)){
+        items.push({...t, clientId:c.id, clientName:c.name});
+      }
+    });
+  });
+  return items.sort((a,b)=>{
+    if(!a.deadline&&!b.deadline) return a.clientName.localeCompare(b.clientName);
+    if(!a.deadline) return 1;
+    if(!b.deadline) return -1;
+    return a.deadline.localeCompare(b.deadline);
+  });
+}
+
+function sidebarCount(n, singular, plural){
+  return `${n} ${n===1 ? singular : plural}`;
+}
+
 function renderKanbanDeadlineAlerts(clientList=clients){
   const el = document.getElementById('kanban-alerts');
   if(!el) return;
   const processItems = getProcessDeadlineItems(clientList);
   const paymentItems = getPaymentDeadlineItems(clientList);
-  if(!processItems.length && !paymentItems.length){
+  const taskItems = getSidebarTaskItems(clientList);
+  if(!processItems.length && !paymentItems.length && !taskItems.length){
     el.className = 'kanban-alerts empty';
-    el.innerHTML = `<div class="kanban-alert-head"><div class="kanban-alert-title">Alertas importantes</div></div><div class="kanban-alert-empty">Nenhum prazo processual ou pagamento ativo no Kanban.</div>`;
+    el.innerHTML = `<div class="kanban-alert-head"><div class="kanban-alert-title">Alertas importantes</div></div><div class="kanban-alert-empty">Nenhum prazo processual, pagamento ou tarefa ativa no Kanban.</div>`;
     return;
   }
   const processUrgent = processItems.filter(t=>{
@@ -1148,6 +1155,11 @@ function renderKanbanDeadlineAlerts(clientList=clients){
     return s==='overdue'||s==='urgent'||s==='warning';
   }).length;
   const paymentAttention = paymentItems.filter(t=>{
+    const s = dayStatus(t.deadline);
+    return s==='overdue'||s==='urgent'||s==='warning';
+  }).length;
+  const taskAttention = taskItems.filter(t=>{
+    if(!t.deadline) return false;
     const s = dayStatus(t.deadline);
     return s==='overdue'||s==='urgent'||s==='warning';
   }).length;
@@ -1169,21 +1181,37 @@ function renderKanbanDeadlineAlerts(clientList=clients){
       <div class="kanban-alert-date">${suffix}: ${fmtDate(t.deadline)}</div>
     </div>`;
   }).join('');
+  const taskList = taskItems.slice(0,4).map(t=>{
+    const s = t.deadline ? dayStatus(t.deadline) : null;
+    const suffix = !t.deadline ? 'Sem prazo' : s==='overdue'?'Vencida':s==='urgent'?'Urgente':s==='warning'?'Em breve':'Prazo';
+    return `<div class="kanban-alert-item task" onclick="openPanel('${t.clientId}')">
+      <div class="kanban-alert-client">${esc(t.clientName)}</div>
+      <div class="kanban-alert-desc">${esc(t.description)}</div>
+      <div class="kanban-alert-date">${t.deadline ? `${suffix}: ${fmtDate(t.deadline)}` : suffix}</div>
+    </div>`;
+  }).join('');
   el.className = 'kanban-alerts';
   el.innerHTML = `
     <div class="kanban-alert-section">
       <div class="kanban-alert-head">
         <div class="kanban-alert-title">Prazos processuais ativos</div>
-        <div class="kanban-alert-count">${processUrgent ? processUrgent+' exigem atenção' : processItems.length+' cadastrados'}</div>
+        <div class="kanban-alert-count">${processUrgent ? sidebarCount(processUrgent,'exige atenção','exigem atenção') : sidebarCount(processItems.length,'cadastrado','cadastrados')}</div>
       </div>
       ${processItems.length?`<div class="kanban-alert-row">${processList}</div>`:'<div class="kanban-alert-empty">Nenhum prazo processual ativo.</div>'}
     </div>
     <div class="kanban-alert-section">
       <div class="kanban-alert-head">
         <div class="kanban-alert-title" style="color:#166534">Pagamentos para cobrar</div>
-        <div class="kanban-alert-count" style="color:#166534;background:#DCFCE7">${paymentAttention ? paymentAttention+' exigem cobrança' : paymentItems.length+' cadastrados'}</div>
+        <div class="kanban-alert-count" style="color:#166534;background:#DCFCE7">${paymentAttention ? sidebarCount(paymentAttention,'exige cobrança','exigem cobrança') : sidebarCount(paymentItems.length,'cadastrado','cadastrados')}</div>
       </div>
       ${paymentItems.length?`<div class="kanban-alert-row">${paymentList}</div>`:'<div class="kanban-alert-empty">Nenhum pagamento ativo.</div>'}
+    </div>
+    <div class="kanban-alert-section">
+      <div class="kanban-alert-head">
+        <div class="kanban-alert-title" style="color:#9A3412">Tarefas</div>
+        <div class="kanban-alert-count" style="color:#9A3412;background:#FFEDD5">${taskAttention ? sidebarCount(taskAttention,'exige atenção','exigem atenção') : sidebarCount(taskItems.length,'cadastrada','cadastradas')}</div>
+      </div>
+      ${taskItems.length?`<div class="kanban-alert-row">${taskList}</div>`:'<div class="kanban-alert-empty">Nenhuma tarefa ativa.</div>'}
     </div>`;
 }
 
@@ -1229,10 +1257,8 @@ function renderCard(c){
 
 function updateCounts(){
   const active = clients.filter(c=>c.column!=='finalizado').length;
-  const pc = pendingCount();
-  document.getElementById('cnt-kanban').textContent = active;
-  document.getElementById('cnt-tasks').textContent = pc || '';
-  document.getElementById('cnt-tasks').style.background = pc ? '#EF4444' : 'rgba(255,255,255,.15)';
+  const kanbanCount = document.getElementById('cnt-kanban');
+  if(kanbanCount) kanbanCount.textContent = active;
 }
 
 // ─────────────────────────────────────────────
@@ -1549,7 +1575,7 @@ function deleteClient(clientId){
   save();
   closePanel();
   renderBoard();
-  if(document.getElementById('page-tasks').classList.contains('active')) renderTasksPage();
+  if(isTasksPageActive()) renderTasksPage();
 }
 
 // ── TAB: TAREFAS ──
@@ -1621,7 +1647,7 @@ function toggleTask(clientId, taskId){
   save();
   renderPanelBody();
   renderBoard();
-  if(document.getElementById('page-tasks').classList.contains('active')) renderTasksPage();
+  if(isTasksPageActive()) renderTasksPage();
 }
 function editTask(clientId, taskId){
   const c = clients.find(x=>x.id===clientId);
@@ -1637,7 +1663,7 @@ function editTask(clientId, taskId){
   if(oldDesc!==trimmed) addHistory(c,'Tarefa editada',trimmed,'task');
   save();
   renderPanelBody();
-  if(document.getElementById('page-tasks').classList.contains('active')) renderTasksPage();
+  if(isTasksPageActive()) renderTasksPage();
 }
 function deleteTask(clientId, taskId){
   const c = clients.find(x=>x.id===clientId);
@@ -1685,7 +1711,7 @@ function toggleTaskKind(clientId, taskId){
   save();
   renderPanelBody();
   renderBoard();
-  if(document.getElementById('page-tasks').classList.contains('active')) renderTasksPage();
+  if(isTasksPageActive()) renderTasksPage();
 }
 
 // ── TAB: CREDENCIAIS ──
@@ -2206,3 +2232,4 @@ initFirebase();
 </script>
 </body>
 </html>
+
