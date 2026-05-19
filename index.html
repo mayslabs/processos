@@ -32,6 +32,8 @@ body.read-only .note-input-wrap,
 body.read-only .tag-edit-btn,
 body.read-only .tag-del-global,
 body.read-only .tag-del,
+body.read-only .sidebar-task-form,
+body.read-only .sidebar-task-action,
 body.read-only .cpick,
 body.read-only .panel-col-select,
 body.read-only .quick-actions,
@@ -106,7 +108,7 @@ body.sidebar-collapsed .sidebar-toggle svg{transform:rotate(180deg)}
 .page.active{display:flex}
 
 /* ── KANBAN ── */
-.board{flex:1;display:flex;gap:14px;padding:18px 20px;overflow-x:auto;overflow-y:hidden;align-items:flex-start}
+.board{flex:1;display:flex;gap:14px;padding:18px 20px;overflow:auto;align-items:flex-start}
 .kanban-alerts{margin:8px 10px 14px;padding-top:12px;border-top:1px solid var(--border);overflow-y:auto;min-height:0}
 .kanban-alerts.empty{color:var(--muted)}
 .kanban-alert-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px}
@@ -129,14 +131,23 @@ body.sidebar-collapsed .sidebar-toggle svg{transform:rotate(180deg)}
 .kanban-alert-item.task .kanban-alert-client{color:#7C2D12}
 .kanban-alert-item.task .kanban-alert-desc{color:#9A3412}
 .kanban-alert-item.task .kanban-alert-date{color:#C2410C}
+.kanban-alert-item.global-task{cursor:default}
+.sidebar-task-actions{display:flex;gap:5px;margin-top:6px}
+.sidebar-task-action{border:none;border-radius:6px;background:#FED7AA;color:#9A3412;font-size:10px;font-weight:900;padding:4px 6px;cursor:pointer;font-family:inherit}
+.sidebar-task-action:hover{background:#FDBA74;color:#7C2D12}
+.sidebar-task-form{display:grid;gap:6px;margin-top:8px}
+.sidebar-task-input{width:100%;border:1px solid #FED7AA;background:#fff;border-radius:8px;padding:7px 8px;font-size:11px;font-family:inherit;color:var(--text);outline:none}
+.sidebar-task-input:focus{border-color:#F97316;box-shadow:0 0 0 2px rgba(249,115,22,.12)}
+.sidebar-task-btn{border:none;border-radius:8px;background:#F97316;color:#fff;font-size:11px;font-weight:900;padding:7px 8px;cursor:pointer;font-family:inherit}
+.sidebar-task-btn:hover{background:#EA580C}
 .kanban-alert-section + .kanban-alert-section{margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
 .kanban-alert-empty{font-size:11px;color:var(--muted);line-height:1.35}
-.col{flex-shrink:0;width:255px;display:flex;flex-direction:column;max-height:100%}
+.col{flex-shrink:0;width:255px;display:flex;flex-direction:column}
 .col-head{display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-bottom:3px solid var(--cc);border-radius:10px 10px 0 0}
 .col-dot{width:9px;height:9px;border-radius:50%;background:var(--cc);flex-shrink:0}
 .col-name{font-size:13px;font-weight:700;color:var(--text);flex:1;text-transform:uppercase;letter-spacing:.03em}
 .col-cnt{font-size:12px;font-weight:700;color:var(--muted);background:var(--bg);padding:2px 8px;border-radius:10px}
-.col-body{flex:1;overflow-y:auto;padding:8px;background:#F8FAFC;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;min-height:160px;display:flex;flex-direction:column;gap:8px}
+.col-body{flex:1;overflow:visible;padding:8px;background:#F8FAFC;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;min-height:160px;display:flex;flex-direction:column;gap:8px}
 .col-body.over{background:#EEF2FF;border-color:var(--primary)}
 .col-empty{text-align:center;padding:24px 12px;color:var(--muted);font-size:12px}
 
@@ -684,6 +695,7 @@ const DEFAULT_WORKSPACE_ID = 'leticia';
 // ─────────────────────────────────────────────
 let clients = [];
 let globalTags = [];
+let globalTasks = [];
 let activeClientId = null;
 let activeTab = 'resumo';
 let resumoEditMode = false;
@@ -748,6 +760,16 @@ function dayStatus(dateStr){
   return 'ok';
 }
 function esc(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function formatPhone(value){
+  const digits = String(value||'').replace(/\D/g,'').slice(0,11);
+  if(!digits) return '';
+  if(digits.length <= 2) return `(${digits}`;
+  if(digits.length <= 7) return `(${digits.slice(0,2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
+}
+function formatPhoneInput(input){
+  input.value = formatPhone(input.value);
+}
 function tagKey(label){ return (label||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 function isProcessDeadline(t){ return t && t.kind === 'process_deadline'; }
 function isPaymentDeadline(t){ return t && t.kind === 'payment_deadline'; }
@@ -850,6 +872,7 @@ function leaveApp(){
   fbRef = null;
   clients = [];
   globalTags = [];
+  globalTasks = [];
   activeClientId = null;
   renderWorkspaceSwitcher();
   closePanel();
@@ -893,22 +916,23 @@ function parseSavedKanban(raw){
     try {
       const parsed = JSON.parse(raw);
       if(Array.isArray(parsed)){
-        return {clients: parsed.map(normalizeClient).filter(Boolean), globalTags: extractGlobalTags(parsed)};
+        return {clients: parsed.map(normalizeClient).filter(Boolean), globalTags: extractGlobalTags(parsed), globalTasks: []};
       }
       return {
         clients: (parsed.clients||[]).map(normalizeClient).filter(Boolean),
-        globalTags: parsed.globalTags||extractGlobalTags(parsed.clients||[])
+        globalTags: parsed.globalTags||extractGlobalTags(parsed.clients||[]),
+        globalTasks: normalizeGlobalTasks(parsed.globalTasks)
       };
     } catch(e){
       console.error('Erro ao ler dados salvos:', e);
-      return {clients: [], globalTags: []};
+      return {clients: [], globalTags: [], globalTasks: []};
     }
   }
   if(raw && typeof raw === 'object'){
     const parsedClients = (raw.clients||[]).map(normalizeClient).filter(Boolean);
-    return {clients: parsedClients, globalTags: raw.globalTags||extractGlobalTags(parsedClients)};
+    return {clients: parsedClients, globalTags: raw.globalTags||extractGlobalTags(parsedClients), globalTasks: normalizeGlobalTasks(raw.globalTasks)};
   }
-  return {clients: [], globalTags: []};
+  return {clients: [], globalTags: [], globalTasks: []};
 }
 
 function listenKanban(){
@@ -917,6 +941,7 @@ function listenKanban(){
   fbReady = false;
   clients = [];
   globalTags = [];
+  globalTasks = [];
   activeClientId = null;
   closePanel();
   fbRef = workspaceRef();
@@ -930,6 +955,7 @@ function listenKanban(){
     const parsed = parseSavedKanban(raw);
     clients = parsed.clients;
     globalTags = parsed.globalTags;
+    globalTasks = parsed.globalTasks;
     fbReady = true;
     setSyncStatus('synced');
     renderAll();
@@ -1015,7 +1041,7 @@ function save(){
   }
   if(currentUser && fbReady && fbRef){
     setSyncStatus('saving');
-    fbRef.set(JSON.stringify({clients, globalTags})).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error'));
+    fbRef.set(JSON.stringify({clients, globalTags, globalTasks})).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error'));
   }
 }
 function extractGlobalTags(clientList){
@@ -1082,7 +1108,7 @@ function mkClient(fields){
   const base = {
     id:uid(), name:'', benefitType:'', via:'', processNumber:'', tribunal:'',
     column:'em_analise', currentSituation:'', summary:'', tags:[], cardColor:'',
-    credentials:{cpf:'',govUser:'',password:''},
+    credentials:{cpf:'',govUser:'',password:'',phone:''},
     honorarios:{valorCausa:'',valorHonorarios:'',percentual:'',observacao:''},
     tasks:[], history:[], createdAt:n, updatedAt:n,
   };
@@ -1092,6 +1118,21 @@ function mkClient(fields){
 }
 function mkTask(desc, deadline='', done=false, kind='internal'){
   return {id:uid(), description:desc, deadline, done, kind, doneAt:'', createdAt:now()};
+}
+function mkGlobalTask(desc, deadline=''){
+  return {id:uid(), description:desc, deadline, done:false, doneAt:'', createdAt:now()};
+}
+function normalizeGlobalTasks(list){
+  return (Array.isArray(list)?list:[]).map(t=>{
+    if(!t || typeof t !== 'object') return null;
+    if(!t.id) t.id = uid();
+    if(!t.description) t.description = '';
+    if(!t.deadline) t.deadline = '';
+    if(typeof t.done !== 'boolean') t.done = false;
+    if(!t.doneAt) t.doneAt = '';
+    if(!t.createdAt) t.createdAt = now();
+    return t;
+  }).filter(Boolean);
 }
 function normalizeClient(c){
   if(!c || typeof c !== 'object') return null;
@@ -1108,7 +1149,9 @@ function normalizeClient(c){
   if(!Array.isArray(c.tags)) c.tags = [];
   if(!Array.isArray(c.tasks)) c.tasks = [];
   if(!Array.isArray(c.history)) c.history = [];
-  if(!c.credentials || typeof c.credentials !== 'object') c.credentials = {cpf:'',govUser:'',password:''};
+  if(!c.credentials || typeof c.credentials !== 'object') c.credentials = {cpf:'',govUser:'',password:'',phone:''};
+  if(!c.credentials.phone) c.credentials.phone = '';
+  c.credentials.phone = formatPhone(c.credentials.phone);
   if(!c.honorarios || typeof c.honorarios !== 'object') c.honorarios = {valorCausa:'',valorHonorarios:'',percentual:'',observacao:''};
   if(!c.honorarios.percentual && String(c.honorarios.valorHonorarios||'').includes('%')){
     c.honorarios.percentual = c.honorarios.valorHonorarios;
@@ -1262,10 +1305,15 @@ function getPaymentDeadlineItems(clientList=clients){
 
 function getSidebarTaskItems(clientList=clients){
   const items = [];
+  globalTasks.forEach(t=>{
+    if(!t.done){
+      items.push({...t, isGlobal:true, clientName:'Tarefa interna'});
+    }
+  });
   clientList.forEach(c=>{
     (c.tasks||[]).forEach(t=>{
       if(!t.done && !isProcessDeadline(t) && !isPaymentDeadline(t)){
-        items.push({...t, clientId:c.id, clientName:c.name});
+        items.push({...t, clientId:c.id, clientName:c.name, isGlobal:false});
       }
     });
   });
@@ -1323,13 +1371,18 @@ function renderKanbanDeadlineAlerts(clientList=clients){
       <div class="kanban-alert-date">${suffix}: ${fmtDate(t.deadline)}</div>
     </div>`;
   }).join('');
-  const taskList = taskItems.slice(0,4).map(t=>{
+  const taskList = taskItems.slice(0,6).map(t=>{
     const s = t.deadline ? dayStatus(t.deadline) : null;
     const suffix = !t.deadline ? 'Sem prazo' : s==='overdue'?'Vencida':s==='urgent'?'Urgente':s==='warning'?'Em breve':'Prazo';
-    return `<div class="kanban-alert-item task" onclick="openPanel('${t.clientId}')">
+    return `<div class="kanban-alert-item task ${t.isGlobal?'global-task':''}" ${t.isGlobal?'':`onclick="openPanel('${t.clientId}')"`}>
       <div class="kanban-alert-client">${esc(t.clientName)}</div>
       <div class="kanban-alert-desc">${esc(t.description)}</div>
       <div class="kanban-alert-date">${t.deadline ? `${suffix}: ${fmtDate(t.deadline)}` : suffix}</div>
+      ${t.isGlobal?`<div class="sidebar-task-actions">
+        <button class="sidebar-task-action" onclick="toggleGlobalTask('${t.id}')">Concluir</button>
+        <button class="sidebar-task-action" onclick="editGlobalTask('${t.id}')">Editar</button>
+        <button class="sidebar-task-action" onclick="deleteGlobalTask('${t.id}')">Excluir</button>
+      </div>`:''}
     </div>`;
   }).join('');
   el.className = 'kanban-alerts';
@@ -1354,6 +1407,11 @@ function renderKanbanDeadlineAlerts(clientList=clients){
         <div class="kanban-alert-count" style="color:#9A3412;background:#FFEDD5">${taskAttention ? sidebarCount(taskAttention,'exige atenção','exigem atenção') : sidebarCount(taskItems.length,'cadastrada','cadastradas')}</div>
       </div>
       ${taskItems.length?`<div class="kanban-alert-row">${taskList}</div>`:'<div class="kanban-alert-empty">Nenhuma tarefa ativa.</div>'}
+      <div class="sidebar-task-form">
+        <input class="sidebar-task-input" id="global-task-desc" placeholder="Nova tarefa interna...">
+        <input class="sidebar-task-input" id="global-task-date" type="date">
+        <button class="sidebar-task-btn" onclick="addGlobalTask()">Adicionar tarefa</button>
+      </div>
     </div>`;
 }
 
@@ -1395,6 +1453,48 @@ function renderCard(c){
     ${paymentHtml}
     ${deadlineHtml}
   </div>`;
+}
+
+function addGlobalTask(){
+  const descEl = document.getElementById('global-task-desc');
+  const dateEl = document.getElementById('global-task-date');
+  const desc = descEl ? descEl.value.trim() : '';
+  const date = dateEl ? dateEl.value : '';
+  if(!desc){ alert('Informe a descrição da tarefa interna.'); return; }
+  globalTasks.push(mkGlobalTask(desc, date));
+  if(descEl) descEl.value = '';
+  if(dateEl) dateEl.value = '';
+  save();
+  renderBoard();
+}
+function toggleGlobalTask(taskId){
+  const t = globalTasks.find(x=>x.id===taskId);
+  if(!t) return;
+  t.done = !t.done;
+  t.doneAt = t.done ? now() : '';
+  save();
+  renderBoard();
+}
+function editGlobalTask(taskId){
+  const t = globalTasks.find(x=>x.id===taskId);
+  if(!t) return;
+  const desc = prompt('Editar tarefa interna:', t.description);
+  if(desc===null) return;
+  const trimmed = desc.trim();
+  if(!trimmed){ alert('A descrição não pode ficar vazia.'); return; }
+  const date = prompt('Data da tarefa no formato AAAA-MM-DD. Deixe vazio para sem prazo:', t.deadline||'');
+  t.description = trimmed;
+  if(date!==null) t.deadline = date.trim();
+  save();
+  renderBoard();
+}
+function deleteGlobalTask(taskId){
+  const t = globalTasks.find(x=>x.id===taskId);
+  if(!t) return;
+  if(!confirm('Excluir esta tarefa interna?')) return;
+  globalTasks = globalTasks.filter(x=>x.id!==taskId);
+  save();
+  renderBoard();
 }
 
 function updateCounts(){
@@ -1867,11 +1967,16 @@ function tabCredenciais(c){
         <div class="cred-label">CPF / Usuário GOV.br</div>
         <div class="cred-val">${cr.cpf||cr.govUser||'<span style="color:var(--muted);font-style:italic">Não informado</span>'}</div>
       </div>
+      <div class="cred-box">
+        <div class="cred-label">Celular</div>
+        <div class="cred-val">${cr.phone||'<span style="color:var(--muted);font-style:italic">Não informado</span>'}</div>
+      </div>
       <div style="font-size:13px;color:var(--muted);line-height:1.55">Senhas de clientes não são exibidas nem cadastradas neste painel. Guarde esse tipo de credencial em um gerenciador de senhas próprio.</div>
     </div>
     <div class="case-section">
       <div class="case-section-title">Editar acesso</div>
       <div class="fl"><span class="fl-label">CPF / Usuário</span><input class="fi" id="edit-cpf" value="${esc(cr.cpf||cr.govUser||'')}"></div>
+      <div class="fl"><span class="fl-label">Celular</span><input class="fi" id="edit-phone" value="${esc(cr.phone||'')}" inputmode="tel" placeholder="(00) 00000-0000" oninput="formatPhoneInput(this)"></div>
       <div class="btn-row" style="margin-top:4px">
         <button class="btn-s p" onclick="saveCredentials('${c.id}')">Salvar</button>
       </div>
@@ -1882,6 +1987,7 @@ function saveCredentials(clientId){
   const c = clients.find(x=>x.id===clientId);
   if(!c) return;
   c.credentials.cpf = document.getElementById('edit-cpf').value;
+  c.credentials.phone = formatPhone(document.getElementById('edit-phone').value);
   addHistory(c,'Credenciais atualizadas','GOV.br','default');
   save();
   renderPanelBody();
