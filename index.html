@@ -20,6 +20,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
 /* ── AUTH ── */
 .auth-locked .sidebar,.auth-locked .main{display:none}
+body.read-only .btn-add,
+body.read-only .btn-edit-card,
+body.read-only .btn-save-client,
+body.read-only .btn-s.p,
+body.read-only .btn-icon,
+body.read-only .btn-del,
+body.read-only .task-add,
+body.read-only .task-actions,
+body.read-only .note-input-wrap,
+body.read-only .tag-edit-btn,
+body.read-only .tag-del-global,
+body.read-only .tag-del,
+body.read-only .cpick,
+body.read-only .panel-col-select,
+body.read-only .quick-actions,
+body.read-only .edit-mode-banner{display:none!important}
+body.read-only .card{cursor:pointer}
 .auth-view{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#E0F2FE 0%,#F8FAFC 45%,#EEF2FF 100%);z-index:500;align-items:center;justify-content:center;padding:24px}
 .auth-locked .auth-view{display:flex}
 .auth-card{width:min(420px,100%);background:#fff;border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:0 24px 60px rgba(15,23,42,.18)}
@@ -70,6 +87,11 @@ body.sidebar-collapsed .kanban-alerts{display:none}
 .topbar-left{display:flex;align-items:center;gap:10px;min-width:0}
 .topbar-title{font-size:19px;font-weight:700}
 .topbar-right{display:flex;align-items:center;gap:10px}
+.workspace-switcher{display:flex;align-items:center;gap:6px;background:#F8FAFC;border:1px solid var(--border);border-radius:9px;padding:4px}
+.workspace-btn{border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:800;padding:6px 9px;border-radius:7px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.workspace-btn:hover{color:var(--primary);background:#EFF6FF}
+.workspace-btn.active{background:var(--primary);color:#fff}
+.workspace-badge{font-size:12px;font-weight:800;color:var(--primary);background:#EFF6FF;border:1px solid #BFDBFE;border-radius:999px;padding:6px 10px;white-space:nowrap}
 .sidebar-toggle{width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0}
 .sidebar-toggle:hover{border-color:var(--primary);color:var(--primary);background:#EFF6FF}
 .sidebar-toggle svg{width:18px;height:18px}
@@ -431,6 +453,7 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
   :root{--panel:100vw}
   .topbar{padding:12px 14px;gap:10px}
   .topbar-right{gap:8px}
+  .workspace-switcher{order:3;width:100%;overflow-x:auto}
   .search{width:170px}
   .panel-hd{padding:16px 18px 12px}
   .panel-name{font-size:18px}
@@ -467,7 +490,7 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
     <label class="auth-label" for="auth-password">Senha</label>
     <input class="auth-input" id="auth-password" type="password" autocomplete="current-password" required>
     <button class="auth-submit" id="auth-submit" type="submit">Entrar</button>
-    <p class="auth-help">O acesso precisa estar cadastrado no Firebase Authentication.</p>
+    <p class="auth-help">Use o e-mail cadastrado no Firebase Authentication para acessar os ambientes liberados.</p>
   </form>
 </div>
 
@@ -497,6 +520,7 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
       <span class="topbar-title" id="topbar-title">Kanban de Processos</span>
     </div>
     <div class="topbar-right">
+      <div class="workspace-switcher" id="workspace-switcher"></div>
       <div id="sync-status"><span style="color:#F59E0B;font-size:11px;font-weight:600">🔄 Conectando...</span></div>
       <div class="user-menu">
         <span id="user-email"></span>
@@ -647,6 +671,13 @@ const COLS = [
 ];
 const COL_LABELS = Object.fromEntries(COLS.map(c=>[c.id,c.label]));
 const PRESET_COLORS = ['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#EC4899','#64748B','#0EA5E9'];
+const WORKSPACES = [
+  {id:'leticia', label:'Letícia', title:'Processos com Letícia'},
+  {id:'pessoal', label:'Pessoal', title:'Meus Processos Pessoais'},
+];
+const WORKSPACE_LABELS = Object.fromEntries(WORKSPACES.map(w=>[w.id,w.label]));
+const WORKSPACE_TITLES = Object.fromEntries(WORKSPACES.map(w=>[w.id,w.title]));
+const DEFAULT_WORKSPACE_ID = 'leticia';
 
 // ─────────────────────────────────────────────
 //  STATE
@@ -663,6 +694,8 @@ let calSelected = null;
 let dragId = null;
 let editingClientId = null;
 let auth, currentUser = null;
+let currentUserProfile = null;
+let currentWorkspaceId = DEFAULT_WORKSPACE_ID;
 
 // ─────────────────────────────────────────────
 //  UTILS
@@ -728,6 +761,9 @@ function taskKindClass(t){
   if(isPaymentDeadline(t)) return 'payment';
   return 'internal';
 }
+function canEdit(){
+  return currentUserProfile && currentUserProfile.role === 'admin';
+}
 function nextKindActionLabel(t){
   if(isProcessDeadline(t)) return 'Pagamento';
   if(isPaymentDeadline(t)) return 'Tarefa';
@@ -784,67 +820,161 @@ function initFirebase(){
   } catch(e){ setSyncStatus('error'); console.error(e); }
 }
 
-function enterApp(user){
+async function enterApp(user){
   currentUser = user;
-  document.body.classList.remove('auth-locked');
-  const emailEl = document.getElementById('user-email');
-  if(emailEl) emailEl.textContent = user.email || '';
-  listenKanban();
+  try {
+    currentUserProfile = await loadUserProfile(user);
+    if(!currentUserProfile.workspaces.length) throw new Error('NO_WORKSPACES');
+    currentWorkspaceId = pickWorkspace(currentUserProfile.workspaces);
+    document.body.classList.remove('auth-locked');
+    document.body.classList.toggle('read-only', !canEdit());
+    const emailEl = document.getElementById('user-email');
+    if(emailEl) emailEl.textContent = currentUserProfile.name || user.email || '';
+    renderWorkspaceSwitcher();
+    listenKanban();
+  } catch(e){
+    console.error('Erro ao carregar permissões:', e);
+    currentUserProfile = null;
+    currentUser = null;
+    if(auth) await auth.signOut();
+    setTimeout(()=>setAuthError('Usuário autenticado, mas sem ambiente liberado. Confira as permissões no Firebase.'), 0);
+  }
 }
 
 function leaveApp(){
   currentUser = null;
+  currentUserProfile = null;
+  currentWorkspaceId = DEFAULT_WORKSPACE_ID;
   fbReady = false;
   if(fbRef) fbRef.off();
   fbRef = null;
   clients = [];
   globalTags = [];
   activeClientId = null;
+  renderWorkspaceSwitcher();
   closePanel();
   document.body.classList.add('auth-locked');
+  document.body.classList.remove('read-only');
   setAuthError('');
   renderAll();
+}
+
+async function loadUserProfile(user){
+  const snap = await firebase.database().ref('users/'+user.uid).once('value');
+  const data = snap.val() || {};
+  const workspaces = Object.keys(data.workspaces||{}).filter(id=>data.workspaces[id] === true && WORKSPACE_LABELS[id]);
+  return {
+    uid: user.uid,
+    email: user.email || '',
+    name: data.name || user.email || '',
+    role: data.role || 'viewer',
+    workspaces
+  };
+}
+
+function pickWorkspace(allowed){
+  let saved = '';
+  try { saved = localStorage.getItem('workspaceId') || ''; } catch(e){}
+  if(saved && allowed.includes(saved)) return saved;
+  if(allowed.includes(DEFAULT_WORKSPACE_ID)) return DEFAULT_WORKSPACE_ID;
+  return allowed[0];
+}
+
+function workspaceRef(id=currentWorkspaceId){
+  return firebase.database().ref('workspaces/'+id+'/kanban');
+}
+
+function legacyKanbanRef(){
+  return firebase.database().ref('kanban');
+}
+
+function parseSavedKanban(raw){
+  if(typeof raw === 'string'){
+    try {
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed)){
+        return {clients: parsed.map(normalizeClient).filter(Boolean), globalTags: extractGlobalTags(parsed)};
+      }
+      return {
+        clients: (parsed.clients||[]).map(normalizeClient).filter(Boolean),
+        globalTags: parsed.globalTags||extractGlobalTags(parsed.clients||[])
+      };
+    } catch(e){
+      console.error('Erro ao ler dados salvos:', e);
+      return {clients: [], globalTags: []};
+    }
+  }
+  if(raw && typeof raw === 'object'){
+    const parsedClients = (raw.clients||[]).map(normalizeClient).filter(Boolean);
+    return {clients: parsedClients, globalTags: raw.globalTags||extractGlobalTags(parsedClients)};
+  }
+  return {clients: [], globalTags: []};
 }
 
 function listenKanban(){
   if(!currentUser) return;
   if(fbRef) fbRef.off();
-  fbRef = firebase.database().ref('kanban');
+  fbReady = false;
+  clients = [];
+  globalTags = [];
+  activeClientId = null;
+  closePanel();
+  fbRef = workspaceRef();
   setSyncStatus('connecting');
-  fbRef.on('value', snap => {
-    const raw = snap.val();
-    if(typeof raw === 'string'){
-      try {
-        const parsed = JSON.parse(raw);
-        if(Array.isArray(parsed)){
-          clients = parsed.map(normalizeClient).filter(Boolean);
-          globalTags = extractGlobalTags(clients);
-        } else {
-          clients = (parsed.clients||[]).map(normalizeClient).filter(Boolean);
-          globalTags = parsed.globalTags||[];
-        }
-      } catch(e){
-        clients = [];
-        globalTags = [];
-        console.error('Erro ao ler dados salvos:', e);
-      }
-    } else if(raw && typeof raw === 'object') {
-      clients = (raw.clients||[]).map(normalizeClient).filter(Boolean);
-      globalTags = raw.globalTags||extractGlobalTags(clients);
-    } else {
-      clients = [];
-      globalTags = [];
+  fbRef.on('value', async snap => {
+    let raw = snap.val();
+    if(!snap.exists() && currentWorkspaceId === DEFAULT_WORKSPACE_ID){
+      raw = await tryLoadLegacyKanban();
+      if(raw !== null && raw !== undefined) fbRef.set(raw).catch(e=>console.error('Migração automática falhou:', e));
     }
+    const parsed = parseSavedKanban(raw);
+    clients = parsed.clients;
+    globalTags = parsed.globalTags;
     fbReady = true;
     setSyncStatus('synced');
     renderAll();
   }, err => { setSyncStatus('error'); console.error(err); });
 }
 
+async function tryLoadLegacyKanban(){
+  try {
+    const snap = await legacyKanbanRef().once('value');
+    return snap.exists() ? snap.val() : null;
+  } catch(e){
+    console.warn('Dados antigos não puderam ser lidos para migração.', e);
+    return null;
+  }
+}
+
+function renderWorkspaceSwitcher(){
+  const el = document.getElementById('workspace-switcher');
+  if(!el) return;
+  const allowed = currentUserProfile ? currentUserProfile.workspaces : [];
+  if(!currentUserProfile || !allowed.length){
+    el.innerHTML = '';
+    return;
+  }
+  if(allowed.length === 1){
+    el.innerHTML = `<span class="workspace-badge">${esc(WORKSPACE_LABELS[allowed[0]]||allowed[0])}</span>`;
+    return;
+  }
+  el.innerHTML = allowed.map(id=>`
+    <button class="workspace-btn ${id===currentWorkspaceId?'active':''}" onclick="switchWorkspace('${id}')">${esc(WORKSPACE_LABELS[id]||id)}</button>
+  `).join('');
+}
+
+function switchWorkspace(id){
+  if(!currentUserProfile || !currentUserProfile.workspaces.includes(id) || id===currentWorkspaceId) return;
+  currentWorkspaceId = id;
+  try { localStorage.setItem('workspaceId', id); } catch(e){}
+  renderWorkspaceSwitcher();
+  listenKanban();
+}
+
 function login(e){
   e.preventDefault();
   if(!auth) return setAuthError('Firebase Authentication não foi inicializado.');
-  const email = document.getElementById('auth-email').value.trim();
+  const email = document.getElementById('auth-email').value.trim().toLowerCase();
   const password = document.getElementById('auth-password').value;
   const btn = document.getElementById('auth-submit');
   btn.disabled = true;
@@ -878,6 +1008,11 @@ function authMessage(err){
 }
 
 function save(){
+  if(!canEdit()){
+    setSyncStatus('synced');
+    alert('Este acesso é somente leitura. Entre com o usuário admin para alterar dados.');
+    return;
+  }
   if(currentUser && fbReady && fbRef){
     setSyncStatus('saving');
     fbRef.set(JSON.stringify({clients, globalTags})).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error'));
@@ -899,10 +1034,18 @@ function extractGlobalTags(clientList){
 }
 
 function renderAll(){
+  updateWorkspaceTitle();
   renderBoard();
   if(activeClientId) renderPanel();
   if(isTasksPageActive()) renderTasksPage();
   updateCounts();
+}
+
+function updateWorkspaceTitle(){
+  const el = document.getElementById('topbar-title');
+  if(el) el.textContent = WORKSPACE_TITLES[currentWorkspaceId] || 'Kanban de Processos';
+  const sub = document.querySelector('.sb-subtitle');
+  if(sub) sub.textContent = WORKSPACE_LABELS[currentWorkspaceId] ? `Ambiente: ${WORKSPACE_LABELS[currentWorkspaceId]}` : 'Processos Previdenciários';
 }
 
 function setSyncStatus(s){
@@ -1056,8 +1199,7 @@ function navigate(page){
   const navEl = document.getElementById('nav-'+page);
   if(pageEl) pageEl.classList.add('active');
   if(navEl) navEl.classList.add('active');
-  const titles = {kanban:'Kanban de Processos'};
-  document.getElementById('topbar-title').textContent = titles[page];
+  updateWorkspaceTitle();
 }
 
 // ─────────────────────────────────────────────

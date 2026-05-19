@@ -1,14 +1,24 @@
 {
   "rules": {
+    "workspaces": {
+      "$workspaceId": {
+        ".read": "auth != null && root.child('users').child(auth.uid).child('workspaces').child($workspaceId).val() === true",
+        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && root.child('users').child(auth.uid).child('workspaces').child($workspaceId).val() === true"
+      }
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+      }
+    },
     "kanban": {
-      ".read": "auth != null && root.child('authorizedUsers').child(auth.uid).val() === true",
-      ".write": "auth != null && root.child('authorizedUsers').child(auth.uid).val() === true"
+      ".read": "auth != null && root.child('users').child(auth.uid).child('workspaces').child('leticia').val() === true",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
     },
     "authorizedUsers": {
-      "$uid": {
-        ".read": "auth != null && root.child('authorizedUsers').child(auth.uid).val() === true",
-        ".write": false
-      }
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      ".write": false
     }
   }
 }
