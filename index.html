@@ -632,6 +632,7 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
       </div>
       <div class="fg"><label>Número do Processo</label><input id="f-proc" placeholder="0000000-00.0000.0.00.0000"></div>
       <div class="fg"><label>Descrição curta do processo</label><input id="f-short-desc" placeholder="Ex: Ação de imissão de posse"></div>
+      <div class="fg"><label>Parte contrária</label><input id="f-opposing-party" placeholder="Ex: Banco, INSS, empresa, pessoa física"></div>
       <div class="fg"><label>Resumo do Caso</label><textarea id="f-summary" rows="4" placeholder="Descreva o caso, histórico médico, motivo do pedido..."></textarea></div>
 
       <div class="sec-title">Credenciais GOV.br</div>
@@ -641,9 +642,10 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
 
       <div class="sec-title">Honorários</div>
       <div class="form-row">
-        <div class="fg"><label>Valor da Causa</label><input id="f-causa" placeholder="R$ 0,00" oninput="formatMoneyInput(this)"></div>
+        <div class="fg"><label>Valor da Causa</label><input id="f-causa" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateNewClientHonorariosCalc()"></div>
         <div class="fg"><label>Honorários</label><input id="f-hon" placeholder="R$ 0,00 ou %" oninput="formatNewClientHonorariosInput(this)"></div>
       </div>
+      <div class="fg"><label>Valor calculado dos Honorários</label><input id="f-hon-calc" placeholder="Preenchido automaticamente quando usar %" readonly></div>
       <div class="fg"><label>Observação sobre Honorários</label><input id="f-hon-obs" placeholder="Ex: 40% do montante total a receber"></div>
     </div>
     <div class="modal-ft">
@@ -1138,7 +1140,7 @@ function mkClient(fields){
   const n = now();
   const base = {
     id:uid(), name:'', benefitType:'', via:'', processNumber:'', tribunal:'',
-    column:'em_analise', currentSituation:'', summary:'', shortDescription:'', tags:[], cardColor:'',
+    column:'em_analise', currentSituation:'', summary:'', shortDescription:'', opposingParty:'', tags:[], cardColor:'',
     credentials:{cpf:'',govUser:'',password:'',phone:''},
     honorarios:{valorCausa:'',valorHonorarios:'',percentual:'',observacao:''},
     tasks:[], history:[], createdAt:n, updatedAt:n,
@@ -1177,6 +1179,7 @@ function normalizeClient(c){
   if(!c.currentSituation) c.currentSituation = '';
   if(!c.summary) c.summary = '';
   if(!c.shortDescription) c.shortDescription = '';
+  if(!c.opposingParty) c.opposingParty = '';
   if(!c.cardColor) c.cardColor = '';
   if(!Array.isArray(c.tags)) c.tags = [];
   if(!Array.isArray(c.tasks)) c.tasks = [];
@@ -1727,6 +1730,7 @@ function tabResumo(c){
       <div class="case-info-grid">
         ${infoCell(caseTypeLabel().replace(/^./, ch=>ch.toUpperCase()), c.benefitType)}
         ${infoCell('Descrição curta', c.shortDescription)}
+        ${infoCell('Parte contrária', c.opposingParty)}
         ${infoCell('Via', c.via)}
         ${infoCell('Número do processo', c.processNumber)}
         ${infoCell('Tribunal', c.tribunal)}
@@ -1789,6 +1793,7 @@ function tabResumoEdit(c){
   </div>
   <div class="fl"><span class="fl-label">Número do Processo</span><input class="fi" id="re-proc" value="${esc(c.processNumber||'')}"></div>
   <div class="fl"><span class="fl-label">Descrição curta do processo</span><input class="fi" id="re-short-desc" value="${esc(c.shortDescription||'')}" placeholder="Ex: Embargos de terceiro"></div>
+  <div class="fl"><span class="fl-label">Parte contrária</span><input class="fi" id="re-opposing-party" value="${esc(c.opposingParty||'')}" placeholder="Ex: Banco, INSS, empresa, pessoa física"></div>
   <div class="fl"><span class="fl-label">Tribunal</span>
     <select class="fi fi-select" id="re-tribunal">
       ${renderTribunalOptions(c.tribunal)}
@@ -1812,6 +1817,7 @@ function saveClientEdit(clientId){
   c.via = document.getElementById('re-via').value;
   c.processNumber = document.getElementById('re-proc').value.trim();
   c.shortDescription = document.getElementById('re-short-desc').value.trim();
+  c.opposingParty = document.getElementById('re-opposing-party').value.trim();
   c.tribunal = document.getElementById('re-tribunal').value;
   c.summary = document.getElementById('re-summary').value.trim();
   addHistory(c,'Cliente atualizado','','default');
@@ -2091,6 +2097,16 @@ function updateHonorariosCalc(){
 function formatNewClientHonorariosInput(input){
   if(input.value.includes('%')) formatPercentInput(input);
   else formatMoneyInput(input);
+  updateNewClientHonorariosCalc();
+}
+function updateNewClientHonorariosCalc(){
+  const causaEl = document.getElementById('f-causa');
+  const honEl = document.getElementById('f-hon');
+  const calcEl = document.getElementById('f-hon-calc');
+  if(!causaEl || !honEl || !calcEl) return;
+  const percent = parsePercent(honEl.value);
+  const causa = parseMoney(causaEl.value);
+  calcEl.value = honEl.value.includes('%') && causa && percent ? formatMoney(causa * percent / 100) : '';
 }
 function saveHonorarios(clientId){
   const c = clients.find(x=>x.id===clientId);
@@ -2457,7 +2473,7 @@ function calNext(){ calDate = new Date(calDate.getFullYear(), calDate.getMonth()
 function openModal(){
   editingClientId = null;
   document.getElementById('modal-title').textContent = 'Novo Cliente';
-  ['f-name','f-proc','f-short-desc','f-summary','f-cpf','f-causa','f-hon','f-hon-obs'].forEach(id=>{
+  ['f-name','f-proc','f-short-desc','f-opposing-party','f-summary','f-cpf','f-causa','f-hon','f-hon-calc','f-hon-obs'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   const benefitSelect = document.getElementById('f-benefit');
@@ -2490,6 +2506,7 @@ function saveClient(){
     column: document.getElementById('f-column').value,
     processNumber: document.getElementById('f-proc').value.trim(),
     shortDescription: document.getElementById('f-short-desc').value.trim(),
+    opposingParty: document.getElementById('f-opposing-party').value.trim(),
     tribunal: document.getElementById('f-tribunal').value,
     summary: document.getElementById('f-summary').value.trim(),
     credentials:{
