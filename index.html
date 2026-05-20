@@ -161,6 +161,7 @@ body.sidebar-collapsed .sidebar-toggle svg{transform:rotate(180deg)}
 .card-alert{color:var(--alert);flex-shrink:0;display:flex;align-items:center}
 .card-alert svg{width:16px;height:16px}
 .card-benefit{font-size:12px;color:var(--muted);margin-bottom:7px}
+.card-short-desc{font-size:12px;color:var(--text);font-weight:600;line-height:1.35;margin:-2px 0 7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
 .tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;color:#fff;white-space:nowrap}
 .card-deadline{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
@@ -630,6 +631,7 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
         </div>
       </div>
       <div class="fg"><label>Número do Processo</label><input id="f-proc" placeholder="0000000-00.0000.0.00.0000"></div>
+      <div class="fg"><label>Descrição curta do processo</label><input id="f-short-desc" placeholder="Ex: Ação de imissão de posse"></div>
       <div class="fg"><label>Resumo do Caso</label><textarea id="f-summary" rows="4" placeholder="Descreva o caso, histórico médico, motivo do pedido..."></textarea></div>
 
       <div class="sec-title">Credenciais GOV.br</div>
@@ -1132,7 +1134,7 @@ function mkClient(fields){
   const n = now();
   const base = {
     id:uid(), name:'', benefitType:'', via:'', processNumber:'', tribunal:'',
-    column:'em_analise', currentSituation:'', summary:'', tags:[], cardColor:'',
+    column:'em_analise', currentSituation:'', summary:'', shortDescription:'', tags:[], cardColor:'',
     credentials:{cpf:'',govUser:'',password:'',phone:''},
     honorarios:{valorCausa:'',valorHonorarios:'',percentual:'',observacao:''},
     tasks:[], history:[], createdAt:n, updatedAt:n,
@@ -1170,6 +1172,7 @@ function normalizeClient(c){
   if(!c.column) c.column = 'em_analise';
   if(!c.currentSituation) c.currentSituation = '';
   if(!c.summary) c.summary = '';
+  if(!c.shortDescription) c.shortDescription = '';
   if(!c.cardColor) c.cardColor = '';
   if(!Array.isArray(c.tags)) c.tags = [];
   if(!Array.isArray(c.tasks)) c.tasks = [];
@@ -1472,6 +1475,7 @@ function renderCard(c){
       ${alert?`<div class="card-alert"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>`:''}
     </div>
     <div class="card-benefit">${esc(c.benefitType)||'<em>Tipo não definido</em>'}</div>
+    ${c.shortDescription?`<div class="card-short-desc">${esc(c.shortDescription)}</div>`:''}
     ${tagsHtml?`<div class="card-tags">${tagsHtml}</div>`:''}
     ${viaHtml}
     ${processHtml}
@@ -1718,6 +1722,7 @@ function tabResumo(c){
       <div class="case-section-title">Dados do processo</div>
       <div class="case-info-grid">
         ${infoCell(caseTypeLabel().replace(/^./, ch=>ch.toUpperCase()), c.benefitType)}
+        ${infoCell('Descrição curta', c.shortDescription)}
         ${infoCell('Via', c.via)}
         ${infoCell('Número do processo', c.processNumber)}
         ${infoCell('Tribunal', c.tribunal)}
@@ -1779,6 +1784,7 @@ function tabResumoEdit(c){
     </select>
   </div>
   <div class="fl"><span class="fl-label">Número do Processo</span><input class="fi" id="re-proc" value="${esc(c.processNumber||'')}"></div>
+  <div class="fl"><span class="fl-label">Descrição curta do processo</span><input class="fi" id="re-short-desc" value="${esc(c.shortDescription||'')}" placeholder="Ex: Embargos de terceiro"></div>
   <div class="fl"><span class="fl-label">Tribunal</span>
     <select class="fi fi-select" id="re-tribunal">
       ${renderTribunalOptions(c.tribunal)}
@@ -1801,6 +1807,7 @@ function saveClientEdit(clientId){
   c.benefitType = document.getElementById('re-benefit').value;
   c.via = document.getElementById('re-via').value;
   c.processNumber = document.getElementById('re-proc').value.trim();
+  c.shortDescription = document.getElementById('re-short-desc').value.trim();
   c.tribunal = document.getElementById('re-tribunal').value;
   c.summary = document.getElementById('re-summary').value.trim();
   addHistory(c,'Cliente atualizado','','default');
@@ -2446,7 +2453,7 @@ function calNext(){ calDate = new Date(calDate.getFullYear(), calDate.getMonth()
 function openModal(){
   editingClientId = null;
   document.getElementById('modal-title').textContent = 'Novo Cliente';
-  ['f-name','f-proc','f-summary','f-cpf','f-causa','f-hon','f-hon-obs'].forEach(id=>{
+  ['f-name','f-proc','f-short-desc','f-summary','f-cpf','f-causa','f-hon','f-hon-obs'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   const benefitSelect = document.getElementById('f-benefit');
@@ -2478,6 +2485,7 @@ function saveClient(){
     via: document.getElementById('f-via').value,
     column: document.getElementById('f-column').value,
     processNumber: document.getElementById('f-proc').value.trim(),
+    shortDescription: document.getElementById('f-short-desc').value.trim(),
     tribunal: document.getElementById('f-tribunal').value,
     summary: document.getElementById('f-summary').value.trim(),
     credentials:{
