@@ -684,6 +684,8 @@ const COL_LABELS = Object.fromEntries(COLS.map(c=>[c.id,c.label]));
 const PRESET_COLORS = ['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#EC4899','#64748B','#0EA5E9'];
 const BENEFIT_OPTIONS = ['BPC - Deficiência','BPC - Idoso','Salário-maternidade rural','Salário-maternidade urbano','Auxílio-doença','Auxílio-acidente','Aposentadoria por invalidez','Aposentadoria por tempo de contribuição','Aposentadoria por idade','Aposentadoria rural','Pensão por morte','Outro'];
 const PERSONAL_PROCESS_OPTIONS = ['Direito do Consumidor','Cível','Família','Trabalhista','Contratual','Danos morais','Cobrança','Execução','Inventário','Imobiliário','Previdenciário','Outro'];
+const DEFAULT_TRIBUNAL_OPTIONS = ['TRF1','TRF2','TRF3','TRF4','TRF5','Outro'];
+const PERSONAL_TRIBUNAL_OPTIONS = ['TRF1','TRF2','TRF3','TRF4','TRF5','TJTO','TJRO','Outro'];
 const WORKSPACES = [
   {id:'leticia', label:'Letícia', title:'Processos com Letícia'},
   {id:'pessoal', label:'Pessoal', title:'Meus Processos Pessoais'},
@@ -799,6 +801,12 @@ function caseTypeOptions(){
 }
 function renderCaseTypeOptions(selected=''){
   return `<option value="">Selecione...</option>` + caseTypeOptions().map(opt=>`<option value="${esc(opt)}" ${selected===opt?'selected':''}>${esc(opt)}</option>`).join('');
+}
+function tribunalOptions(){
+  return isPersonalWorkspace() ? PERSONAL_TRIBUNAL_OPTIONS : DEFAULT_TRIBUNAL_OPTIONS;
+}
+function renderTribunalOptions(selected=''){
+  return `<option value="">Nenhum</option>` + tribunalOptions().map(t=>`<option value="${esc(t)}" ${selected===t?'selected':''}>${esc(t)}</option>`).join('');
 }
 function canEdit(){
   return currentUserProfile && currentUserProfile.role === 'admin';
@@ -1773,8 +1781,7 @@ function tabResumoEdit(c){
   <div class="fl"><span class="fl-label">Número do Processo</span><input class="fi" id="re-proc" value="${esc(c.processNumber||'')}"></div>
   <div class="fl"><span class="fl-label">Tribunal</span>
     <select class="fi fi-select" id="re-tribunal">
-      <option value="">Nenhum</option>
-      ${['TRF1','TRF2','TRF3','TRF4','TRF5','Outro'].map(t=>`<option value="${t}" ${c.tribunal===t?'selected':''}>${t}</option>`).join('')}
+      ${renderTribunalOptions(c.tribunal)}
     </select>
   </div>
   <div class="fl"><span class="fl-label">Resumo do Caso</span><textarea class="fi" id="re-summary" rows="6" style="min-height:100px">${esc(c.summary||'')}</textarea></div>
@@ -2446,9 +2453,10 @@ function openModal(){
   const benefitLabel = document.getElementById('f-benefit-label');
   if(benefitLabel) benefitLabel.textContent = caseTypeRequiredLabel();
   if(benefitSelect) benefitSelect.innerHTML = renderCaseTypeOptions('');
+  const tribunalSelect = document.getElementById('f-tribunal');
+  if(tribunalSelect) tribunalSelect.innerHTML = renderTribunalOptions('');
   document.getElementById('f-column').value='em_analise';
   document.getElementById('f-via').value='';
-  document.getElementById('f-tribunal').value='';
   document.getElementById('modal-bg').classList.add('on');
 }
 function closeModal(){ document.getElementById('modal-bg').classList.remove('on'); }
