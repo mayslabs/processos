@@ -585,7 +585,7 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
         <div class="fg" style="grid-column:1/-1"><label>Nome completo *</label><input id="f-name" placeholder="Nome do cliente"></div>
       </div>
       <div class="form-row">
-        <div class="fg"><label>Tipo de Benefício *</label>
+        <div class="fg"><label id="f-benefit-label">Tipo de Benefício *</label>
           <select id="f-benefit">
             <option value="">Selecione...</option>
             <option>BPC - Deficiência</option>
@@ -682,6 +682,8 @@ const COLS = [
 ];
 const COL_LABELS = Object.fromEntries(COLS.map(c=>[c.id,c.label]));
 const PRESET_COLORS = ['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#EC4899','#64748B','#0EA5E9'];
+const BENEFIT_OPTIONS = ['BPC - Deficiência','BPC - Idoso','Salário-maternidade rural','Salário-maternidade urbano','Auxílio-doença','Auxílio-acidente','Aposentadoria por invalidez','Aposentadoria por tempo de contribuição','Aposentadoria por idade','Aposentadoria rural','Pensão por morte','Outro'];
+const PERSONAL_PROCESS_OPTIONS = ['Direito do Consumidor','Cível','Família','Trabalhista','Contratual','Danos morais','Cobrança','Execução','Inventário','Imobiliário','Previdenciário','Outro'];
 const WORKSPACES = [
   {id:'leticia', label:'Letícia', title:'Processos com Letícia'},
   {id:'pessoal', label:'Pessoal', title:'Meus Processos Pessoais'},
@@ -782,6 +784,21 @@ function taskKindClass(t){
   if(isProcessDeadline(t)) return 'process';
   if(isPaymentDeadline(t)) return 'payment';
   return 'internal';
+}
+function isPersonalWorkspace(){
+  return currentWorkspaceId === 'pessoal';
+}
+function caseTypeLabel(){
+  return isPersonalWorkspace() ? 'Tipo de processo' : 'Tipo de benefício';
+}
+function caseTypeRequiredLabel(){
+  return caseTypeLabel().replace(/^./, c=>c.toUpperCase()) + ' *';
+}
+function caseTypeOptions(){
+  return isPersonalWorkspace() ? PERSONAL_PROCESS_OPTIONS : BENEFIT_OPTIONS;
+}
+function renderCaseTypeOptions(selected=''){
+  return `<option value="">Selecione...</option>` + caseTypeOptions().map(opt=>`<option value="${esc(opt)}" ${selected===opt?'selected':''}>${esc(opt)}</option>`).join('');
 }
 function canEdit(){
   return currentUserProfile && currentUserProfile.role === 'admin';
@@ -1692,7 +1709,7 @@ function tabResumo(c){
     <div class="case-section">
       <div class="case-section-title">Dados do processo</div>
       <div class="case-info-grid">
-        ${infoCell('Benefício', c.benefitType)}
+        ${infoCell(caseTypeLabel().replace(/^./, ch=>ch.toUpperCase()), c.benefitType)}
         ${infoCell('Via', c.via)}
         ${infoCell('Número do processo', c.processNumber)}
         ${infoCell('Tribunal', c.tribunal)}
@@ -1738,14 +1755,12 @@ function tabResumo(c){
   </div>`;
 }
 function tabResumoEdit(c){
-  const benefitOpts = ['BPC - Deficiência','BPC - Idoso','Salário-maternidade rural','Salário-maternidade urbano','Auxílio-doença','Auxílio-acidente','Aposentadoria por invalidez','Aposentadoria por tempo de contribuição','Aposentadoria por idade','Aposentadoria rural','Pensão por morte','Outro'];
   return `
   <div class="edit-mode-banner">Modo de edição: altere os campos e clique em Salvar</div>
   <div class="fl"><span class="fl-label">Nome</span><input class="fi" id="re-name" value="${esc(c.name||'')}"></div>
-  <div class="fl"><span class="fl-label">Tipo de Benefício</span>
+  <div class="fl"><span class="fl-label">${caseTypeLabel().replace(/^./, ch=>ch.toUpperCase())}</span>
     <select class="fi fi-select" id="re-benefit">
-      <option value="">Selecione...</option>
-      ${benefitOpts.map(b=>`<option value="${b}" ${c.benefitType===b?'selected':''}>${b}</option>`).join('')}
+      ${renderCaseTypeOptions(c.benefitType)}
     </select>
   </div>
   <div class="fl"><span class="fl-label">Via</span>
@@ -2427,7 +2442,10 @@ function openModal(){
   ['f-name','f-proc','f-summary','f-cpf','f-causa','f-hon','f-hon-obs'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
-  document.getElementById('f-benefit').value='';
+  const benefitSelect = document.getElementById('f-benefit');
+  const benefitLabel = document.getElementById('f-benefit-label');
+  if(benefitLabel) benefitLabel.textContent = caseTypeRequiredLabel();
+  if(benefitSelect) benefitSelect.innerHTML = renderCaseTypeOptions('');
   document.getElementById('f-column').value='em_analise';
   document.getElementById('f-via').value='';
   document.getElementById('f-tribunal').value='';
@@ -2438,7 +2456,7 @@ function saveClient(){
   const name = document.getElementById('f-name').value.trim();
   if(!name){ alert('Informe o nome do cliente.'); return; }
   const benefit = document.getElementById('f-benefit').value;
-  if(!benefit){ alert('Selecione o tipo de benefício.'); return; }
+  if(!benefit){ alert(`Selecione o ${caseTypeLabel()}.`); return; }
   const causaValue = formatMoney(document.getElementById('f-causa').value);
   const honRaw = document.getElementById('f-hon').value.trim();
   const honIsPercent = honRaw.includes('%');
