@@ -461,6 +461,110 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
 .badge.a{background:#DBEAFE;color:#1D4ED8}
 .badge.n{background:var(--bg);color:var(--muted)}
 
+/* ── PASTEL CLEAN THEME ── */
+:root{
+  --bg:#F7FAFC;--surface:#FFFFFF;--sb-bg:#FBFCFE;
+  --primary:#5F8FD3;--primary-dark:#4778BF;
+  --text:#223047;--muted:#718096;--border:#E6EDF5;
+  --alert:#D97070;--warn:#C4923D;--ok:#5FAA82;
+  --shadow-soft:0 10px 30px rgba(31,42,68,.07);
+}
+body{background:var(--bg);color:var(--text)}
+.auth-view{background:linear-gradient(135deg,#F2FAFF 0%,#FBFCFE 52%,#F7F5FF 100%)}
+.auth-card,.panel,.modal{box-shadow:var(--shadow-soft)}
+.auth-card{border-radius:12px}
+.sidebar{background:var(--sb-bg)}
+.nav-btn:hover,.sidebar-toggle:hover,.workspace-btn:hover,.btn-panel-action:hover{background:#EEF6FF;color:#4778BF}
+.nav-btn.active,.workspace-btn.active,.btn-add,.auth-submit,.btn-s.p,.btn-lg.p{background:var(--primary);color:#fff}
+.nav-btn.active:hover,.workspace-btn.active:hover,.btn-add:hover,.auth-submit:hover,.btn-s.p:hover,.btn-lg.p:hover{background:var(--primary-dark)}
+.search,.fi,.fi-select,.auth-input,.sidebar-task-input{background:#fff;border-color:var(--border)}
+.board{background:linear-gradient(180deg,#F8FBFD 0%,#F5F8FB 100%)}
+.col-head{border-radius:8px 8px 0 0;border-bottom-width:2px}
+.col-body{background:#FBFCFE;border-radius:0 0 8px 8px}
+.card{border-radius:8px;box-shadow:none;border-color:#E8EEF6}
+.card:hover{box-shadow:0 8px 22px rgba(31,42,68,.08);transform:translateY(-1px)}
+.tag,.tag-ed{color:#334155}
+.tag-del{color:rgba(51,65,85,.55)}
+.tag-del:hover{color:#334155}
+.via-pill.j,.badge.j{background:#F2EEFF;color:#6D5BA7}
+.via-pill.a,.badge.a{background:#EAF4FF;color:#3D6FA8}
+.card-process-deadline,.process-alert-panel,.ti.process-deadline,.task-pi.process-deadline{background:#FFF7F7;border-color:#F4CACA;color:#9B4D4D}
+.card-process-label,.process-alert-label{color:#B45D5D}
+.card-payment-deadline,.ti.payment-deadline{background:#F2FBF6;border-color:#CDEEDB;color:#2E6F4E}
+.card-payment-label{color:#3C8D65}
+.kanban-alert-item{background:#FFF7F7;border-color:#F4CACA}
+.kanban-alert-item.payment{background:#F2FBF6;border-color:#CDEEDB}
+.kanban-alert-item.task{background:#FFF9ED;border-color:#F4DFB8}
+.kanban-alert-item.finance{background:#FFF9ED;border-color:#F1D9A8}
+.kanban-alert-item.finance.charge{background:#F2FBF6;border-color:#CDEEDB}
+.kanban-alert-item.finance.share{background:#EEF6FF;border-color:#CFE2FA}
+.kanban-alert-client,.kanban-alert-desc,.kanban-alert-date{color:#7A5660}
+.kanban-alert-item.payment .kanban-alert-client,.kanban-alert-item.payment .kanban-alert-desc,.kanban-alert-item.payment .kanban-alert-date{color:#356F52}
+.kanban-alert-item.task .kanban-alert-client,.kanban-alert-item.task .kanban-alert-desc,.kanban-alert-item.task .kanban-alert-date{color:#8A6427}
+.kanban-alert-item.finance .kanban-alert-client,.kanban-alert-item.finance .kanban-alert-desc,.kanban-alert-item.finance .kanban-alert-date{color:#7B632D}
+.panel-body{background:#F7FAFC}
+.case-section,.metric-tile,.case-status{border-radius:8px;box-shadow:none;border-color:var(--border)}
+.next-task-card{background:#EEF6FF;color:#23405F;border:1px solid #CFE2FA}
+.next-task-label{color:#5D7898}
+.next-task-date{background:#DCEBFF;color:#315F99}
+.note-bubble{background:#F2FBF6;border-color:#CDEEDB}
+.note-bubble-text{color:#2E6F4E}
+.note-bubble-time,.note-edit-btn{color:#3C8D65}
+.btn-delete-card,.btn-s.danger{background:#FFF7F7;border-color:#F4CACA;color:#B45D5D}
+.btn-delete-card:hover,.btn-s.danger:hover{background:#FDEDED;border-color:#E5A8A8}
+
+/* ── FINANCE TAB ── */
+.finance-hero{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.finance-metric{background:#fff;border:1px solid var(--border);border-radius:8px;padding:13px;min-width:0}
+.finance-metric.expectation{border-left:4px solid #BBD7F7}
+.finance-metric.confirmed{border-left:4px solid #BCE8D0}
+.finance-metric.fees{border-left:4px solid #F8D99B}
+.finance-metric.mine{border-left:4px solid #D7C8F7}
+.finance-metric-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:7px}
+.finance-metric-value{font-size:16px;font-weight:850;color:var(--text);line-height:1.25}
+.finance-alerts{display:flex;flex-direction:column;gap:8px}
+.finance-alert{display:flex;justify-content:space-between;gap:12px;border:1px solid #F1D9A8;background:#FFF9ED;border-radius:8px;padding:11px 12px;color:#765D28}
+.finance-alert.charge{background:#F2FBF6;border-color:#CDEEDB;color:#356F52}
+.finance-alert.share{background:#EEF6FF;border-color:#CFE2FA;color:#315F99}
+.finance-alert-title{font-size:13px;font-weight:850;margin-bottom:3px}
+.finance-alert-text{font-size:12px;line-height:1.35}
+.finance-alert span{font-size:11px;font-weight:800;white-space:nowrap}
+.finance-expectation{display:grid;grid-template-columns:1.1fr .75fr .75fr .85fr .7fr;gap:10px}
+.finance-preview{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.finance-preview span{background:#F7FAFC;border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-size:12px;color:var(--muted)}
+.finance-preview strong{color:var(--text)}
+.finance-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.finance-table-head{display:grid;grid-template-columns:1.2fr .75fr .8fr .75fr .75fr;gap:8px;padding:0 8px 6px;color:var(--muted);font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.06em}
+.finance-installments{display:flex;flex-direction:column;gap:9px}
+.finance-row{border:1px solid var(--border);background:#fff;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:9px}
+.finance-row.late{border-color:#F1D9A8;background:#FFFCF5}
+.finance-row.charge{border-color:#CDEEDB;background:#F8FFFB}
+.finance-row.share{border-color:#CFE2FA;background:#F7FBFF}
+.finance-row.done{background:#F8FBFA}
+.finance-row-main{display:grid;grid-template-columns:1.2fr .75fr .8fr .75fr .75fr;gap:8px}
+.finance-row-main .fi{margin:0}
+.finance-row-calc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:center}
+.finance-row-calc div{background:#F7FAFC;border:1px solid var(--border);border-radius:8px;padding:7px 9px}
+.finance-row-calc span{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:3px}
+.finance-row-calc strong{font-size:13px;color:var(--text)}
+.finance-status{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:850;white-space:nowrap}
+.finance-status.pending{background:#F7FAFC;color:var(--muted);border:1px solid var(--border)}
+.finance-status.late{background:#FFF1D6;color:#8A6427}
+.finance-status.charge{background:#E9F8F0;color:#356F52}
+.finance-status.share{background:#EAF4FF;color:#315F99}
+.finance-status.done{background:#E9F8F0;color:#2E6F4E}
+.finance-checks{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.finance-checks label{display:inline-flex;align-items:center;gap:6px;background:#F7FAFC;border:1px solid var(--border);border-radius:999px;padding:6px 9px;font-size:12px;color:var(--text)}
+.finance-checks input{accent-color:var(--primary)}
+.finance-remove{margin-left:auto;border:none;background:#FFF7F7;color:#B45D5D;border-radius:7px;width:26px;height:26px;cursor:pointer;font-size:16px;line-height:1}
+.finance-note{margin:0}
+.finance-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.finance-empty{border:1px dashed var(--border);border-radius:8px;padding:18px;text-align:center;color:var(--muted);font-size:13px;background:#FBFCFE}
+body.read-only .finance-actions,
+body.read-only .finance-remove,
+body.read-only .finance-checks,
+body.read-only .finance-section-head .btn-s{display:none!important}
+
 @media (max-width: 760px){
   :root{--panel:100vw}
   .topbar{padding:12px 14px;gap:10px}
@@ -473,6 +577,10 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
   .panel-body{padding:16px 14px}
   .case-hero,.case-actions,.case-info-grid{grid-template-columns:1fr}
   .case-metrics{grid-template-columns:1fr 1fr}
+  .finance-hero{grid-template-columns:1fr 1fr}
+  .finance-expectation,.finance-table-head,.finance-row-main,.finance-row-calc{grid-template-columns:1fr}
+  .finance-table-head{display:none}
+  .finance-section-head,.finance-actions{align-items:stretch;flex-direction:column}
 }
 @media (max-width: 430px){
   body.sidebar-collapsed .sidebar{width:0;border-right:none;overflow:hidden}
@@ -481,6 +589,7 @@ input[type="color"].cpick{width:34px;height:34px;border:none;border-radius:7px;c
   .topbar-right{width:100%;flex-wrap:wrap}
   .search{flex:1;min-width:0}
   .case-metrics{grid-template-columns:1fr}
+  .finance-hero{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -677,19 +786,19 @@ const FIREBASE_CONFIG = {
 //  CONSTANTS
 // ─────────────────────────────────────────────
 const COLS = [
-  {id:'em_analise',         label:'Em Análise',                          color:'#6366F1'},
-  {id:'aguardando_doc',     label:'Aguardando Documentação/Informação',  color:'#F59E0B'},
-  {id:'em_elaboracao',      label:'Em Elaboração',                       color:'#F97316'},
-  {id:'req_administrativo', label:'Req. Administrativo',                 color:'#3B82F6'},
-  {id:'processo_judicial',  label:'Processo Judicial',                   color:'#8B5CF6'},
-  {id:'finalizado',         label:'Finalizado',                          color:'#10B981'},
+  {id:'em_analise',         label:'Em Análise',                          color:'#A5B4FC'},
+  {id:'aguardando_doc',     label:'Aguardando Documentação/Informação',  color:'#FCD34D'},
+  {id:'em_elaboracao',      label:'Em Elaboração',                       color:'#FDBA74'},
+  {id:'req_administrativo', label:'Req. Administrativo',                 color:'#93C5FD'},
+  {id:'processo_judicial',  label:'Processo Judicial',                   color:'#C4B5FD'},
+  {id:'finalizado',         label:'Finalizado',                          color:'#86EFAC'},
 ];
 const COL_LABELS = Object.fromEntries(COLS.map(c=>[c.id,c.label]));
 const COL_SHORT_LABELS = {
   aguardando_doc: 'Aguardando docs/info',
   req_administrativo: 'Req. administrativo',
 };
-const PRESET_COLORS = ['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#EC4899','#64748B','#0EA5E9'];
+const PRESET_COLORS = ['#FCA5A5','#FCD34D','#86EFAC','#93C5FD','#C4B5FD','#F9A8D4','#CBD5E1','#67E8F9'];
 const BENEFIT_OPTIONS = ['BPC - Deficiência','BPC - Idoso','Salário-maternidade rural','Salário-maternidade urbano','Auxílio-doença','Auxílio-acidente','Aposentadoria por invalidez','Aposentadoria por tempo de contribuição','Aposentadoria por idade','Aposentadoria rural','Pensão por morte','Outro'];
 const PERSONAL_PROCESS_OPTIONS = ['Consumidor','Cível','Inventário','Previdenciário','Imobiliário','Trabalhista','Outro'];
 const DEFAULT_TRIBUNAL_OPTIONS = ['TRF1','TRF2','TRF3','TRF4','TRF5','Outro'];
@@ -701,6 +810,8 @@ const WORKSPACES = [
 const WORKSPACE_LABELS = Object.fromEntries(WORKSPACES.map(w=>[w.id,w.label]));
 const WORKSPACE_TITLES = Object.fromEntries(WORKSPACES.map(w=>[w.id,w.title]));
 const DEFAULT_WORKSPACE_ID = 'leticia';
+const DEFAULT_FEE_PERCENT = 30;
+const DEFAULT_MY_SHARE_PERCENT = 50;
 
 // ─────────────────────────────────────────────
 //  STATE
@@ -761,6 +872,10 @@ function formatPercent(value){
   if(!n) return '';
   return `${String(n).replace('.',',')}%`;
 }
+function formatMoneyValue(value){
+  const n = typeof value === 'number' ? value : parseMoney(value);
+  return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
 function dayStatus(dateStr){
   if(!dateStr) return null;
   const today = new Date(); today.setHours(0,0,0,0);
@@ -795,6 +910,56 @@ function taskKindClass(t){
   if(isPaymentDeadline(t)) return 'payment';
   return 'internal';
 }
+function isPastDate(dateStr){
+  if(!dateStr) return false;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr+'T00:00:00');
+  return d < today;
+}
+function calcFinanceSummary(c){
+  const finance = c.finance || normalizeFinance(null, c.honorarios || {});
+  const exp = finance.expectation || {};
+  const expClient = parseMoney(exp.estimatedClientReceipt);
+  const expFee = expClient * (parsePercent(exp.feePercent) || DEFAULT_FEE_PERCENT) / 100;
+  const expMine = expFee * (parsePercent(exp.mySharePercent) || DEFAULT_MY_SHARE_PERCENT) / 100;
+  const installments = finance.installments || [];
+  const confirmedClient = installments.reduce((sum,p)=>sum+parseMoney(p.clientAmount),0);
+  const confirmedFees = installments.reduce((sum,p)=>sum+parseMoney(p.feeAmount),0);
+  const confirmedMine = installments.reduce((sum,p)=>sum+parseMoney(p.myShareAmount),0);
+  const feesReceived = installments.reduce((sum,p)=>sum+(p.feeReceived?parseMoney(p.feeAmount):0),0);
+  const mineReceived = installments.reduce((sum,p)=>sum+(p.myShareReceived?parseMoney(p.myShareAmount):0),0);
+  return {
+    expClient, expFee, expMine,
+    confirmedClient, confirmedFees, confirmedMine,
+    feesReceived, mineReceived,
+    pendingMine: Math.max(confirmedMine - mineReceived, 0),
+    pendingFees: Math.max(confirmedFees - feesReceived, 0),
+  };
+}
+function financeInstallmentStatus(p){
+  if(p.myShareReceived) return {key:'done', label:'Recebido'};
+  if(p.feeReceived) return {key:'share', label:'Repasse'};
+  if(p.clientReceived) return {key:'charge', label:'Cobrar'};
+  if(isPastDate(p.expectedDate)) return {key:'late', label:'Confirmar'};
+  return {key:'pending', label:'Pendente'};
+}
+function getFinanceAlerts(clientList=clients){
+  const items = [];
+  clientList.forEach(c=>{
+    ((c.finance&&c.finance.installments)||[]).forEach(p=>{
+      if(!p || p.myShareReceived) return;
+      const status = financeInstallmentStatus(p);
+      if(status.key==='late'){
+        items.push({clientId:c.id, clientName:c.name, installment:p, title:'Confirmar recebimento', detail:'Pagamento previsto passou. Verifique se o cliente recebeu.', date:p.expectedDate, tone:'late'});
+      } else if(status.key==='charge'){
+        items.push({clientId:c.id, clientName:c.name, installment:p, title:'Cobrar honorários', detail:'Cliente recebeu. Honorários ainda não foram marcados como recebidos.', date:p.expectedDate, tone:'charge'});
+      } else if(status.key==='share'){
+        items.push({clientId:c.id, clientName:c.name, installment:p, title:'Registrar repasse', detail:'Honorários recebidos. Sua parte ainda não foi marcada.', date:p.expectedDate, tone:'share'});
+      }
+    });
+  });
+  return items.sort((a,b)=>(a.date||'9999-99-99').localeCompare(b.date||'9999-99-99'));
+}
 function isPersonalWorkspace(){
   return currentWorkspaceId === 'pessoal';
 }
@@ -825,6 +990,7 @@ function nextKindActionLabel(t){
   return 'Prazo';
 }
 function hasAlert(c){
+  if(getFinanceAlerts([c]).length) return true;
   return c.tasks.some(t=>{
     if(t.done) return false;
     if(!t.deadline) return false;
@@ -1143,6 +1309,7 @@ function mkClient(fields){
     column:'em_analise', currentSituation:'', summary:'', shortDescription:'', opposingParty:'', tags:[], cardColor:'',
     credentials:{cpf:'',govUser:'',password:'',phone:''},
     honorarios:{valorCausa:'',valorHonorarios:'',percentual:'',observacao:''},
+    finance:null,
     tasks:[], history:[], createdAt:n, updatedAt:n,
   };
   const c = {...base, ...fields};
@@ -1166,6 +1333,46 @@ function normalizeGlobalTasks(list){
     if(!t.createdAt) t.createdAt = now();
     return t;
   }).filter(Boolean);
+}
+function normalizeFinance(finance, honorarios={}){
+  const baseExpectation = finance && finance.expectation && typeof finance.expectation === 'object' ? finance.expectation : {};
+  const legacyPercent = parsePercent(honorarios.percentual) || DEFAULT_FEE_PERCENT;
+  const legacyBase = parseMoney(honorarios.valorCausa);
+  const expectation = {
+    estimatedClientReceipt: formatMoney(baseExpectation.estimatedClientReceipt || legacyBase || ''),
+    expectedDate: baseExpectation.expectedDate || '',
+    confidence: baseExpectation.confidence || 'media',
+    feePercent: formatPercent(baseExpectation.feePercent || legacyPercent || DEFAULT_FEE_PERCENT),
+    mySharePercent: formatPercent(baseExpectation.mySharePercent || DEFAULT_MY_SHARE_PERCENT),
+    notes: baseExpectation.notes || honorarios.observacao || '',
+  };
+  const rawInstallments = finance && Array.isArray(finance.installments) ? finance.installments : [];
+  const installments = rawInstallments.map(p=>{
+    if(!p || typeof p !== 'object') return null;
+    const feePercent = formatPercent(p.feePercent || legacyPercent || DEFAULT_FEE_PERCENT);
+    const mySharePercent = formatPercent(p.mySharePercent || DEFAULT_MY_SHARE_PERCENT);
+    const clientAmount = formatMoney(p.clientAmount || '');
+    const feeAmount = formatMoney(parseMoney(clientAmount) * parsePercent(feePercent) / 100);
+    const myShareAmount = formatMoney(parseMoney(feeAmount) * parsePercent(mySharePercent) / 100);
+    const leticiaShareAmount = formatMoney(parseMoney(feeAmount) - parseMoney(myShareAmount));
+    return {
+      id: p.id || uid(),
+      description: p.description || '',
+      expectedDate: p.expectedDate || '',
+      clientAmount,
+      feePercent,
+      feeAmount,
+      mySharePercent,
+      myShareAmount,
+      leticiaShareAmount,
+      clientReceived: p.clientReceived === true,
+      feeReceived: p.feeReceived === true,
+      myShareReceived: p.myShareReceived === true,
+      notes: p.notes || '',
+      createdAt: p.createdAt || now(),
+    };
+  }).filter(Boolean);
+  return {expectation, installments};
 }
 function normalizeClient(c){
   if(!c || typeof c !== 'object') return null;
@@ -1200,6 +1407,7 @@ function normalizeClient(c){
   } else {
     c.honorarios.valorHonorarios = formatMoney(c.honorarios.valorHonorarios) || c.honorarios.valorHonorarios || '';
   }
+  c.finance = normalizeFinance(c.finance, c.honorarios);
   c.tasks = c.tasks.map(t => {
     if(!t || typeof t !== 'object') return null;
     if(!t.id) t.id = uid();
@@ -1369,8 +1577,9 @@ function renderKanbanDeadlineAlerts(clientList=clients){
   if(!el) return;
   const processItems = getProcessDeadlineItems(clientList);
   const paymentItems = getPaymentDeadlineItems(clientList);
+  const financeItems = getFinanceAlerts(clientList);
   const taskItems = getSidebarTaskItems(clientList);
-  if(!processItems.length && !paymentItems.length && !taskItems.length){
+  if(!processItems.length && !paymentItems.length && !financeItems.length && !taskItems.length){
     el.className = 'kanban-alerts empty';
     el.innerHTML = `<div class="kanban-alert-head"><div class="kanban-alert-title">Alertas importantes</div></div><div class="kanban-alert-empty">Nenhum prazo processual, pagamento ou tarefa ativa no Kanban.</div>`;
     return;
@@ -1388,6 +1597,13 @@ function renderKanbanDeadlineAlerts(clientList=clients){
     const s = dayStatus(t.deadline);
     return s==='overdue'||s==='urgent'||s==='warning';
   }).length;
+  const financeList = financeItems.slice(0,4).map(item=>{
+    return `<div class="kanban-alert-item finance ${item.tone}" onclick="openPanel('${item.clientId}');document.querySelector('[data-tab=honorarios]').click()">
+      <div class="kanban-alert-client">${esc(item.clientName)}</div>
+      <div class="kanban-alert-desc">${esc(item.title)}: ${esc(item.installment.description||'Parcela')}</div>
+      <div class="kanban-alert-date">${item.date ? fmtDate(item.date) : 'Sem data'} · ${esc(item.detail)}</div>
+    </div>`;
+  }).join('');
   const processList = processItems.slice(0,4).map(t=>{
     const s = dayStatus(t.deadline);
     const suffix = s==='overdue'?'Vencido':s==='urgent'?'Urgente':s==='warning'?'Em breve':'Prazo';
@@ -1435,6 +1651,13 @@ function renderKanbanDeadlineAlerts(clientList=clients){
         <div class="kanban-alert-count" style="color:#166534;background:#DCFCE7">${paymentAttention ? sidebarCount(paymentAttention,'exige cobrança','exigem cobrança') : sidebarCount(paymentItems.length,'cadastrado','cadastrados')}</div>
       </div>
       ${paymentItems.length?`<div class="kanban-alert-row">${paymentList}</div>`:'<div class="kanban-alert-empty">Nenhum pagamento ativo.</div>'}
+    </div>
+    <div class="kanban-alert-section">
+      <div class="kanban-alert-head">
+        <div class="kanban-alert-title" style="color:#9A6A18">Financeiro</div>
+        <div class="kanban-alert-count" style="color:#9A6A18;background:#FEF3C7">${financeItems.length ? sidebarCount(financeItems.length,'pendência','pendências') : 'Tudo em dia'}</div>
+      </div>
+      ${financeItems.length?`<div class="kanban-alert-row">${financeList}</div>`:'<div class="kanban-alert-empty">Nenhuma pendência financeira.</div>'}
     </div>
     <div class="kanban-alert-section">
       <div class="kanban-alert-head">
@@ -1664,7 +1887,7 @@ function renderPanelBody(){
 }
 
 // ── TAB: RESUMO ──
-const CARD_COLORS = ['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#EC4899','#06B6D4','#F97316','#6366F1','#14B8A6'];
+const CARD_COLORS = ['#FCA5A5','#FCD34D','#86EFAC','#93C5FD','#C4B5FD','#F9A8D4','#67E8F9','#FDBA74','#A5B4FC','#5EEAD4'];
 function tabResumo(c){
   if(resumoEditMode) return tabResumoEdit(c);
   const col = COLS.find(x=>x.id===c.column);
@@ -2034,39 +2257,100 @@ function saveCredentials(clientId){
 
 // ── TAB: HONORÁRIOS ──
 function tabHonorarios(c){
-  const h = c.honorarios;
-  const causa = formatMoney(h.valorCausa) || h.valorCausa;
-  const percentual = formatPercent(h.percentual);
-  const honorariosCalculados = percentual ? formatMoney(parseMoney(causa) * parsePercent(percentual) / 100) : '';
-  const honorariosValor = honorariosCalculados || formatMoney(h.valorHonorarios) || h.valorHonorarios;
+  const finance = c.finance || normalizeFinance(null, c.honorarios || {});
+  const exp = finance.expectation;
+  const summary = calcFinanceSummary(c);
+  const alerts = getFinanceAlerts([c]);
+  const expFee = summary.expFee;
+  const expMine = summary.expMine;
+  const confidence = exp.confidence || 'media';
+  const confidenceOptions = [
+    ['baixa','Baixa'],
+    ['media','Média'],
+    ['alta','Alta']
+  ].map(([value,label])=>`<option value="${value}" ${confidence===value?'selected':''}>${label}</option>`).join('');
+  const metric = (label, value, tone='') => `
+    <div class="finance-metric ${tone}">
+      <div class="finance-metric-label">${label}</div>
+      <div class="finance-metric-value">${formatMoneyValue(value)}</div>
+    </div>`;
+  const alertHtml = alerts.length ? `
+    <div class="finance-alerts">
+      ${alerts.map(item=>`
+        <div class="finance-alert ${item.tone}">
+          <div>
+            <div class="finance-alert-title">${esc(item.title)}</div>
+            <div class="finance-alert-text">${esc(item.installment.description||'Parcela')} · ${esc(item.detail)}</div>
+          </div>
+          <span>${item.date ? fmtDate(item.date) : 'Sem data'}</span>
+        </div>
+      `).join('')}
+    </div>` : '';
+  const rows = finance.installments.length ? finance.installments.map(p=>{
+    const status = financeInstallmentStatus(p);
+    const feeAmount = formatMoney(parseMoney(p.clientAmount) * (parsePercent(p.feePercent) || DEFAULT_FEE_PERCENT) / 100);
+    const myShareAmount = formatMoney(parseMoney(feeAmount) * (parsePercent(p.mySharePercent) || DEFAULT_MY_SHARE_PERCENT) / 100);
+    const leticiaShareAmount = formatMoney(parseMoney(feeAmount) - parseMoney(myShareAmount));
+    return `
+      <div class="finance-row ${status.key}" data-installment="${p.id}">
+        <div class="finance-row-main">
+          <input class="fi finance-desc" id="fin-desc-${p.id}" value="${esc(p.description)}" placeholder="Ex: 1º pagamento INSS">
+          <input class="fi finance-date" id="fin-date-${p.id}" type="date" value="${esc(p.expectedDate)}">
+          <input class="fi finance-money" id="fin-client-${p.id}" value="${esc(p.clientAmount)}" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateFinanceInstallmentPreview('${p.id}')">
+          <input class="fi finance-percent" id="fin-fee-percent-${p.id}" value="${esc(p.feePercent)}" placeholder="30%" oninput="formatPercentInput(this); updateFinanceInstallmentPreview('${p.id}')">
+          <input class="fi finance-percent" id="fin-share-percent-${p.id}" value="${esc(p.mySharePercent)}" placeholder="50%" oninput="formatPercentInput(this); updateFinanceInstallmentPreview('${p.id}')">
+        </div>
+        <div class="finance-row-calc">
+          <div><span>Honorários</span><strong id="fin-fee-${p.id}">${esc(feeAmount)||'R$ 0,00'}</strong></div>
+          <div><span>Minha parte</span><strong id="fin-mine-${p.id}">${esc(myShareAmount)||'R$ 0,00'}</strong></div>
+          <div><span>Letícia</span><strong id="fin-leticia-${p.id}">${esc(leticiaShareAmount)||'R$ 0,00'}</strong></div>
+          <span class="finance-status ${status.key}">${status.label}</span>
+        </div>
+        <div class="finance-checks">
+          <label><input type="checkbox" ${p.clientReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','clientReceived',this.checked)"> Cliente recebeu</label>
+          <label><input type="checkbox" ${p.feeReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','feeReceived',this.checked)"> Honorários recebidos</label>
+          <label><input type="checkbox" ${p.myShareReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','myShareReceived',this.checked)"> Minha parte recebida</label>
+          <button class="finance-remove" onclick="removeFinanceInstallment('${c.id}','${p.id}')" title="Remover parcela">×</button>
+        </div>
+        <input class="fi finance-note" id="fin-note-${p.id}" value="${esc(p.notes||'')}" placeholder="Observação desta parcela">
+      </div>`;
+  }).join('') : '<div class="finance-empty">Nenhuma parcela confirmada ainda.</div>';
   return `
   <div class="case-stack">
+    <div class="finance-hero">
+      ${metric('Expectativa', summary.expClient, 'expectation')}
+      ${metric('Confirmado', summary.confirmedClient, 'confirmed')}
+      ${metric('Honorários', summary.confirmedFees || summary.expFee, 'fees')}
+      ${metric('Minha parte', summary.confirmedMine || summary.expMine, 'mine')}
+    </div>
+    ${alertHtml}
     <div class="case-section">
-      <div class="case-section-title">Resumo financeiro</div>
-      <div class="hon-grid">
-        <div class="hon-card">
-          <div class="hon-lbl">Valor da Causa</div>
-          <div class="hon-val ${!causa?'empty':''}">${esc(causa)||'Não informado'}</div>
-        </div>
-        <div class="hon-card">
-          <div class="hon-lbl">Percentual</div>
-          <div class="hon-val ${!percentual?'empty':''}">${esc(percentual)||'Não informado'}</div>
-        </div>
-        <div class="hon-card">
-          <div class="hon-lbl">Valor dos Honorários</div>
-          <div class="hon-val ${!honorariosValor?'empty':''}">${esc(honorariosValor)||'Não informado'}</div>
-        </div>
+      <div class="case-section-title">Expectativa de recebimento</div>
+      <div class="finance-expectation">
+        <div class="fl"><span class="fl-label">Valor estimado do cliente</span><input class="fi" id="fin-exp-client" value="${esc(exp.estimatedClientReceipt||'')}" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateFinanceExpectationPreview()"></div>
+        <div class="fl"><span class="fl-label">Honorários</span><input class="fi" id="fin-exp-fee-percent" value="${esc(exp.feePercent||formatPercent(DEFAULT_FEE_PERCENT))}" placeholder="30%" oninput="formatPercentInput(this); updateFinanceExpectationPreview()"></div>
+        <div class="fl"><span class="fl-label">Minha parte</span><input class="fi" id="fin-exp-share-percent" value="${esc(exp.mySharePercent||formatPercent(DEFAULT_MY_SHARE_PERCENT))}" placeholder="50%" oninput="formatPercentInput(this); updateFinanceExpectationPreview()"></div>
+        <div class="fl"><span class="fl-label">Data provável</span><input class="fi" id="fin-exp-date" type="date" value="${esc(exp.expectedDate||'')}"></div>
+        <div class="fl"><span class="fl-label">Certeza</span><select class="fi-select" id="fin-exp-confidence">${confidenceOptions}</select></div>
       </div>
-      ${h.observacao?`<div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);margin-bottom:2px">${esc(h.observacao)}</div>`:''}
+      <div class="finance-preview">
+        <span>Honorários previstos: <strong id="fin-exp-fee">${formatMoneyValue(expFee)}</strong></span>
+        <span>Minha parte prevista: <strong id="fin-exp-mine">${formatMoneyValue(expMine)}</strong></span>
+      </div>
+      <textarea class="fi finance-note" id="fin-exp-notes" rows="2" placeholder="Observação sobre expectativa...">${esc(exp.notes||'')}</textarea>
     </div>
     <div class="case-section">
-      <div class="case-section-title">Editar financeiro</div>
-      <div class="fl"><span class="fl-label">Valor da Causa</span><input class="fi" id="h-causa" value="${esc(causa||'')}" oninput="formatMoneyInput(this); updateHonorariosCalc()"></div>
-      <div class="fl"><span class="fl-label">Honorários (%)</span><input class="fi" id="h-percent" value="${esc(percentual||'')}" placeholder="Ex: 40%" oninput="formatPercentInput(this); updateHonorariosCalc()"></div>
-      <div class="fl"><span class="fl-label">Valor dos Honorários</span><input class="fi" id="h-hon" value="${esc(honorariosValor||'')}" oninput="formatMoneyInput(this)"></div>
-      <div class="fl"><span class="fl-label">Observação</span><input class="fi" id="h-obs" value="${esc(h.observacao||'')}"></div>
-      <div class="btn-row">
-        <button class="btn-s p" onclick="saveHonorarios('${c.id}')">Salvar</button>
+      <div class="finance-section-head">
+        <div class="case-section-title">Parcelas confirmadas</div>
+        <button class="btn-s g" onclick="addFinanceInstallment('${c.id}')">+ Adicionar parcela</button>
+      </div>
+      <div class="finance-table-head">
+        <span>Parcela</span><span>Data</span><span>Cliente recebe</span><span>Honorários</span><span>Minha parte</span>
+      </div>
+      <div class="finance-installments">${rows}</div>
+      <div class="finance-actions">
+        <button class="btn-s g" onclick="addMaternityFinanceModel('${c.id}')">Modelo salário-maternidade</button>
+        <button class="btn-s p" onclick="saveHonorarios('${c.id}')">Salvar financeiro</button>
       </div>
     </div>
   </div>`;
@@ -2094,6 +2378,32 @@ function updateHonorariosCalc(){
   const percent = parsePercent(percentEl.value);
   if(causa && percent) honEl.value = formatMoney(causa * percent / 100);
 }
+function updateFinanceExpectationPreview(){
+  const clientEl = document.getElementById('fin-exp-client');
+  const feeEl = document.getElementById('fin-exp-fee-percent');
+  const shareEl = document.getElementById('fin-exp-share-percent');
+  const feePreview = document.getElementById('fin-exp-fee');
+  const minePreview = document.getElementById('fin-exp-mine');
+  if(!clientEl || !feeEl || !shareEl || !feePreview || !minePreview) return;
+  const fee = parseMoney(clientEl.value) * (parsePercent(feeEl.value) || DEFAULT_FEE_PERCENT) / 100;
+  const mine = fee * (parsePercent(shareEl.value) || DEFAULT_MY_SHARE_PERCENT) / 100;
+  feePreview.textContent = formatMoneyValue(fee);
+  minePreview.textContent = formatMoneyValue(mine);
+}
+function updateFinanceInstallmentPreview(installmentId){
+  const clientEl = document.getElementById('fin-client-'+installmentId);
+  const feePercentEl = document.getElementById('fin-fee-percent-'+installmentId);
+  const sharePercentEl = document.getElementById('fin-share-percent-'+installmentId);
+  const feeEl = document.getElementById('fin-fee-'+installmentId);
+  const mineEl = document.getElementById('fin-mine-'+installmentId);
+  const leticiaEl = document.getElementById('fin-leticia-'+installmentId);
+  if(!clientEl || !feePercentEl || !sharePercentEl || !feeEl || !mineEl || !leticiaEl) return;
+  const fee = parseMoney(clientEl.value) * (parsePercent(feePercentEl.value) || DEFAULT_FEE_PERCENT) / 100;
+  const mine = fee * (parsePercent(sharePercentEl.value) || DEFAULT_MY_SHARE_PERCENT) / 100;
+  feeEl.textContent = formatMoneyValue(fee);
+  mineEl.textContent = formatMoneyValue(mine);
+  leticiaEl.textContent = formatMoneyValue(Math.max(fee - mine, 0));
+}
 function formatNewClientHonorariosInput(input){
   if(input.value.includes('%')) formatPercentInput(input);
   else formatMoneyInput(input);
@@ -2108,20 +2418,140 @@ function updateNewClientHonorariosCalc(){
   const causa = parseMoney(causaEl.value);
   calcEl.value = honEl.value.includes('%') && causa && percent ? formatMoney(causa * percent / 100) : '';
 }
+function syncFinanceFormToClient(c){
+  if(!c || !document.getElementById('fin-exp-client')) return false;
+  const expClient = document.getElementById('fin-exp-client').value;
+  const expFeePercent = document.getElementById('fin-exp-fee-percent').value;
+  const expSharePercent = document.getElementById('fin-exp-share-percent').value;
+  const finance = c.finance || normalizeFinance(null, c.honorarios || {});
+  finance.expectation = {
+    estimatedClientReceipt: formatMoney(expClient),
+    feePercent: formatPercent(expFeePercent) || formatPercent(DEFAULT_FEE_PERCENT),
+    mySharePercent: formatPercent(expSharePercent) || formatPercent(DEFAULT_MY_SHARE_PERCENT),
+    expectedDate: document.getElementById('fin-exp-date').value,
+    confidence: document.getElementById('fin-exp-confidence').value,
+    notes: document.getElementById('fin-exp-notes').value,
+  };
+  finance.installments = (finance.installments||[]).map(p=>{
+    const clientAmount = formatMoney(document.getElementById('fin-client-'+p.id)?.value || p.clientAmount || '');
+    const feePercent = formatPercent(document.getElementById('fin-fee-percent-'+p.id)?.value || p.feePercent || DEFAULT_FEE_PERCENT);
+    const mySharePercent = formatPercent(document.getElementById('fin-share-percent-'+p.id)?.value || p.mySharePercent || DEFAULT_MY_SHARE_PERCENT);
+    const feeAmount = formatMoney(parseMoney(clientAmount) * (parsePercent(feePercent)||DEFAULT_FEE_PERCENT) / 100);
+    const myShareAmount = formatMoney(parseMoney(feeAmount) * (parsePercent(mySharePercent)||DEFAULT_MY_SHARE_PERCENT) / 100);
+    return {
+      ...p,
+      description: document.getElementById('fin-desc-'+p.id)?.value.trim() || p.description || 'Parcela',
+      expectedDate: document.getElementById('fin-date-'+p.id)?.value || '',
+      clientAmount,
+      feePercent,
+      feeAmount,
+      mySharePercent,
+      myShareAmount,
+      leticiaShareAmount: formatMoney(parseMoney(feeAmount)-parseMoney(myShareAmount)),
+      notes: document.getElementById('fin-note-'+p.id)?.value || '',
+    };
+  });
+  c.finance = finance;
+  c.honorarios.valorCausa = finance.expectation.estimatedClientReceipt;
+  c.honorarios.percentual = finance.expectation.feePercent;
+  c.honorarios.valorHonorarios = formatMoney(parseMoney(finance.expectation.estimatedClientReceipt) * parsePercent(finance.expectation.feePercent) / 100);
+  c.honorarios.observacao = finance.expectation.notes;
+  return true;
+}
 function saveHonorarios(clientId){
   const c = clients.find(x=>x.id===clientId);
   if(!c) return;
-  c.honorarios.valorCausa = formatMoney(document.getElementById('h-causa').value);
-  c.honorarios.percentual = formatPercent(document.getElementById('h-percent').value);
-  c.honorarios.valorHonorarios = formatMoney(document.getElementById('h-hon').value);
-  c.honorarios.observacao = document.getElementById('h-obs').value;
-  addHistory(c,'Honorários atualizados','','default');
+  syncFinanceFormToClient(c);
+  addHistory(c,'Financeiro atualizado','','default');
   save();
   renderPanelBody();
+  renderBoard();
+}
+function addFinanceInstallment(clientId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c) return;
+  syncFinanceFormToClient(c);
+  if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
+  c.finance.installments.push({
+    id: uid(),
+    description: '',
+    expectedDate: '',
+    clientAmount: '',
+    feePercent: formatPercent(DEFAULT_FEE_PERCENT),
+    feeAmount: '',
+    mySharePercent: formatPercent(DEFAULT_MY_SHARE_PERCENT),
+    myShareAmount: '',
+    leticiaShareAmount: '',
+    clientReceived: false,
+    feeReceived: false,
+    myShareReceived: false,
+    notes: '',
+    createdAt: now(),
+  });
+  renderPanelBody();
+}
+function addMaternityFinanceModel(clientId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c) return;
+  syncFinanceFormToClient(c);
+  if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
+  const labels = ['1º pagamento INSS','2ª parcela INSS','3ª parcela INSS','4ª parcela INSS','5ª parcela INSS'];
+  labels.forEach(label=>{
+    c.finance.installments.push({
+      id: uid(),
+      description: label,
+      expectedDate: '',
+      clientAmount: '',
+      feePercent: formatPercent(DEFAULT_FEE_PERCENT),
+      feeAmount: '',
+      mySharePercent: formatPercent(DEFAULT_MY_SHARE_PERCENT),
+      myShareAmount: '',
+      leticiaShareAmount: '',
+      clientReceived: false,
+      feeReceived: false,
+      myShareReceived: false,
+      notes: '',
+      createdAt: now(),
+    });
+  });
+  addHistory(c,'Modelo salário-maternidade aplicado','Parcelas financeiras criadas para preenchimento.','default');
+  renderPanelBody();
+}
+function removeFinanceInstallment(clientId, installmentId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c || !c.finance) return;
+  syncFinanceFormToClient(c);
+  if(!confirm('Remover esta parcela financeira?')) return;
+  c.finance.installments = c.finance.installments.filter(p=>p.id!==installmentId);
+  addHistory(c,'Parcela financeira removida','','warn');
+  save();
+  renderPanelBody();
+  renderBoard();
+}
+function toggleFinanceInstallmentStatus(clientId, installmentId, field, checked){
+  const c = clients.find(x=>x.id===clientId);
+  if(c) syncFinanceFormToClient(c);
+  const p = c && c.finance ? c.finance.installments.find(x=>x.id===installmentId) : null;
+  if(!p) return;
+  p[field] = checked;
+  if(field==='clientReceived' && !checked){
+    p.feeReceived = false;
+    p.myShareReceived = false;
+  }
+  if(field==='feeReceived' && checked) p.clientReceived = true;
+  if(field==='feeReceived' && !checked) p.myShareReceived = false;
+  if(field==='myShareReceived' && checked){
+    p.clientReceived = true;
+    p.feeReceived = true;
+  }
+  addHistory(c,'Status financeiro atualizado',`${p.description||'Parcela'}: ${financeInstallmentStatus(p).label}`,'default');
+  save();
+  renderPanelBody();
+  renderBoard();
 }
 
 // ── TAB: ETIQUETAS ──
-const ALL_PRESET_COLORS = ['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#EC4899','#64748B','#0EA5E9','#F97316','#84CC16','#06B6D4','#F43F5E','#A855F7','#14B8A6','#FBBF24','#6366F1'];
+const ALL_PRESET_COLORS = ['#FCA5A5','#FCD34D','#86EFAC','#93C5FD','#C4B5FD','#F9A8D4','#CBD5E1','#67E8F9','#FDBA74','#BEF264','#5EEAD4','#FDA4AF','#D8B4FE','#99F6E4','#FDE68A','#A5B4FC'];
 function tabEtiquetas(c){
   const presets = ALL_PRESET_COLORS.map(pc=>`<div class="pc" style="background:${pc}" data-color="${pc}" onclick="selectPreset(this)" title="${pc}"></div>`).join('');
   const globalTagsHtml = globalTags.length ? globalTags.map(t=>{
