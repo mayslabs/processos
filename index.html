@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-19-cache-fix">
+<meta name="app-build" content="2026-06-19-structural-redesign">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-19-cache-fix';
+  const build = '2026-06-19-structural-redesign';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -723,6 +723,453 @@ body.read-only .finance-section-head .btn-s{display:none!important}
   .search{flex:1;min-width:0}
   .case-metrics{grid-template-columns:1fr}
   .finance-hero{grid-template-columns:1fr}
+}
+
+/* ── STRUCTURAL REDESIGN: CLEAN WORKSPACE ── */
+:root{
+  --sidebar:242px;
+  --panel:720px;
+  --bg:#F3F7FA;
+  --surface:#FFFFFF;
+  --sb-bg:#FFFFFF;
+  --text:#1F2A3D;
+  --muted:#6E7F96;
+  --border:#E3ECF3;
+  --primary:#6E98D8;
+  --primary-dark:#527FC2;
+  --ok:#72B990;
+  --alert:#D87575;
+  --warn:#D2A856;
+  --shadow-soft:0 18px 45px rgba(31,42,68,.08);
+  --shadow-card:0 8px 22px rgba(31,42,68,.055);
+}
+body{background:linear-gradient(180deg,#F7FAFC 0%,#EEF5F8 100%);font-size:14px}
+.sidebar{
+  background:rgba(255,255,255,.96);
+  border-right:1px solid #E2EBF3;
+  box-shadow:10px 0 30px rgba(31,42,68,.035);
+}
+.sb-logo{padding:24px 20px 18px;border-bottom:1px solid #EDF3F8}
+.sb-logo h1{font-size:15px;font-weight:850;color:#1F2A3D}
+.sb-logo .sb-subtitle{display:block;margin-top:6px;color:#7B8EA6}
+.sb-nav{padding:16px 10px 10px}
+.nav-btn{
+  min-height:42px;
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:750;
+  color:#607189;
+}
+.nav-btn.active{
+  background:#EDF6FF!important;
+  color:#315F99!important;
+  border-color:#C9E1F7!important;
+  box-shadow:inset 3px 0 0 #9CC9F5,0 8px 18px rgba(108,150,215,.08);
+}
+.sb-count{
+  min-width:24px;
+  text-align:center;
+  background:#EEF4F9;
+  color:#72849A;
+  padding:3px 7px;
+}
+.topbar{
+  min-height:76px;
+  padding:16px 22px;
+  border-bottom:1px solid #E2EBF3;
+  background:rgba(255,255,255,.88);
+}
+.topbar-title{font-size:20px;font-weight:850;color:#1F2A3D}
+.sidebar-toggle,.logout-btn,.workspace-switcher,.search,.btn-add{
+  border-radius:12px;
+}
+.workspace-switcher{
+  padding:4px;
+  gap:4px;
+  background:#F5F9FC;
+}
+.workspace-btn{border-radius:9px;padding:8px 11px}
+.workspace-btn.active{background:#DFEEFF!important;color:#315F99!important}
+.search{
+  height:38px;
+  width:230px;
+  background:#FFFFFF;
+  border-color:#DCE7F0;
+  box-shadow:0 1px 0 rgba(31,42,68,.03);
+}
+.btn-add{
+  min-height:38px;
+  padding:8px 17px;
+  font-weight:850;
+  background:#6E98D8!important;
+  border-color:#6E98D8!important;
+  box-shadow:0 10px 22px rgba(108,150,215,.16);
+}
+.board{
+  gap:16px;
+  padding:22px;
+  align-items:stretch;
+  background:linear-gradient(180deg,#F7FAFC 0%,#F1F6F9 100%);
+}
+.col{
+  width:272px;
+  min-height:calc(100vh - 122px);
+  background:rgba(255,255,255,.62);
+  border:1px solid #E4EDF5;
+  border-radius:18px;
+  padding:10px;
+  box-shadow:0 12px 34px rgba(31,42,68,.045);
+}
+.col-head{
+  position:relative;
+  grid-template-columns:12px minmax(0,1fr) auto;
+  gap:9px;
+  min-height:48px;
+  padding:12px 11px 11px;
+  background:rgba(255,255,255,.8);
+  border:1px solid rgba(226,235,243,.8);
+  border-bottom:1px solid rgba(226,235,243,.8);
+  border-radius:14px;
+  overflow:hidden;
+}
+.col-head::before{
+  content:'';
+  position:absolute;
+  inset:0 auto 0 0;
+  width:4px;
+  background:color-mix(in srgb,var(--cc) 68%,white);
+}
+.col-dot{
+  width:10px;
+  height:10px;
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--cc) 18%,transparent);
+}
+.col-name{
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.025em;
+  color:#26344A;
+}
+.col-cnt{
+  border:1px solid #E0EAF3;
+  background:#F5F9FC;
+  color:#71839A;
+  border-radius:999px;
+  padding:3px 9px;
+  font-size:11px;
+}
+.col-body{
+  flex:1;
+  min-height:calc(100vh - 198px);
+  border:0;
+  background:transparent;
+  padding:10px 0 0;
+  gap:10px;
+}
+.col-body.over{
+  background:#EFF7FF;
+  outline:2px solid #BBD7F7;
+  outline-offset:2px;
+  border-radius:14px;
+}
+.col-empty{
+  border:1px dashed #DCE7F0;
+  background:rgba(255,255,255,.55);
+  border-radius:14px;
+  padding:28px 12px;
+}
+.card{
+  border:1px solid #DFEAF3!important;
+  border-left:1px solid #DFEAF3!important;
+  border-radius:16px;
+  padding:13px;
+  background:#FFFFFF!important;
+  box-shadow:var(--shadow-card);
+}
+.card::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:14px;
+  right:14px;
+  height:3px;
+  background:linear-gradient(90deg,#BBD7F7,#D7C8F7,#BCE8D0);
+  opacity:.75;
+  border-radius:999px;
+}
+.card:hover{box-shadow:0 16px 34px rgba(31,42,68,.095);transform:translateY(-2px)}
+.card-top{margin-bottom:7px;padding-top:3px}
+.card-name{font-size:14px;font-weight:850;color:#1F2A3D;line-height:1.28}
+.card-benefit{font-size:12px;color:#6C7F98;margin-bottom:8px}
+.card-tags{gap:6px;margin-bottom:7px}
+.tag,.tag-ed,.via-pill,.badge{
+  border-radius:999px!important;
+  padding:3px 9px;
+  font-size:10px;
+  font-weight:800;
+}
+.card-alert{
+  width:20px;
+  height:20px;
+  align-items:center;
+  justify-content:center;
+}
+.card-process-deadline,.card-payment-deadline{
+  border-radius:12px;
+  padding:9px 10px;
+  margin-top:9px;
+}
+.kanban-alerts{
+  margin:12px 10px 16px;
+  padding-top:14px;
+  border-top:1px solid #EDF3F8;
+}
+.kanban-alert-section{
+  border:1px solid #E6EEF6;
+  background:#FAFCFE;
+  border-radius:14px;
+  padding:10px;
+}
+.kanban-alert-section + .kanban-alert-section{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid #E6EEF6;
+}
+.kanban-alert-head{margin-bottom:8px}
+.kanban-alert-title{font-size:9px;letter-spacing:.075em;color:#647891!important}
+.kanban-alert-count{font-size:9px;background:#EEF4F9!important;border-color:#DFE9F3!important;color:#647891!important}
+.kanban-alert-item{
+  border-radius:12px;
+  padding:9px 10px;
+  background:#FFFFFF!important;
+  border-color:#E2EBF3!important;
+}
+.kanban-alert-item.payment{background:#F7FCF9!important}
+.kanban-alert-item.task,.kanban-alert-item.finance{background:#FFFCF4!important}
+.sidebar-task-form{gap:8px}
+.sidebar-task-input{height:36px;border-radius:11px;border-color:#DCE7F0!important}
+.sidebar-task-btn{
+  min-height:36px;
+  border-radius:11px;
+  font-weight:850;
+}
+.overlay{background:rgba(31,42,68,.28);backdrop-filter:blur(2px)}
+.panel{
+  width:min(var(--panel),100vw);
+  background:#F6FAFC;
+  box-shadow:-28px 0 70px rgba(31,42,68,.18);
+}
+.panel-hd{
+  padding:24px 28px 18px;
+  background:rgba(255,255,255,.94)!important;
+  border-bottom:1px solid #E3ECF3;
+}
+.panel-name{font-size:22px;font-weight:900}
+.panel-sub{gap:7px}
+.close-btn{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  background:#F4F8FB;
+}
+.panel-tabs{
+  gap:8px;
+  padding:10px 26px 0;
+  background:rgba(255,255,255,.94)!important;
+}
+.ptab{
+  border:1px solid transparent;
+  border-bottom:1px solid transparent;
+  border-radius:12px 12px 0 0;
+  padding:11px 13px;
+  font-weight:850;
+}
+.ptab.active{
+  background:#EFF7FF!important;
+  border-color:#D7E8FA!important;
+  border-bottom-color:#EFF7FF!important;
+  color:#416FAF!important;
+}
+.panel-body{
+  padding:22px 28px 30px;
+  background:#F6FAFC;
+}
+.case-stack{gap:16px}
+.case-section,.metric-tile,.case-status,.next-task-card,.cred-box,.hon-card{
+  border-radius:16px!important;
+  border:1px solid #E1EAF2!important;
+  background:#FFFFFF!important;
+  box-shadow:0 10px 28px rgba(31,42,68,.045)!important;
+}
+.case-section{padding:18px}
+.case-section-title,.metric-label,.finance-metric-label,.fl-label,.cred-label,.hon-lbl,.tgroup-title,.sec-title{
+  color:#6C7F98;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.075em;
+}
+.case-hero{
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.case-status{
+  border-left-width:5px!important;
+  padding:17px 17px 17px 18px;
+}
+.case-status-main{font-size:18px;font-weight:900}
+.next-task-card{
+  min-height:124px;
+  color:#23405F;
+  justify-content:space-between;
+}
+.next-task-title{font-size:17px;font-weight:900;color:#1F2A3D}
+.next-task-date{
+  align-self:flex-start;
+  border-radius:999px;
+  padding:7px 12px;
+  font-weight:850;
+}
+.case-metrics{gap:12px;grid-template-columns:repeat(auto-fit,minmax(126px,1fr))}
+.metric-tile{padding:14px}
+.metric-value{font-size:18px;font-weight:900}
+.case-info-grid{gap:14px}
+.info-cell{
+  background:#F8FBFD;
+  border:1px solid #E7EFF6;
+  border-radius:14px;
+  padding:12px;
+}
+.summary-text{line-height:1.65;color:#26344A}
+.note-bubble{
+  border-radius:14px;
+  background:#F4FCF8!important;
+}
+.note-input-wrap .fi,.fi,.fi-select,.fg input,.fg select,.fg textarea{
+  border-radius:12px;
+  border-color:#DCE7F0;
+}
+.btn-s,.btn-lg,.btn-panel-action,.btn-edit-card,.btn-delete-card,.btn-save-client,.btn-cancel-edit{
+  border-radius:12px!important;
+}
+.btn-panel-action{
+  min-height:42px;
+  background:#F7FBFF;
+  border-color:#D7E8FA;
+  color:#315F99;
+}
+.delete-zone{padding-top:12px}
+.task-pi,.ti{
+  border-radius:16px!important;
+  border:1px solid #E1EAF2!important;
+  background:#FFFFFF!important;
+  box-shadow:0 8px 24px rgba(31,42,68,.04);
+}
+.task-pi.process-deadline,.ti.process-deadline{background:#FFF9F9!important}
+.task-pi.payment-deadline,.ti.payment-deadline{background:#F7FCF9!important}
+.task-pcheck,.ti-check{border-color:#CAD8E5}
+.task-pdel{
+  border-radius:9px;
+  border:1px solid #E0EAF3;
+  background:#F8FBFD;
+  color:#66788F;
+}
+.history-list{
+  border-radius:16px;
+  border-color:#E1EAF2;
+  padding:8px 18px;
+}
+.hist-item{padding:14px 0}
+.hist-dot{width:9px;height:9px}
+.finance-hero{
+  gap:12px;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+.finance-metric{
+  position:relative;
+  min-height:82px;
+  border:1px solid #E1EAF2!important;
+  border-left:1px solid #E1EAF2!important;
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 10px 28px rgba(31,42,68,.045)!important;
+  overflow:hidden;
+}
+.finance-metric::before{
+  content:'';
+  position:absolute;
+  inset:0 0 auto;
+  height:4px;
+  background:#BBD7F7;
+}
+.finance-metric.confirmed::before{background:#BCE8D0}
+.finance-metric.fees::before{background:#F8D99B}
+.finance-metric.mine::before{background:#D7C8F7}
+.finance-metric-value{font-size:19px;font-weight:950}
+.finance-alert{
+  border-radius:16px;
+  padding:13px 15px;
+}
+.finance-expectation{
+  grid-template-columns:1fr .68fr .68fr .82fr .72fr;
+  align-items:end;
+}
+.finance-preview span{
+  background:#F5F9FC;
+  border-color:#E0EAF3;
+  padding:8px 12px;
+}
+.finance-row{
+  border-radius:16px;
+  padding:12px;
+  box-shadow:0 8px 24px rgba(31,42,68,.04)!important;
+}
+.finance-row-main{gap:10px}
+.finance-row-calc{gap:10px}
+.finance-row-calc div{
+  border-radius:13px;
+  background:#F8FBFD;
+}
+.finance-checks label{border-radius:999px;background:#FAFCFE}
+.finance-status{padding:7px 11px}
+.global-tags-list{gap:8px}
+.tag-add-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 40px auto;
+  gap:9px;
+  align-items:center;
+}
+.pc,.cc-swatch,.cc-none{width:26px;height:26px}
+.modal{border-radius:18px}
+.modal-hd,.modal-ft{background:#FFFFFF!important}
+.tasks-bar{
+  padding:14px 20px 0;
+  background:#FFFFFF;
+}
+.tf-btn{
+  border-radius:12px 12px 0 0;
+  padding:10px 15px;
+  font-weight:850;
+}
+.tasks-list{padding:22px}
+.tasks-cal{background:#FFFFFF}
+@media (max-width: 960px){
+  :root{--panel:100vw}
+  .finance-hero{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .finance-expectation,.finance-row-main,.finance-row-calc{grid-template-columns:1fr}
+}
+@media (max-width: 760px){
+  .board{padding:16px;gap:12px}
+  .col{width:258px;min-height:520px}
+  .panel-hd{padding:18px 18px 14px}
+  .panel-tabs{padding:8px 14px 0}
+  .panel-body{padding:16px 14px 22px}
+  .case-hero,.case-info-grid,.case-actions{grid-template-columns:1fr}
+}
+@media (max-width: 430px){
+  .topbar{padding:14px}
+  .btn-add,.search{width:100%;justify-content:center}
+  .finance-hero,.case-metrics{grid-template-columns:1fr}
+  .tag-add-row{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -1997,7 +2444,7 @@ function renderPanelSub(c){
   const viaCls = c.via==='Judicial'?'j':c.via==='Administrativa'?'a':'n';
   document.getElementById('panel-sub').innerHTML =
     `<span class="badge ${viaCls}">${c.via||'Via indefinida'}</span>` +
-    (col?`<span class="badge n" style="color:${col.color};background:${col.color}18">${col.label}</span>`:'') +
+    (col?`<span class="badge n" style="${softColorStyle(col.color,.18)}">${col.label}</span>`:'') +
     (c.processNumber?`<span style="font-size:11px;color:var(--muted)">${esc(c.processNumber)}${c.tribunal?' ('+esc(c.tribunal)+')':''}</span>`:'');
 }
 function getPendingTasks(c){
@@ -2736,7 +3183,7 @@ function tabEtiquetas(c){
       <div style="margin-bottom:8px"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Cores rápidas</div><div class="preset-colors">${presets}</div></div>
       <div class="tag-add-row">
         <input class="fi" id="tag-label" placeholder="Nome da etiqueta..." style="resize:none;min-height:unset;margin:0">
-        <input type="color" class="cpick" id="tag-color" value="#3B82F6">
+        <input type="color" class="cpick" id="tag-color" value="#93C5FD">
         <button class="btn-s p" onclick="addGlobalTag('${c.id}')">Criar</button>
       </div>
     </div>
