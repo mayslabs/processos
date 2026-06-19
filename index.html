@@ -565,6 +565,125 @@ body.read-only .finance-remove,
 body.read-only .finance-checks,
 body.read-only .finance-section-head .btn-s{display:none!important}
 
+/* ── MOCKUP POLISH PASS ── */
+.topbar{background:rgba(255,255,255,.92);backdrop-filter:saturate(140%) blur(8px)}
+.sb-logo h1,.topbar-title,.panel-name,.card-name{letter-spacing:0}
+.nav-btn{border:1px solid transparent}
+.nav-btn.active{
+  background:#EAF4FF!important;
+  color:#315F99!important;
+  border-color:#CFE2FA;
+  box-shadow:inset 3px 0 0 #93C5FD;
+}
+.nav-btn.active .sb-count{background:#DCEBFF!important;color:#315F99!important}
+.workspace-switcher{background:#FBFCFE;border-color:#E6EDF5}
+.workspace-btn.active{
+  background:#DCEBFF!important;
+  color:#315F99!important;
+  box-shadow:0 1px 2px rgba(49,95,153,.08);
+}
+.btn-add,.btn-s.p,.btn-lg.p,.auth-submit{
+  background:#6C96D7!important;
+  border:1px solid #5F8FD3!important;
+  box-shadow:0 1px 2px rgba(49,95,153,.08);
+}
+.btn-add:hover,.btn-s.p:hover,.btn-lg.p:hover,.auth-submit:hover{background:#5F8FD3!important}
+.btn-s.g,.btn-lg.g,.logout-btn,.sidebar-toggle{background:#fff;border-color:#E3ECF6;color:#48607A}
+.btn-s.g:hover,.btn-lg.g:hover,.logout-btn:hover,.sidebar-toggle:hover{background:#F4F9FF;border-color:#CFE2FA;color:#315F99}
+.sidebar-task-btn{
+  background:#EEF6FF!important;
+  color:#315F99!important;
+  border:1px solid #CFE2FA!important;
+}
+.sidebar-task-btn:hover{background:#DCEBFF!important}
+.ptab{border-radius:8px 8px 0 0}
+.ptab.active,.tf-btn.active{
+  color:#4778BF!important;
+  border-bottom-color:#93C5FD!important;
+  background:#F7FBFF;
+}
+.panel-hd,.panel-tabs,.modal-hd,.modal-ft{background:rgba(255,255,255,.95)}
+.panel{box-shadow:-12px 0 30px rgba(31,42,68,.08)}
+.case-section{background:#fff}
+.case-section-title,.metric-label,.finance-metric-label,.fl-label,.cred-label,.hon-lbl,.tgroup-title,.sec-title{
+  color:#6C7F99;
+  letter-spacing:.055em;
+}
+.metric-tile,.hon-card,.cred-box{background:#FBFCFE;border:1px solid var(--border)}
+.card{background:rgba(255,255,255,.92)}
+.card.has-color{border-color:#E8EEF6}
+.card-alert{color:#D97070;background:#FFF1F1;border-radius:999px;padding:2px}
+.card-deadline.overdue,.card-deadline.urgent{color:#B45D5D}
+.card-deadline.warning{color:#9A6A18}
+.tag,.tag-ed{
+  border-radius:999px!important;
+  font-weight:700;
+  box-shadow:none;
+}
+.task-kind.process{background:#FFF1F1;color:#B45D5D}
+.task-kind.payment{background:#EAF7EF;color:#356F52}
+.task-kind.internal{background:#EAF4FF;color:#315F99}
+.via-pill,.badge{border-radius:999px}
+.kanban-alert-title{color:#6C7F99!important}
+.kanban-alert-count{
+  background:#F1F6FB!important;
+  color:#56708D!important;
+  border:1px solid #E1EAF4;
+}
+.kanban-alert-item:hover{background:#fff!important;border-color:#CFE2FA!important}
+.kanban-alert-item,.kanban-alert-item.payment,.kanban-alert-item.task,.kanban-alert-item.finance{
+  box-shadow:none;
+}
+.note-box{background:#FFFCF3;border-color:#F5DF9A}
+.note-ta{border-color:#F5DF9A!important}
+.history-list{box-shadow:none}
+.hist-dot{opacity:.75}
+.btn-edit-card{background:#EEF6FF;border-color:#CFE2FA;color:#315F99}
+.btn-edit-card:hover{background:#DCEBFF;border-color:#93C5FD}
+.btn-save-client{background:#79BE97;color:#fff}
+.btn-save-client:hover{background:#68AA85}
+.delete-zone{border-top-color:#E6EDF5}
+.btn-delete-card{background:#FFF7F7;border-color:#F4CACA;color:#B45D5D}
+.global-tag-item{gap:5px}
+.tag-edit-btn,.tag-del-global{color:#718096}
+.pc,.cc-swatch{box-shadow:inset 0 0 0 1px rgba(255,255,255,.75)}
+.sidebar-task-action{
+  background:#FFF8E8!important;
+  color:#8A6427!important;
+  border:1px solid #F4DFB8!important;
+}
+.sidebar-task-action:hover{background:#FFF3D6!important;color:#765D28!important}
+.sidebar-task-input:focus,.fi:focus,.fi-select:focus,.search:focus,.auth-input:focus{
+  border-color:#93C5FD!important;
+  box-shadow:0 0 0 3px rgba(147,197,253,.18)!important;
+}
+.kanban-alert-client,
+.kanban-alert-desc,
+.kanban-alert-date{color:#607089!important}
+.kanban-alert-item.payment .kanban-alert-client,
+.kanban-alert-item.payment .kanban-alert-desc,
+.kanban-alert-item.payment .kanban-alert-date{color:#4E7A63!important}
+.kanban-alert-item.task .kanban-alert-client,
+.kanban-alert-item.task .kanban-alert-desc,
+.kanban-alert-item.task .kanban-alert-date,
+.kanban-alert-item.finance .kanban-alert-client,
+.kanban-alert-item.finance .kanban-alert-desc,
+.kanban-alert-item.finance .kanban-alert-date{color:#806A40!important}
+.card-process-deadline,.process-alert-panel,.ti.process-deadline,.task-pi.process-deadline{
+  background:#FFF8F8!important;
+  border-color:#F3D3D3!important;
+  color:#9B5A5A!important;
+}
+.card-payment-deadline,.ti.payment-deadline{
+  background:#F5FBF8!important;
+  border-color:#D7EFDF!important;
+  color:#3F7259!important;
+}
+.case-status{background:#fff!important}
+.next-task-card{box-shadow:none}
+.finance-metric,.finance-row,.finance-alert{box-shadow:none}
+.sync-soft{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700}
+
 @media (max-width: 760px){
   :root{--panel:100vw}
   .topbar{padding:12px 14px;gap:10px}
@@ -642,7 +761,7 @@ body.read-only .finance-section-head .btn-s{display:none!important}
     </div>
     <div class="topbar-right">
       <div class="workspace-switcher" id="workspace-switcher"></div>
-      <div id="sync-status"><span style="color:#F59E0B;font-size:11px;font-weight:600">🔄 Conectando...</span></div>
+      <div id="sync-status"><span class="sync-soft" style="color:#9A6A18">• Conectando...</span></div>
       <div class="user-menu">
         <span id="user-email"></span>
         <button class="logout-btn" onclick="logout()">Sair</button>
@@ -887,6 +1006,26 @@ function dayStatus(dateStr){
   return 'ok';
 }
 function esc(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function hexToRgb(hex){
+  const clean = String(hex||'').trim().replace('#','');
+  if(!/^[0-9a-f]{6}$/i.test(clean)) return {r:148,g:163,b:184};
+  return {
+    r: parseInt(clean.slice(0,2),16),
+    g: parseInt(clean.slice(2,4),16),
+    b: parseInt(clean.slice(4,6),16),
+  };
+}
+function softColorStyle(hex, alpha=.18){
+  const {r,g,b} = hexToRgb(hex);
+  const textR = Math.max(38, Math.round(r*.55));
+  const textG = Math.max(48, Math.round(g*.55));
+  const textB = Math.max(64, Math.round(b*.55));
+  return `background:rgba(${r},${g},${b},${alpha});color:rgb(${textR},${textG},${textB});border:1px solid rgba(${r},${g},${b},${Math.min(alpha+.16,.42)})`;
+}
+function softBorderColor(hex, alpha=.55){
+  const {r,g,b} = hexToRgb(hex);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
 function formatPhone(value){
   const digits = String(value||'').replace(/\D/g,'').slice(0,11);
   if(!digits) return '';
@@ -1251,7 +1390,7 @@ function extractGlobalTags(clientList){
       const key = t && typeof t==='object' ? tagKey(t.label) : '';
       if(t && typeof t==='object' && t.label && !seen[key]){
         seen[key] = true;
-        result.push({id:t.id||uid(), label:t.label, color:t.color||'#3B82F6'});
+        result.push({id:t.id||uid(), label:t.label, color:t.color||'#93C5FD'});
       }
     });
   });
@@ -1276,9 +1415,14 @@ function updateWorkspaceTitle(){
 function setSyncStatus(s){
   const el = document.getElementById('sync-status');
   if(!el) return;
-  const map = {connecting:['🔄','Conectando...','#F59E0B'],saving:['💾','Salvando...','#3B82F6'],synced:['☁️','Sincronizado','#10B981'],error:['❌','Erro','#EF4444']};
+  const map = {
+    connecting:['•','Conectando...','#9A6A18'],
+    saving:['•','Salvando...','#4778BF'],
+    synced:['•','Sincronizado','#4E7A63'],
+    error:['•','Erro','#B45D5D']
+  };
   const [icon,label,color] = map[s]||map.synced;
-  el.innerHTML = `<span style="color:${color};font-size:11px;font-weight:600">${icon} ${label}</span>`;
+  el.innerHTML = `<span class="sync-soft" style="color:${color}">${icon} ${label}</span>`;
 }
 
 function showSetupBanner(){
@@ -1432,7 +1576,7 @@ function normalizeClient(c){
     if(!t || typeof t !== 'object') return null;
     if(!t.id) t.id = uid();
     if(!t.label) t.label = '';
-    if(!t.color) t.color = '#6366F1';
+    if(!t.color) t.color = '#93C5FD';
     return t;
   }).filter(Boolean);
   const tagSeen = {};
@@ -1647,22 +1791,22 @@ function renderKanbanDeadlineAlerts(clientList=clients){
     </div>
     <div class="kanban-alert-section">
       <div class="kanban-alert-head">
-        <div class="kanban-alert-title" style="color:#166534">Pagamentos para cobrar</div>
-        <div class="kanban-alert-count" style="color:#166534;background:#DCFCE7">${paymentAttention ? sidebarCount(paymentAttention,'exige cobrança','exigem cobrança') : sidebarCount(paymentItems.length,'cadastrado','cadastrados')}</div>
+        <div class="kanban-alert-title">Pagamentos para cobrar</div>
+        <div class="kanban-alert-count">${paymentAttention ? sidebarCount(paymentAttention,'exige cobrança','exigem cobrança') : sidebarCount(paymentItems.length,'cadastrado','cadastrados')}</div>
       </div>
       ${paymentItems.length?`<div class="kanban-alert-row">${paymentList}</div>`:'<div class="kanban-alert-empty">Nenhum pagamento ativo.</div>'}
     </div>
     <div class="kanban-alert-section">
       <div class="kanban-alert-head">
-        <div class="kanban-alert-title" style="color:#9A6A18">Financeiro</div>
-        <div class="kanban-alert-count" style="color:#9A6A18;background:#FEF3C7">${financeItems.length ? sidebarCount(financeItems.length,'pendência','pendências') : 'Tudo em dia'}</div>
+        <div class="kanban-alert-title">Financeiro</div>
+        <div class="kanban-alert-count">${financeItems.length ? sidebarCount(financeItems.length,'pendência','pendências') : 'Tudo em dia'}</div>
       </div>
       ${financeItems.length?`<div class="kanban-alert-row">${financeList}</div>`:'<div class="kanban-alert-empty">Nenhuma pendência financeira.</div>'}
     </div>
     <div class="kanban-alert-section">
       <div class="kanban-alert-head">
-        <div class="kanban-alert-title" style="color:#9A3412">Tarefas</div>
-        <div class="kanban-alert-count" style="color:#9A3412;background:#FFEDD5">${taskAttention ? sidebarCount(taskAttention,'exige atenção','exigem atenção') : sidebarCount(taskItems.length,'cadastrada','cadastradas')}</div>
+        <div class="kanban-alert-title">Tarefas</div>
+        <div class="kanban-alert-count">${taskAttention ? sidebarCount(taskAttention,'exige atenção','exigem atenção') : sidebarCount(taskItems.length,'cadastrada','cadastradas')}</div>
       </div>
       ${taskItems.length?`<div class="kanban-alert-row">${taskList}</div>`:'<div class="kanban-alert-empty">Nenhuma tarefa ativa.</div>'}
       <div class="sidebar-task-form">
@@ -1679,12 +1823,12 @@ function renderCard(c){
   const paymentTask = nextPaymentDeadline(c);
   const nd = nextDeadline(c);
   const ds = nd ? dayStatus(nd) : null;
-  const tagsHtml = c.tags.map(t=>`<span class="tag" style="background:${esc(t.color)}">${esc(t.label)}</span>`).join('');
+  const tagsHtml = c.tags.map(t=>`<span class="tag" style="${softColorStyle(t.color,.18)}">${esc(t.label)}</span>`).join('');
   const viaHtml = c.via ? `<div class="card-via"><span class="via-pill ${c.via==='Judicial'?'j':'a'}">${esc(c.via)}</span></div>` : '';
   let deadlineHtml = '';
   if(nd){
     const cls = ds==='overdue'?'overdue':ds==='urgent'?'urgent':ds==='warning'?'warning':'';
-    const prefix = ds==='overdue'?'⚠️ Vencido: ':ds==='urgent'?'🔴 ':ds==='warning'?'⚠️ ':'📅 ';
+    const prefix = ds==='overdue'?'Vencido: ':ds==='urgent'?'Urgente: ':ds==='warning'?'Em breve: ':'Prazo: ';
     deadlineHtml = `<div class="card-deadline ${cls}">${prefix}${fmtDate(nd)}</div>`;
   }
   const processHtml = processTask ? `<div class="card-process-deadline">
@@ -1695,7 +1839,7 @@ function renderCard(c){
     <span class="card-payment-label">Pagamento do cliente</span>
     ${esc(paymentTask.description)} — ${fmtDate(paymentTask.deadline)}
   </div>` : '';
-  const colorStyle = c.cardColor ? `border-left-color:${c.cardColor}` : '';
+  const colorStyle = c.cardColor ? `border-left-color:${softBorderColor(c.cardColor,.55)}` : '';
   return `<div class="card${c.cardColor?' has-color':''}" id="card-${c.id}" style="${colorStyle}" draggable="true"
     onclick="openPanel('${c.id}')"
     ondragstart="onDragStart(event,'${c.id}')"
@@ -1861,12 +2005,12 @@ function getCaseStatusMeta(c){
   if(next && next.deadline){
     const status = dayStatus(next.deadline);
     const prefix = isProcessDeadline(next) ? 'Prazo processual' : isPaymentDeadline(next) ? 'Pagamento do cliente' : 'Prazo';
-    if(status==='overdue') return {title:`${prefix} vencido`, detail:`${next.description} venceu em ${fmtDate(next.deadline)}`, color:'#EF4444'};
-    if(status==='urgent') return {title:`${prefix} urgente`, detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#F43F5E'};
-    if(status==='warning') return {title:`${prefix} próximo`, detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#F59E0B'};
+    if(status==='overdue') return {title:`${prefix} vencido`, detail:`${next.description} venceu em ${fmtDate(next.deadline)}`, color:'#D97070'};
+    if(status==='urgent') return {title:`${prefix} urgente`, detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#D97070'};
+    if(status==='warning') return {title:`${prefix} próximo`, detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#D8B16A'};
   }
-  if(pending.length) return {title:`${pending.length} tarefa${pending.length>1?'s':''} pendente${pending.length>1?'s':''}`, detail:next?next.description:'Há atividades em aberto.', color:'#2563EB'};
-  if(c.column==='finalizado') return {title:'Caso finalizado', detail:'Não há tarefas pendentes para este cliente.', color:'#10B981'};
+  if(pending.length) return {title:`${pending.length} tarefa${pending.length>1?'s':''} pendente${pending.length>1?'s':''}`, detail:next?next.description:'Há atividades em aberto.', color:'#93C5FD'};
+  if(c.column==='finalizado') return {title:'Caso finalizado', detail:'Não há tarefas pendentes para este cliente.', color:'#79BE97'};
   return {title:col?col.label:'Em acompanhamento', detail:'Sem tarefas pendentes cadastradas.', color:col?col.color:'#64748B'};
 }
 function renderPanelBody(){
@@ -2557,7 +2701,7 @@ function tabEtiquetas(c){
   const globalTagsHtml = globalTags.length ? globalTags.map(t=>{
     const applied = c.tags.some(ct=>ct.id===t.id || tagKey(ct.label)===tagKey(t.label));
     return `<div class="global-tag-item">
-      <div class="tag-ed" style="background:${esc(t.color)};opacity:${applied?'1':'0.4'};cursor:pointer;user-select:none"
+      <div class="tag-ed" style="${softColorStyle(t.color,.2)};opacity:${applied?'1':'0.45'};cursor:pointer;user-select:none"
            onclick="${applied?`removeTagById('${c.id}','${t.id}')`:`applyGlobalTag('${c.id}','${t.id}')`}"
            title="${applied?'Clique para remover':'Clique para aplicar'}">
         ${esc(t.label)}${applied?' ativo':''}
