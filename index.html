@@ -3,7 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="app-build" content="2026-06-19-cache-fix">
 <title>Processos Previdenciários</title>
+<script>
+(() => {
+  const build = '2026-06-19-cache-fix';
+  if(!/^https?:$/.test(location.protocol)) return;
+  const params = new URLSearchParams(location.search);
+  if(params.get('build') === build) return;
+  params.set('build', build);
+  location.replace(`${location.pathname}?${params.toString()}${location.hash}`);
+})();
+</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M32 11v42'/%3E%3Cpath d='M22 53h20'/%3E%3Cpath d='M16 20h32'/%3E%3Cpath d='M20 20l-9 17h18L20 20z'/%3E%3Cpath d='M44 20l-9 17h18L44 20z'/%3E%3Cpath d='M11 37c2.2 4.4 15.8 4.4 18 0'/%3E%3Cpath d='M35 37c2.2 4.4 15.8 4.4 18 0'/%3E%3Cpath d='M27 15h10'/%3E%3C/g%3E%3C/svg%3E">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
