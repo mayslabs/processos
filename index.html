@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-22-main-v2-live">
+<meta name="app-build" content="2026-06-22-mockup-final">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-22-main-v2-live';
+  const build = '2026-06-22-mockup-final';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1639,10 +1639,193 @@ body{
   .v2-kanban{grid-template-columns:repeat(6,260px)}
   .search,.btn-add{width:100%;justify-content:center}
 }
+/* ── MOCKUP FINAL: interface principal ── */
+:root{
+  --final-bg:#F6FAFC;
+  --final-surface:#FFFFFF;
+  --final-soft:#F3F8FC;
+  --final-line:#DDE8F1;
+  --final-text:#111B2F;
+  --final-muted:#65748A;
+  --final-primary:#5F6EEA;
+  --final-primary-soft:#EEF1FF;
+  --final-blue:#7DB7F0;
+  --final-orange:#F7B955;
+  --final-coral:#F39B77;
+  --final-purple:#A98BF1;
+  --final-green:#6CCB96;
+  --sidebar:236px;
+  --panel:460px;
+}
+body{
+  background:radial-gradient(circle at 20% 0,#FBFDFF 0,#F6FAFC 38%,#EEF5F8 100%)!important;
+  color:var(--final-text)!important;
+  font-size:14px!important;
+  overflow:hidden;
+}
+.deploy-proof{display:none!important}
+.sidebar{
+  width:var(--sidebar)!important;
+  background:rgba(255,255,255,.86)!important;
+  border-right:1px solid var(--final-line)!important;
+  padding:22px 18px!important;
+  gap:18px!important;
+  box-shadow:8px 0 28px rgba(33,51,74,.04);
+}
+.sb-logo{padding:0 0 18px!important;border-bottom:0!important}
+.sb-logo h1{font-size:15px!important;font-weight:900!important;color:var(--final-text)!important;gap:12px!important}
+.sb-logo h1::after{display:none!important;content:''!important}
+.sb-mark{width:40px;height:40px;border-radius:14px;background:#F0F5FF;color:#576DDD;display:inline-grid;place-items:center;font-size:20px!important}
+.sb-subtitle{display:block;margin-left:52px;margin-top:-11px;font-size:12px;color:var(--final-muted)!important}
+.sb-nav{padding:0!important;gap:8px!important;display:grid!important}
+.nav-btn{height:44px!important;border-radius:10px!important;border:1px solid transparent!important;background:transparent!important;color:#536176!important;padding:0 12px!important;display:flex!important;align-items:center!important;gap:11px!important;font-weight:800!important;box-shadow:none!important}
+.nav-btn svg{width:18px!important;height:18px!important;color:currentColor!important}
+.nav-btn.active{background:#F1F3FF!important;border-color:#DDE3FF!important;color:#5F6EEA!important}
+.nav-btn.ghost:hover{background:#F7FAFD!important;border-color:#E7EEF5!important}
+.sb-count{margin-left:auto;background:#EEF1FF!important;color:#5F6EEA!important;border-radius:999px;padding:3px 8px!important;font-size:11px!important}
+.kanban-alerts{margin-top:8px!important;border:1px solid var(--final-line)!important;background:rgba(255,255,255,.78)!important;border-radius:14px!important;padding:14px!important;display:flex!important;flex-direction:column!important;gap:10px!important;box-shadow:0 16px 38px rgba(33,51,74,.06)!important}
+.kanban-alert-title{font-size:12px!important;text-transform:none!important;letter-spacing:0!important;color:var(--final-text)!important}
+.kanban-alert-count,.kanban-alert-empty{font-size:12px!important;color:var(--final-muted)!important}
+.kanban-alert-row{display:grid!important;gap:10px!important}
+.kanban-alert-item{border-radius:10px!important;padding:12px!important;background:#FFF!important;border:1px solid var(--final-line)!important;box-shadow:none!important;display:grid!important;gap:4px!important}
+.kanban-alert-item.overdue,.kanban-alert-item.urgent{background:#FFF5F5!important;border-color:#FFD2D2!important}
+.kanban-alert-item.warning,.kanban-alert-item.task{background:#FFF9ED!important;border-color:#FFE1A8!important}
+.kanban-alert-item.payment,.kanban-alert-item.finance{background:#F1FBF6!important;border-color:#CDEEDB!important}
+.kanban-alert-client{font-size:12px!important;font-weight:900!important;color:var(--final-text)!important}
+.kanban-alert-desc,.kanban-alert-date{font-size:11px!important;color:#6B7C91!important}
+.sidebar-user{margin-top:auto;border:1px solid var(--final-line);background:#FFF;border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 28px rgba(33,51,74,.04)}
+.sidebar-user-avatar{width:36px;height:36px;border-radius:50%;background:#E7E1FF;color:#6656C7;display:grid;place-items:center;font-weight:900}
+.sidebar-user strong{display:block;font-size:12px;color:var(--final-text)}
+.sidebar-user span{display:block;font-size:11px;color:var(--final-muted)}
+.main{background:transparent!important}
+.topbar{min-height:82px!important;height:auto!important;background:rgba(255,255,255,.84)!important;border-bottom:1px solid var(--final-line)!important;padding:16px 24px!important;gap:24px!important;box-shadow:0 8px 24px rgba(33,51,74,.035)}
+.topbar-left,.topbar-right{gap:16px!important}
+.sidebar-toggle{display:none!important}
+.workspace-card{width:250px;height:48px;border:1px solid var(--final-line);border-radius:10px;background:#FFF;padding:7px 12px;display:grid;gap:2px;box-shadow:0 8px 18px rgba(33,51,74,.04)}
+.workspace-card>span{font-size:10px;text-transform:none;color:#7B8799;font-weight:800}
+.workspace-switcher{border:0!important;background:transparent!important;padding:0!important;gap:4px!important}
+.workspace-btn,.workspace-badge{border:0!important;background:transparent!important;padding:0!important;font-size:12px!important;color:var(--final-text)!important;font-weight:900!important}
+.workspace-btn:not(.active){display:none!important}
+#sync-status{min-width:150px;height:48px;border:1px solid var(--final-line);border-radius:10px;background:#FFF;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(33,51,74,.04)}
+.sync-soft{font-size:12px!important;font-weight:900!important}
+.sync-card{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;line-height:1.1}
+.sync-card i{grid-row:1/3;width:13px;height:13px;border-radius:50%;box-shadow:0 0 0 6px rgba(108,203,150,.12)}
+.sync-card strong{font-size:12px;color:var(--final-text)}
+.sync-card small{font-size:10px;color:var(--final-muted)}
+.user-menu{font-size:12px!important;color:var(--final-muted)!important}
+.logout-btn{height:36px!important;border-radius:10px!important;background:#FFF!important;border-color:var(--final-line)!important;color:#536176!important}
+.search{width:min(430px,32vw)!important;height:48px!important;border-radius:10px!important;border:1px solid var(--final-line)!important;background:#FFF!important;padding:0 18px!important;font-size:13px!important;box-shadow:0 8px 18px rgba(33,51,74,.04)}
+.btn-add{height:48px!important;border-radius:10px!important;background:#6672EA!important;color:#FFF!important;padding:0 18px!important;font-size:13px!important;box-shadow:0 12px 28px rgba(95,110,234,.22)!important}
+.page.active{padding:26px 24px 24px!important;overflow:auto!important}
+.page-head{display:flex;align-items:flex-start;gap:16px;margin:0 0 24px 12px}
+.topbar-title{display:block!important;font-size:22px!important;font-weight:950!important;color:var(--final-text)!important;line-height:1.1}
+.page-head p{margin:4px 0 0;color:var(--final-muted);font-size:14px}
+.client-total-pill{align-self:center;border:1px solid var(--final-line);background:#FFF;border-radius:10px;padding:7px 12px;color:#66748A;font-size:12px;font-weight:800}
+.board,.final-board{min-width:1420px!important;display:grid!important;grid-template-columns:repeat(6,minmax(202px,1fr))!important;gap:12px!important;align-items:start!important}
+.final-col{min-height:610px;border:1px solid var(--final-line);border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.38));padding:10px;box-shadow:0 14px 32px rgba(33,51,74,.045)}
+.final-col-head{height:58px;border:1px solid color-mix(in srgb,var(--col),#FFF 64%);border-radius:8px;background:color-mix(in srgb,var(--col),#FFF 90%);padding:11px 12px;display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:start}
+.final-col-icon{color:var(--col);font-weight:900;font-size:17px;line-height:1}
+.final-col-name{font-size:12px;text-transform:none;font-weight:950;color:color-mix(in srgb,var(--col),#162033 54%);line-height:1.1}
+.final-col-sub{grid-column:2/4;font-size:10px;color:#6D7B91;margin-top:-12px}
+.final-col-count{grid-row:1/3;grid-column:3;width:24px;height:24px;border-radius:999px;background:#EEF3FF;color:#5A6D8C;display:grid;place-items:center;font-size:12px;font-weight:900}
+.final-col-body{padding-top:10px;min-height:515px}
+.final-empty{height:82px;border:1px dashed #D5E2EC;border-radius:10px;background:#FBFDFF;display:grid;place-items:center;color:#8795A8;font-size:12px}
+.final-add-client{margin:10px 2px 0;border:0;background:transparent;color:var(--col);font-size:12px;font-weight:900;cursor:pointer;padding:8px}
+.final-card{background:#FFF;border:1px solid color-mix(in srgb,var(--col),#FFF 68%);border-radius:8px;padding:12px;margin-bottom:10px;min-height:128px;box-shadow:0 12px 24px rgba(33,51,74,.06);cursor:pointer;transition:.16s ease}
+.final-card:hover{transform:translateY(-1px);box-shadow:0 16px 30px rgba(33,51,74,.08)}
+.final-card-title{font-size:13px;font-weight:950;color:var(--final-text);line-height:1.25;margin-bottom:8px}
+.final-card-benefit{font-size:11px;color:#68778E;margin-bottom:10px;line-height:1.35}
+.final-card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.final-chip{display:inline-flex;align-items:center;gap:5px;border-radius:7px;padding:5px 7px;font-size:10px;font-weight:900;line-height:1;background:#F2F6FA;color:#52647A}
+.final-chip.judicial{background:#FFF2D5;color:#A36B17}
+.final-chip.admin{background:#EAF2FF;color:#376AA8}
+.final-chip.done{background:#E8F8EF;color:#2A7D50}
+.final-card-meta{display:grid;gap:7px;margin-top:auto;color:#6B7C91;font-size:11px}
+.final-card-meta-row{display:flex;align-items:center;gap:7px}
+.final-card-date.overdue,.final-card-date.urgent{color:#D05A5A;font-weight:900}
+.final-card-date.warning{color:#C57F21;font-weight:900}
+.final-card-date.ok{color:#2A7D50;font-weight:900}
+.final-card-alert{border-radius:8px;padding:8px 9px;background:#FFF5F5;border:1px solid #FFD2D2;color:#BA4B4B;font-size:11px;font-weight:900;margin-top:8px}
+.overlay.on{background:transparent!important;backdrop-filter:none!important}
+.panel{width:var(--panel)!important;max-width:calc(100vw - 24px)!important;background:#FFF!important;border-left:1px solid var(--final-line)!important;box-shadow:-22px 0 48px rgba(33,51,74,.12)!important}
+.panel-hd{height:auto!important;padding:26px 22px 18px!important;border-bottom:0!important;gap:14px!important;align-items:flex-start!important}
+.panel-avatar{width:42px;height:42px;border-radius:50%;background:#ECE7FF;color:#6957C9;display:grid;place-items:center;font-weight:950;flex:none}
+.panel-hd-info{flex:1!important;min-width:0!important}
+.panel-name{font-size:18px!important;font-weight:950!important;color:var(--final-text)!important;line-height:1.18;margin-bottom:6px}
+.panel-sub{gap:7px!important}
+.panel-icon-btn,.close-btn{width:32px!important;height:32px!important;border-radius:8px!important;border:1px solid var(--final-line)!important;background:#FFF!important;color:#65748A!important;display:grid!important;place-items:center!important;font-weight:900!important;cursor:pointer!important}
+.panel-tabs{padding:0 18px!important;height:48px!important;border-bottom:1px solid var(--final-line)!important;gap:0!important;overflow-x:auto!important}
+.ptab{height:48px!important;padding:0 9px!important;display:flex!important;align-items:center!important;border-bottom:2px solid transparent!important;color:#65748A!important;font-size:11px!important;font-weight:850!important;white-space:nowrap!important}
+.ptab.active{color:#365EDB!important;border-color:#365EDB!important;background:transparent!important}
+.panel-body{padding:16px 18px 86px!important;background:#FFF!important;height:calc(100vh - 158px)!important;overflow:auto!important}
+.panel-footer{position:absolute;left:0;right:0;bottom:0;height:70px;border-top:1px solid var(--final-line);background:#FFF;display:grid;grid-template-columns:1fr 1fr 56px;gap:10px;padding:12px}
+.panel-foot-btn{border:1px solid var(--final-line);background:#FFF;border-radius:8px;color:#536176;font-weight:850;font-size:12px;cursor:pointer}
+.panel-foot-btn:hover{background:#F7FAFD;color:#365EDB}
+.panel-foot-btn.small{font-size:16px}
+.badge{border-radius:7px!important;padding:5px 8px!important;font-size:10px!important;font-weight:900!important}
+.badge.j,.badge.a,.badge.n{border:0!important}
+.badge.j{background:#EEF1FF!important;color:#4B5DDB!important}
+.badge.a{background:#EAF2FF!important;color:#376AA8!important}
+.badge.n{background:#FFF2D5!important;color:#8F6818!important}
+.final-section{border:1px solid var(--final-line);background:#FFF;border-radius:8px;padding:14px;margin-bottom:12px}
+.final-section-title{font-size:12px;font-weight:950;color:#27344A;margin-bottom:12px}
+.final-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.final-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.final-kpi{border:1px solid var(--final-line);border-radius:8px;background:#FFF;padding:12px}
+.final-kpi span{display:block;font-size:10px;color:#65748A;font-weight:900;margin-bottom:8px}
+.final-kpi strong{display:block;font-size:20px;color:var(--final-text)}
+.final-status-card{min-height:92px;background:linear-gradient(135deg,#F4FBF8,#FFFFFF);border-color:#D8F0E2}
+.final-next-card{min-height:92px;background:linear-gradient(135deg,#F5F8FF,#FFFFFF);border-color:#DCE5FF}
+.final-data-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.final-info{border:1px solid var(--final-line);border-radius:8px;background:#FBFDFF;padding:11px}
+.final-info span{display:block;font-size:10px;text-transform:none;color:#65748A;font-weight:900;margin-bottom:6px}
+.final-info strong{font-size:12px;color:#1A2740}
+.final-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.final-action-btn,.btn-s.p,.btn-s.g,.btn-panel-action{border:1px solid var(--final-line)!important;background:#FFF!important;color:#365E93!important;border-radius:8px!important;height:36px!important;font-size:12px!important;font-weight:850!important;box-shadow:none!important}
+.btn-s.p,.btn-save-client{background:#5F6EEA!important;color:#FFF!important;border-color:#5F6EEA!important}
+.task-table{border:1px solid var(--final-line);border-radius:8px;overflow:auto}
+.task-table-row{display:grid;grid-template-columns:28px 1.6fr .8fr .8fr .8fr .8fr;gap:8px;align-items:center;padding:11px 12px;border-bottom:1px solid #EDF2F6;font-size:12px}
+.task-table-row{min-width:720px}
+.task-table-row.head{background:#FBFDFF;color:#65748A;font-size:10px;font-weight:950;text-transform:none}
+.task-table-row:last-child{border-bottom:0}
+.task-radio{width:15px;height:15px;border:1px solid #9AAABC;border-radius:50%;cursor:pointer}
+.task-radio.done{background:#6CCB96;border-color:#6CCB96}
+.history-list.final-history{border:1px solid var(--final-line);border-radius:8px;padding:12px 16px;background:#FFF}
+.final-hist-item{display:grid;grid-template-columns:14px 1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid #EDF2F6}
+.final-hist-item:last-child{border-bottom:0}
+.final-hist-dot{width:7px;height:7px;border-radius:50%;background:#6E9FEB;margin-top:5px}
+.final-hist-item strong{font-size:12px}
+.final-hist-item p{margin:3px 0 0;color:#65748A;font-size:12px}
+.final-hist-item time{font-size:11px;color:#7B8799;white-space:nowrap}
+.finance-hero{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.finance-metric{border-radius:8px!important;border:1px solid var(--final-line)!important;border-top:3px solid #9CC4F6!important;padding:14px!important}
+.finance-metric.confirmed{border-top-color:#A6E3C4!important}.finance-metric.fees{border-top-color:#FFD889!important}.finance-metric.mine{border-top-color:#CDB9FF!important}
+.finance-metric-label{font-size:10px!important;color:#65748A!important}
+.finance-metric-value{font-size:18px!important}
+.finance-expectation{grid-template-columns:1.1fr .72fr .72fr .86fr .62fr!important}
+.finance-table-head{grid-template-columns:1.2fr .8fr .9fr .9fr .9fr .7fr!important}
+.finance-row-main{grid-template-columns:1.2fr .8fr .9fr .72fr .72fr!important}
+.finance-row{border-radius:8px!important;background:#FFF!important}
+.finance-table-head,.finance-row{min-width:680px}
+.finance-installments{overflow:auto}
+.finance-row-calc{grid-template-columns:repeat(3,minmax(0,1fr)) auto!important}
+.global-tags-list{display:flex!important;flex-direction:column!important;gap:8px!important}
+.global-tag-item{display:grid!important;grid-template-columns:1fr auto auto!important;gap:8px!important;align-items:center!important}
+.tag-ed{border-radius:8px!important;padding:9px 12px!important;font-size:12px!important}
+.preset-colors{gap:8px!important}
+.pc{width:22px!important;height:22px!important}
+@media(max-width:900px){
+  .sidebar{display:none!important}
+  .topbar{padding:12px!important;flex-direction:column!important;align-items:stretch!important}
+  .topbar-left,.topbar-right{width:100%;flex-wrap:wrap!important}
+  .workspace-card,#sync-status,.search,.btn-add{width:100%!important}
+  .board,.final-board{min-width:980px!important}
+  .panel{width:100vw!important;max-width:100vw!important}
+  .final-grid-2,.final-kpis,.final-data-grid,.finance-hero,.finance-expectation{grid-template-columns:1fr!important}
+}
 </style>
 </head>
 <body class="auth-locked">
-<div class="deploy-proof">VISUAL V2 ATIVO - 22/06/2026</div>
 
 <!-- AUTH -->
 <div class="auth-view" id="auth-view">
@@ -1667,17 +1850,48 @@ body{
 <!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="sb-logo">
-    <h1><span class="sb-mark">⚖️</span><span class="sb-brand-text">Gestão Jurídica</span></h1>
+    <h1><span class="sb-mark">⚖</span><span class="sb-brand-text">Gestão Jurídica</span></h1>
     <span class="sb-subtitle">Processos Previdenciários</span>
   </div>
   <div class="sb-nav">
-    <button class="nav-btn active" id="nav-kanban" onclick="navigate('kanban')" title="Kanban">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="11" rx="1"/><rect x="14" y="17" width="7" height="4" rx="1"/></svg>
-      <span class="nav-label">Kanban</span>
+    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-btn active" id="nav-kanban" onclick="navigate('kanban')" title="Processos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v5h5"/><path d="M10 13h6"/><path d="M10 17h6"/></svg>
+      <span class="nav-label">Processos</span>
       <span class="sb-count" id="cnt-kanban">0</span>
+    </button>
+    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Agenda">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
+      <span class="nav-label">Agenda</span>
+    </button>
+    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Tarefas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+      <span class="nav-label">Tarefas</span>
+    </button>
+    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Etiquetas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13l-7 7-9-9V4h7z"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
+      <span class="nav-label">Etiquetas</span>
+    </button>
+    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Relatórios">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="11" width="3" height="5"/><rect x="12" y="8" width="3" height="8"/><rect x="17" y="13" width="3" height="3"/></svg>
+      <span class="nav-label">Relatórios</span>
+    </button>
+    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Configurações">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2 3-.2-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21h-3.4v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.2.1-2-3 .1-.1A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.5-1H3v-3.4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.2 3-2 .2.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V4h3.4v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.2-.1 3 2-.1.2a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1V14h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      <span class="nav-label">Configurações</span>
     </button>
   </div>
   <div class="kanban-alerts empty" id="kanban-alerts"></div>
+  <div class="sidebar-user">
+    <div class="sidebar-user-avatar">LC</div>
+    <div>
+      <strong>Letícia Carvalho</strong>
+      <span>Administrador</span>
+    </div>
+  </div>
 </nav>
 
 <!-- MAIN -->
@@ -1687,16 +1901,18 @@ body{
       <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Ocultar menu lateral" aria-label="Ocultar menu lateral">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <span class="topbar-title" id="topbar-title">Kanban de Processos</span>
+      <div class="workspace-card">
+        <span>Ambiente atual</span>
+        <div id="workspace-switcher" class="workspace-switcher"></div>
+      </div>
     </div>
     <div class="topbar-right">
-      <div class="workspace-switcher" id="workspace-switcher"></div>
       <div id="sync-status"><span class="sync-soft" style="color:#9A6A18">• Conectando...</span></div>
       <div class="user-menu">
         <span id="user-email"></span>
         <button class="logout-btn" onclick="logout()">Sair</button>
       </div>
-      <input class="search" type="text" placeholder="🔍  Buscar cliente..." id="search-input" oninput="handleSearch(this.value)">
+      <input class="search" type="text" placeholder="Buscar clientes, processos, tarefas..." id="search-input" oninput="handleSearch(this.value)">
       <button class="btn-add" onclick="openModal()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Novo Cliente
@@ -1706,6 +1922,13 @@ body{
 
   <!-- KANBAN PAGE -->
   <div class="page active" id="page-kanban">
+    <div class="page-head">
+      <div>
+        <span class="topbar-title" id="topbar-title">Processos</span>
+        <p>Kanban</p>
+      </div>
+      <span class="client-total-pill" id="client-total-pill">0 clientes</span>
+    </div>
     <div class="board" id="board"></div>
   </div>
 
@@ -1715,10 +1938,12 @@ body{
 <div class="overlay" id="overlay" onclick="closePanel()"></div>
 <div class="panel" id="panel">
   <div class="panel-hd">
+    <div class="panel-avatar" id="panel-avatar">--</div>
     <div class="panel-hd-info">
       <div class="panel-name" id="panel-name"></div>
       <div class="panel-sub" id="panel-sub"></div>
     </div>
+    <button class="panel-icon-btn" onclick="enterResumoEdit()" title="Editar cliente">✎</button>
     <button class="close-btn" onclick="closePanel()">✕</button>
   </div>
   <div class="panel-tabs" id="panel-tabs">
@@ -1730,6 +1955,11 @@ body{
     <div class="ptab" data-tab="etiquetas" onclick="switchTab(this)">Etiquetas</div>
   </div>
   <div class="panel-body" id="panel-body"></div>
+  <div class="panel-footer">
+    <button class="panel-foot-btn" onclick="document.querySelector('[data-tab=resumo]').click();enterResumoEdit()">Editar cliente</button>
+    <button class="panel-foot-btn" onclick="document.querySelector('[data-tab=tarefas]').click()">Nova tarefa</button>
+    <button class="panel-foot-btn small" onclick="document.querySelector('[data-tab=historico]').click()">•••</button>
+  </div>
 </div>
 
 <!-- NEW CLIENT MODAL -->
@@ -1763,11 +1993,11 @@ body{
         </div>
         <div class="fg"><label>Coluna inicial *</label>
           <select id="f-column">
-            <option value="em_analise">Em Análise</option>
-            <option value="aguardando_doc">Aguardando Documentação/Informação</option>
-            <option value="em_elaboracao">Em Elaboração</option>
-            <option value="req_administrativo">Requerimento Administrativo</option>
-            <option value="processo_judicial">Processo Judicial</option>
+            <option value="em_analise">Protocolo</option>
+            <option value="aguardando_doc">Em análise</option>
+            <option value="em_elaboracao">Protocolado</option>
+            <option value="req_administrativo">Audiência</option>
+            <option value="processo_judicial">Aguardando cliente</option>
             <option value="finalizado">Finalizado</option>
           </select>
         </div>
@@ -1835,17 +2065,21 @@ const FIREBASE_CONFIG = {
 //  CONSTANTS
 // ─────────────────────────────────────────────
 const COLS = [
-  {id:'em_analise',         label:'Em Análise',                          color:'#A5B4FC'},
-  {id:'aguardando_doc',     label:'Aguardando Documentação/Informação',  color:'#FCD34D'},
-  {id:'em_elaboracao',      label:'Em Elaboração',                       color:'#FDBA74'},
-  {id:'req_administrativo', label:'Req. Administrativo',                 color:'#93C5FD'},
-  {id:'processo_judicial',  label:'Processo Judicial',                   color:'#C4B5FD'},
-  {id:'finalizado',         label:'Finalizado',                          color:'#86EFAC'},
+  {id:'em_analise',         label:'Protocolo',            color:'#8EA7FF'},
+  {id:'aguardando_doc',     label:'Em análise',           color:'#F7B955'},
+  {id:'em_elaboracao',      label:'Protocolado',          color:'#F39B77'},
+  {id:'req_administrativo', label:'Audiência',            color:'#7DB7F0'},
+  {id:'processo_judicial',  label:'Aguardando cliente',   color:'#A98BF1'},
+  {id:'finalizado',         label:'Finalizado',           color:'#6CCB96'},
 ];
 const COL_LABELS = Object.fromEntries(COLS.map(c=>[c.id,c.label]));
 const COL_SHORT_LABELS = {
-  aguardando_doc: 'Aguardando docs/info',
-  req_administrativo: 'Req. administrativo',
+  em_analise: 'Protocolo',
+  aguardando_doc: 'Em análise',
+  em_elaboracao: 'Protocolado',
+  req_administrativo: 'Audiência',
+  processo_judicial: 'Aguardando cliente',
+  finalizado: 'Finalizado',
 };
 const PRESET_COLORS = ['#FCA5A5','#FCD34D','#86EFAC','#93C5FD','#C4B5FD','#F9A8D4','#CBD5E1','#67E8F9'];
 const BENEFIT_OPTIONS = ['BPC - Deficiência','BPC - Idoso','Salário-maternidade rural','Salário-maternidade urbano','Auxílio-doença','Auxílio-acidente','Aposentadoria por invalidez','Aposentadoria por tempo de contribuição','Aposentadoria por idade','Aposentadoria rural','Pensão por morte','Outro'];
@@ -4131,6 +4365,349 @@ function renderPanelSub(c){
     `<span class="badge ${viaCls}">${esc(c.via||'Via indefinida')}</span>` +
     (col?`<span class="badge n" style="${softColorStyle(col.color,.18)}">${esc(col.label)}</span>`:'') +
     (c.processNumber?`<span class="v2-tab-chip" style="background:#F4F8FB;color:#667085;border:1px solid #DDE8F0">${esc(c.processNumber)}${c.tribunal?' ('+esc(c.tribunal)+')':''}</span>`:'');
+}
+
+// ─────────────────────────────────────────────
+//  MOCKUP FINAL: renderização principal
+// ─────────────────────────────────────────────
+const FINAL_COL_META = {
+  em_analise: {icon:'▱', sub:'Em preparação'},
+  aguardando_doc: {icon:'↻', sub:'Análise do caso'},
+  em_elaboracao: {icon:'□', sub:'Aguardando despacho'},
+  req_administrativo: {icon:'▣', sub:'Data marcada'},
+  processo_judicial: {icon:'◇', sub:'Documentos / informações'},
+  finalizado: {icon:'✓', sub:'Concluídos'},
+};
+function finalInitials(name=''){
+  const parts = String(name||'').trim().split(/\s+/).filter(Boolean);
+  return ((parts[0]||'?')[0] + (parts.length>1 ? parts[parts.length-1][0] : '')).toUpperCase();
+}
+function finalDateClass(date){
+  if(!date) return '';
+  const s = dayStatus(date);
+  return s==='overdue'?'overdue':s==='urgent'?'urgent':s==='warning'?'warning':'ok';
+}
+function finalDueLabel(task){
+  if(!task || !task.deadline) return 'Sem prazo';
+  if(isProcessDeadline(task)) return `Prazo: ${fmtDate(task.deadline)}`;
+  if(isPaymentDeadline(task)) return `Pagamento: ${fmtDate(task.deadline)}`;
+  return fmtDate(task.deadline);
+}
+function finalTaskStatus(t){
+  if(t.done) return ['Concluída','done'];
+  const s = t.deadline ? dayStatus(t.deadline) : '';
+  if(s==='overdue') return ['Atrasada','late'];
+  if(s==='urgent' || s==='warning') return ['Pendente','pending'];
+  return ['Em andamento','active'];
+}
+function renderWorkspaceSwitcher(){
+  const el = document.getElementById('workspace-switcher');
+  if(!el) return;
+  const allowed = currentUserProfile && currentUserProfile.workspaces && currentUserProfile.workspaces.length ? currentUserProfile.workspaces : WORKSPACES.map(w=>w.id);
+  if(allowed.length <= 1){
+    const id = allowed[0] || currentWorkspaceId || DEFAULT_WORKSPACE_ID;
+    el.innerHTML = `<span class="workspace-badge">${esc(WORKSPACE_LABELS[id]||'Letícia Carvalho Advocacia')}</span>`;
+    return;
+  }
+  el.innerHTML = allowed.map(id=>`<button class="workspace-btn ${id===currentWorkspaceId?'active':''}" onclick="switchWorkspace('${id}')">${esc(id==='leticia'?'Letícia Carvalho Advocacia':WORKSPACE_LABELS[id]||id)}</button>`).join('');
+}
+function updateWorkspaceTitle(){
+  const el = document.getElementById('topbar-title');
+  if(el) el.textContent = 'Processos';
+  const sub = document.querySelector('.sb-subtitle');
+  if(sub) sub.textContent = 'Processos Previdenciários';
+}
+function setSyncStatus(s){
+  const el = document.getElementById('sync-status');
+  if(!el) return;
+  const map = {
+    connecting:['#F7B955','Conectando','Aguardando Firebase'],
+    saving:['#7DB7F0','Salvando','Agora'],
+    synced:['#6CCB96','Sincronizado','Há 2 minutos'],
+    error:['#EE7373','Erro','Verifique conexão']
+  };
+  const [color,label,detail] = map[s]||map.synced;
+  el.innerHTML = `<span class="sync-card"><i style="background:${color}"></i><strong>${label}</strong><small>${detail}</small></span>`;
+}
+function updateCounts(){
+  const n = clients.length;
+  const cnt = document.getElementById('cnt-kanban');
+  if(cnt) cnt.textContent = n;
+  const pill = document.getElementById('client-total-pill');
+  if(pill) pill.textContent = `${n} cliente${n===1?'':'s'}`;
+}
+function renderBoard(){
+  const board = document.getElementById('board');
+  if(!board) return;
+  const filtered = searchQ ? clients.filter(c=>
+    (c.name||'').toLowerCase().includes(searchQ) ||
+    (c.benefitType||'').toLowerCase().includes(searchQ) ||
+    (c.processNumber||'').toLowerCase().includes(searchQ) ||
+    (c.summary||'').toLowerCase().includes(searchQ)
+  ) : clients;
+  board.className = 'board final-board';
+  board.innerHTML = COLS.map(col=>{
+    const meta = FINAL_COL_META[col.id] || {icon:'□', sub:''};
+    const cards = filtered.filter(c=>c.column===col.id);
+    return `<section class="final-col" style="--col:${col.color}">
+      <div class="final-col-head">
+        <span class="final-col-icon">${meta.icon}</span>
+        <span class="final-col-name">${esc(col.label)}</span>
+        <span class="final-col-count">${cards.length}</span>
+        <span class="final-col-sub">${esc(meta.sub)}</span>
+      </div>
+      <div class="final-col-body col-body" id="col-${col.id}"
+        ondragover="onDragOver(event,'${col.id}')"
+        ondragleave="onDragLeave(event)"
+        ondrop="onDrop(event,'${col.id}')">
+        ${cards.length ? cards.map(c=>renderCard(c)).join('') : '<div class="final-empty">Nenhum processo</div>'}
+      </div>
+      <button class="final-add-client" onclick="openModal()">+ Adicionar cliente</button>
+    </section>`;
+  }).join('');
+  renderKanbanDeadlineAlerts(filtered);
+  updateCounts();
+}
+function renderCard(c){
+  const col = COLS.find(x=>x.id===c.column) || COLS[0];
+  const next = getNextTask(c);
+  const dateCls = next && next.deadline ? finalDateClass(next.deadline) : '';
+  const tags = (c.tags||[]).slice(0,1).map(t=>`<span class="final-chip" style="${softColorStyle(t.color,.18)}">${esc(t.label)}</span>`).join('');
+  const viaChip = c.via ? `<span class="final-chip ${c.via==='Judicial'?'judicial':'admin'}">${esc(c.via)}</span>` : '';
+  const doneChip = c.column==='finalizado' ? '<span class="final-chip done">Concluído</span>' : '';
+  const alert = hasAlert(c) ? `<div class="final-card-alert">${next&&next.description?esc(next.description):'Pendência exige atenção'}</div>` : '';
+  return `<article class="final-card card" id="card-${c.id}" draggable="true"
+    onclick="openPanel('${c.id}')"
+    ondragstart="onDragStart(event,'${c.id}')"
+    ondragend="onDragEnd(event)"
+    style="--col:${col.color}">
+    <div class="final-card-title">${esc(c.name)}</div>
+    <div class="final-card-benefit">${esc(c.benefitType||caseTypeLabel()+' não informado')}</div>
+    <div class="final-card-tags">${viaChip}${tags}${doneChip}</div>
+    ${alert}
+    <div class="final-card-meta">
+      <div class="final-card-meta-row"><span>▣</span><span class="final-card-date ${dateCls}">${next ? finalDueLabel(next) : (c.column==='finalizado' ? 'Concluído' : 'Sem prazo')}</span></div>
+    </div>
+  </article>`;
+}
+function renderKanbanDeadlineAlerts(clientList=clients){
+  const el = document.getElementById('kanban-alerts');
+  if(!el) return;
+  const urgent = getProcessDeadlineItems(clientList).filter(t=>['overdue','urgent'].includes(dayStatus(t.deadline))).slice(0,3);
+  const upcoming = getProcessDeadlineItems(clientList).filter(t=>dayStatus(t.deadline)==='warning').slice(0,3);
+  const docs = getSidebarTaskItems(clientList).filter(t=>!t.done).slice(0,3);
+  const block = (title,count,items,cls,empty) => `<section class="kanban-alert-block">
+    <div class="kanban-alert-head"><div class="kanban-alert-title">${title}</div><div class="kanban-alert-count">${count}</div></div>
+    <div class="kanban-alert-row">${items.length ? items.map(t=>`<div class="kanban-alert-item ${cls}" onclick="${t.clientId?`openPanel('${t.clientId}')`:''}">
+      <div class="kanban-alert-client">${esc(t.clientName||'Tarefa')}</div>
+      <div class="kanban-alert-desc">${esc(t.description||'Pendência')}</div>
+      <div class="kanban-alert-date">${t.deadline?fmtDate(t.deadline):'Sem data'}</div>
+    </div>`).join('') : `<div class="kanban-alert-empty">${empty}</div>`}</div>
+  </section>`;
+  el.className = 'kanban-alerts';
+  el.innerHTML =
+    block('Alertas', urgent.length ? `${urgent.length} prazo${urgent.length>1?'s':''} vencem hoje` : 'Tudo em dia', urgent, 'overdue', 'Nenhum prazo crítico.') +
+    block('Agenda', upcoming.length ? `${upcoming.length} próximo${upcoming.length>1?'s':''}` : 'Sem urgência', upcoming, 'warning', 'Nenhuma audiência ou prazo próximo.') +
+    block('Documentos', docs.length ? `${docs.length} pendente${docs.length>1?'s':''}` : 'Sem pendência', docs, 'payment', 'Nenhum documento pendente.');
+}
+function openPanel(id){
+  activeClientId = id;
+  activeTab = 'resumo';
+  resumoEditMode = false;
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.toggle('active', t.dataset.tab==='resumo'));
+  renderPanel();
+  document.getElementById('overlay').classList.add('on');
+  document.getElementById('panel').classList.add('on');
+}
+function renderPanel(){
+  const c = clients.find(x=>x.id===activeClientId);
+  if(!c) return;
+  const avatar = document.getElementById('panel-avatar');
+  if(avatar) avatar.textContent = finalInitials(c.name);
+  document.getElementById('panel-name').textContent = c.name;
+  renderPanelSub(c);
+  renderPanelBody();
+}
+function renderPanelSub(c){
+  const col = COLS.find(x=>x.id===c.column);
+  const viaCls = c.via==='Judicial'?'j':c.via==='Administrativa'?'a':'n';
+  document.getElementById('panel-sub').innerHTML =
+    (c.via?`<span class="badge ${viaCls}">${esc(c.via)}</span>`:'') +
+    (col?`<span class="badge n">${esc(col.label)}</span>`:'') +
+    (c.benefitType?`<span style="font-size:12px;color:#65748A">${esc(c.benefitType)}</span>`:'');
+}
+function enterResumoEdit(){
+  activeTab = 'resumo';
+  resumoEditMode = true;
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.toggle('active', t.dataset.tab==='resumo'));
+  renderPanelBody();
+}
+function tabResumo(c){
+  if(resumoEditMode) return tabResumoEdit(c);
+  const col = COLS.find(x=>x.id===c.column);
+  const pending = getPendingTasks(c);
+  const doneCount = (c.tasks||[]).filter(t=>t.done).length;
+  const next = getNextTask(c);
+  const notes = c.history.filter(h=>h.type==='note').slice(0,1);
+  const nextDate = next&&next.deadline ? dayStatus(next.deadline) : '';
+  const info = (label,value) => `<div class="final-info"><span>${label}</span><strong>${value?esc(value):'Não informado'}</strong></div>`;
+  const kpi = (label,value) => `<div class="final-kpi"><span>${label}</span><strong>${value}</strong></div>`;
+  return `<div class="case-stack">
+    <div class="final-grid-2">
+      <div class="final-section final-status-card">
+        <div class="final-section-title">Status atual</div>
+        <strong>${esc(col?col.label:'Em acompanhamento')}</strong>
+        <p>${pending.length ? `${pending.length} tarefa${pending.length>1?'s':''} pendente${pending.length>1?'s':''}.` : 'Tudo em dia.'}</p>
+      </div>
+      <div class="final-section final-next-card">
+        <div class="final-section-title">Próximo passo</div>
+        <strong>${next?esc(next.description):'Nenhuma tarefa pendente'}</strong>
+        <p class="final-card-date ${nextDate}">${next&&next.deadline ? `Vence em ${fmtDate(next.deadline)}` : 'Sem prazo ativo'}</p>
+        ${next?`<button class="final-action-btn" onclick="document.querySelector('[data-tab=tarefas]').click()">Ver tarefa</button>`:''}
+      </div>
+    </div>
+    <div class="final-kpis">
+      ${kpi('Tarefas', pending.length)}
+      ${kpi('Próximos prazos', pending.filter(t=>t.deadline).length)}
+      ${kpi('Dias em análise', c.createdAt ? Math.max(1, Math.ceil((new Date()-new Date(c.createdAt))/(1000*60*60*24))) : '0')}
+      ${kpi('Protocolos', c.processNumber ? '1' : '0')}
+    </div>
+    <div class="final-grid-2">
+      <div class="final-section">
+        <div class="final-section-title">Dados do processo</div>
+        <div class="final-data-grid">
+          ${info('Processo', c.processNumber)}
+          ${info('Via', c.via)}
+          ${info(caseTypeLabel().replace(/^./, ch=>ch.toUpperCase()), c.benefitType)}
+          ${info('Parte contrária', c.opposingParty)}
+          ${info('Data de entrada', c.createdAt ? fmtDate(c.createdAt.slice(0,10)) : '')}
+          ${info('Tribunal', c.tribunal)}
+        </div>
+      </div>
+      <div class="final-section">
+        <div class="final-section-title">Resumo do caso</div>
+        <p>${c.summary||c.currentSituation?esc(c.summary||c.currentSituation):'Nenhum resumo cadastrado.'}</p>
+        <div class="final-section-title" style="margin-top:16px">Anotações recentes</div>
+        ${notes.length ? notes.map(h=>`<p><small>${fmtDateTime(h.date)} · ${esc(h.details||'')}</small></p>`).join('') : '<p><small>Nenhuma anotação recente.</small></p>'}
+      </div>
+    </div>
+    <div class="final-section">
+      <div class="final-section-title">Ações rápidas</div>
+      <div class="final-actions">
+        <button class="final-action-btn" onclick="enterResumoEdit()">Editar cliente</button>
+        <button class="final-action-btn" onclick="document.querySelector('[data-tab=tarefas]').click()">Nova tarefa</button>
+        <button class="final-action-btn" onclick="document.querySelector('[data-tab=historico]').click()">Nova anotação</button>
+        <button class="final-action-btn" onclick="document.querySelector('[data-tab=honorarios]').click()">Financeiro</button>
+      </div>
+    </div>
+  </div>`;
+}
+function tabTarefas(c){
+  const tasks = c.tasks || [];
+  const pending = tasks.filter(t=>!t.done);
+  const done = tasks.filter(t=>t.done);
+  const rows = tasks.length ? tasks.map(t=>{
+    const status = finalTaskStatus(t);
+    return `<div class="task-table-row">
+      <span class="task-radio ${t.done?'done':''}" onclick="toggleTask('${c.id}','${t.id}')"></span>
+      <div><strong>${esc(t.description)}</strong><br><small>${t.done&&t.doneAt?'Concluída em '+fmtDateTime(t.doneAt):'Vence '+(t.deadline?fmtDate(t.deadline):'sem prazo')}</small></div>
+      <span class="final-chip">${taskKindLabel(t)}</span>
+      <span>${t.deadline?fmtDate(t.deadline):'Sem prazo'}</span>
+      <span>Letícia</span>
+      <span class="final-chip ${status[1]==='done'?'done':''}">${status[0]}</span>
+    </div>`;
+  }).join('') : '<div class="finance-empty">Nenhuma tarefa cadastrada.</div>';
+  return `<div class="case-stack">
+    <div class="final-kpis">
+      <div class="final-kpi"><span>Pendentes</span><strong>${pending.length}</strong></div>
+      <div class="final-kpi"><span>Em andamento</span><strong>${pending.filter(t=>t.deadline).length}</strong></div>
+      <div class="final-kpi"><span>Concluídas</span><strong>${done.length}</strong></div>
+      <div class="final-kpi"><span>Atrasadas</span><strong>${pending.filter(t=>t.deadline&&dayStatus(t.deadline)==='overdue').length}</strong></div>
+    </div>
+    <div class="final-section">
+      <div class="final-section-title">Tarefas do cliente</div>
+      <div class="task-table">
+        <div class="task-table-row head"><span></span><span>Tarefa</span><span>Tipo</span><span>Prazo</span><span>Responsável</span><span>Status</span></div>
+        ${rows}
+      </div>
+    </div>
+    <div class="final-section">
+      <div class="final-section-title">Nova tarefa</div>
+      <div style="display:grid;grid-template-columns:1.4fr .8fr .7fr auto;gap:8px">
+        <input class="fi" id="new-task-desc" placeholder="Descreva a tarefa...">
+        <select class="fi-select" id="new-task-kind"><option value="internal">Tarefa interna</option><option value="process_deadline">Prazo processual</option><option value="payment_deadline">Pagamento</option></select>
+        <input class="fi" id="new-task-date" type="date">
+        <button class="btn-s p" onclick="addTask('${c.id}')">Adicionar</button>
+      </div>
+    </div>
+  </div>`;
+}
+function tabHistorico(c){
+  const items = c.history.length ? c.history.map(h=>`<div class="final-hist-item">
+    <span class="final-hist-dot"></span>
+    <div><strong>${esc(h.action)}</strong>${h.details?`<p>${esc(h.details)}</p>`:''}</div>
+    <time>${fmtDateTime(h.date)}</time>
+  </div>`).join('') : '<div class="finance-empty">Sem registros ainda.</div>';
+  return `<div class="case-stack">
+    <div class="final-section">
+      <div class="final-section-title">Nova anotação</div>
+      <textarea class="fi note-ta" id="note-input" placeholder="Escreva uma anotação sobre o caso..." rows="4"></textarea>
+      <button class="btn-s p" onclick="addNote('${c.id}')">Salvar anotação</button>
+    </div>
+    <div class="final-section">
+      <div class="final-section-title">Histórico do caso</div>
+      <div class="history-list final-history">${items}</div>
+    </div>
+  </div>`;
+}
+function tabCredenciais(c){
+  const cr = c.credentials || {};
+  return `<div class="case-stack">
+    <div class="final-section" style="background:linear-gradient(135deg,#F8FBFF,#FFFFFF)">
+      <div class="final-section-title">Acesso GOV.br</div>
+      <p>Dados utilizados para acesso à conta do cliente no GOV.br. Mantenha as informações atualizadas.</p>
+    </div>
+    <div class="final-section">
+      <div class="final-data-grid">
+        <div class="final-info"><span>CPF / Usuário GOV.br</span><strong>${esc(cr.cpf||cr.govUser||'Não informado')}</strong></div>
+        <button class="final-action-btn" onclick="document.getElementById('edit-cpf').focus()">Editar</button>
+        <div class="final-info"><span>Celular</span><strong>${esc(cr.phone||'Não informado')}</strong></div>
+        <button class="final-action-btn" onclick="document.getElementById('edit-phone').focus()">Editar</button>
+      </div>
+    </div>
+    <div class="final-section">
+      <div class="final-section-title">Editar acesso</div>
+      <div class="fl"><span class="fl-label">CPF / Usuário</span><input class="fi" id="edit-cpf" value="${esc(cr.cpf||cr.govUser||'')}"></div>
+      <div class="fl"><span class="fl-label">Celular</span><input class="fi" id="edit-phone" value="${esc(cr.phone||'')}" inputmode="tel" placeholder="(00) 00000-0000" oninput="formatPhoneInput(this)"></div>
+      <button class="btn-s p" onclick="saveCredentials('${c.id}')">Salvar</button>
+    </div>
+    <div class="final-section"><p>As senhas não são armazenadas por segurança. Para alterar senha, o cliente deve fazer diretamente no site do GOV.br.</p></div>
+  </div>`;
+}
+function tabEtiquetas(c){
+  const applied = (c.tags||[]).map(t=>`<span class="tag-ed" style="${softColorStyle(t.color,.18)}">${esc(t.label)} <button class="tag-del" onclick="removeTagById('${c.id}','${t.id}')">×</button></span>`).join('') || '<span style="color:#65748A;font-size:12px">Nenhuma etiqueta aplicada.</span>';
+  const presets = ALL_PRESET_COLORS.map(pc=>`<div class="pc" style="background:${pc}" data-color="${pc}" onclick="selectPreset(this)" title="${pc}"></div>`).join('');
+  const available = globalTags.length ? globalTags.map(t=>{
+    const isApplied = c.tags.some(ct=>ct.id===t.id || tagKey(ct.label)===tagKey(t.label));
+    return `<div class="global-tag-item">
+      <div class="tag-ed" style="${softColorStyle(t.color,.18)}">${esc(t.label)}</div>
+      <button class="tag-edit-btn" onclick="${isApplied?`removeTagById('${c.id}','${t.id}')`:`applyGlobalTag('${c.id}','${t.id}')`}">${isApplied?'×':'+'}</button>
+      <button class="tag-del-global" onclick="deleteGlobalTag('${t.id}')">Excluir</button>
+    </div>`;
+  }).join('') : '<div class="finance-empty">Nenhuma etiqueta criada ainda.</div>';
+  return `<div class="case-stack">
+    <div class="final-section"><div class="final-section-title">Etiquetas aplicadas</div><div class="global-tags-list" style="flex-direction:row!important;flex-wrap:wrap!important">${applied}</div></div>
+    <div class="final-section"><div class="final-section-title">Etiquetas disponíveis</div><div class="global-tags-list">${available}</div></div>
+    <div class="final-section">
+      <div class="final-section-title">Criar nova etiqueta</div>
+      <div class="preset-colors">${presets}</div>
+      <div class="tag-add-row" style="margin-top:12px">
+        <input class="fi" id="tag-label" placeholder="Nome da etiqueta..." style="margin:0">
+        <input type="color" class="cpick" id="tag-color" value="#93C5FD">
+        <button class="btn-s p" onclick="addGlobalTag('${c.id}')">Criar</button>
+      </div>
+    </div>
+  </div>`;
 }
 initSidebar();
 initFirebase();
