@@ -1,0 +1,4 @@
+DEPLOY-PROVA-20260622-170711
+data: 2026-06-22 17:07 -03:00
+rota-principal-build: 2026-06-22-deploy-proof
+rota-v2-build: 2026-06-22-v2-deploy-proof
