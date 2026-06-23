@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-23-finalizados-perdidos">
+<meta name="app-build" content="2026-06-23-financeiro-travado-alertas">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-23-finalizados-perdidos';
+  const build = '2026-06-23-financeiro-travado-alertas';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1659,7 +1659,7 @@ body{
   --final-purple:#A98BF1;
   --final-green:#6CCB96;
   --sidebar:236px;
-  --panel:640px;
+  --panel:760px;
 }
 body{
   background:radial-gradient(circle at 20% 0,#FBFDFF 0,#F6FAFC 38%,#EEF5F8 100%)!important;
@@ -1861,13 +1861,22 @@ button.nav-kpi{cursor:pointer}
 .finance-metric.confirmed{border-top-color:#A6E3C4!important}.finance-metric.fees{border-top-color:#FFD889!important}.finance-metric.mine{border-top-color:#CDB9FF!important}
 .finance-metric-label{font-size:10px!important;color:#65748A!important}
 .finance-metric-value{font-size:18px!important}
-.finance-expectation{grid-template-columns:1.1fr .72fr .72fr .86fr .62fr!important}
-.finance-table-head{grid-template-columns:1.2fr .8fr .9fr .9fr .9fr .7fr!important}
+.finance-metric-sub{margin-top:8px;font-size:11px;line-height:1.35;color:#65748A}
+.finance-metric-sub strong{color:#1A2740;font-weight:600}
+.finance-pending-note{margin-top:10px;border:1px solid #E4EDF5;background:#F8FBFE;border-radius:8px;padding:10px 12px;color:#536176;font-size:12px;line-height:1.45}
+.finance-pending-note strong{color:#1A2740;font-weight:600}
+.finance-expectation{grid-template-columns:1.18fr .72fr .72fr .9fr .68fr!important;align-items:end!important}
+.finance-expectation .fl{display:grid;gap:6px;align-content:end}
+.finance-expectation .fi,.finance-expectation .fi-select{height:36px!important;margin:0!important}
+.finance-table-head{grid-template-columns:1.2fr .8fr .9fr .72fr .72fr!important}
 .finance-row-main{grid-template-columns:1.2fr .8fr .9fr .72fr .72fr!important}
 .finance-row{border-radius:8px!important;background:#FFF!important}
 .finance-table-head,.finance-row{min-width:680px}
 .finance-installments{overflow:auto}
-.finance-row-calc{grid-template-columns:repeat(3,minmax(0,1fr)) auto!important}
+.finance-row-calc{grid-template-columns:repeat(2,minmax(0,1fr)) auto!important}
+.finance-row.locked input,.finance-row.locked textarea,.finance-row.locked select,.finance-expectation.locked input,.finance-expectation.locked select,.finance-note.locked{background:#F7FAFC!important;color:#536176!important}
+.finance-alert.upcoming{background:#F8F5FF!important;border-color:#DED6FF!important;color:#5F4BA8!important}
+.finance-section-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 .global-tags-list{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;gap:8px!important;margin:0!important}
 .global-tag-item{display:inline-flex!important;align-items:center!important;gap:5px!important;max-width:100%!important}
 .tag-ed{border-radius:999px!important;padding:6px 10px!important;font-size:11px!important;line-height:1!important;max-width:220px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
@@ -2382,12 +2391,15 @@ function calcFinanceSummary(c){
   const confirmedClient = installments.reduce((sum,p)=>sum+parseMoney(p.clientAmount),0);
   const confirmedFees = installments.reduce((sum,p)=>sum+parseMoney(p.feeAmount),0);
   const confirmedMine = installments.reduce((sum,p)=>sum+parseMoney(p.myShareAmount),0);
+  const clientReceived = installments.reduce((sum,p)=>sum+(p.clientReceived?parseMoney(p.clientAmount):0),0);
   const feesReceived = installments.reduce((sum,p)=>sum+(p.feeReceived?parseMoney(p.feeAmount):0),0);
   const mineReceived = installments.reduce((sum,p)=>sum+(p.myShareReceived?parseMoney(p.myShareAmount):0),0);
   return {
     expClient, expFee, expMine,
     confirmedClient, confirmedFees, confirmedMine,
+    clientReceived,
     feesReceived, mineReceived,
+    pendingClient: Math.max(confirmedClient - clientReceived, 0),
     pendingMine: Math.max(confirmedMine - mineReceived, 0),
     pendingFees: Math.max(confirmedFees - feesReceived, 0),
   };
@@ -2408,13 +2420,29 @@ function getFinanceAlerts(clientList=clients){
       if(status.key==='late'){
         items.push({clientId:c.id, clientName:c.name, installment:p, title:'Confirmar recebimento', detail:'Pagamento previsto passou. Verifique se o cliente recebeu.', date:p.expectedDate, tone:'late'});
       } else if(status.key==='charge'){
-        items.push({clientId:c.id, clientName:c.name, installment:p, title:'Cobrar honorários', detail:'Cliente recebeu. Honorários ainda não foram marcados como recebidos.', date:p.expectedDate, tone:'charge'});
+        items.push({clientId:c.id, clientName:c.name, installment:p, title:'Honorários em aberto', detail:'Cliente recebeu. Honorários ainda não foram marcados como recebidos.', date:p.expectedDate, tone:'charge'});
       } else if(status.key==='share'){
-        items.push({clientId:c.id, clientName:c.name, installment:p, title:'Registrar repasse', detail:'Honorários recebidos. Sua parte ainda não foi marcada.', date:p.expectedDate, tone:'share'});
+        items.push({clientId:c.id, clientName:c.name, installment:p, title:'Minha parte em aberto', detail:'Honorários recebidos. Sua parte ainda não foi marcada como recebida.', date:p.expectedDate, tone:'share'});
+      } else if(status.key==='pending'){
+        const s = dayStatus(p.expectedDate);
+        if(s==='urgent' || s==='warning'){
+          items.push({clientId:c.id, clientName:c.name, installment:p, title:'Pagamento próximo', detail:'Data prevista para o cliente receber está se aproximando.', date:p.expectedDate, tone:'upcoming'});
+        }
       }
     });
   });
   return items.sort((a,b)=>(a.date||'9999-99-99').localeCompare(b.date||'9999-99-99'));
+}
+function financePendingNotes(finance){
+  const installments = (finance && finance.installments) || [];
+  const notes = [];
+  installments.forEach((p, index)=>{
+    const name = p.description || `Parcela ${index+1}`;
+    if(!p.clientReceived) notes.push(`${name}: cliente ainda não foi marcado como recebido`);
+    else if(!p.feeReceived) notes.push(`${name}: honorários não foram pagos`);
+    else if(!p.myShareReceived) notes.push(`${name}: minha parte não foi paga`);
+  });
+  return notes;
 }
 function isPersonalWorkspace(){
   return currentWorkspaceId === 'pessoal';
@@ -2806,6 +2834,7 @@ function normalizeFinance(finance, honorarios={}){
     feePercent: formatPercent(baseExpectation.feePercent || legacyPercent || DEFAULT_FEE_PERCENT),
     mySharePercent: formatPercent(baseExpectation.mySharePercent || DEFAULT_MY_SHARE_PERCENT),
     notes: baseExpectation.notes || honorarios.observacao || '',
+    locked: baseExpectation.locked === true,
   };
   const rawInstallments = finance && Array.isArray(finance.installments) ? finance.installments : [];
   const installments = rawInstallments.map(p=>{
@@ -2833,7 +2862,7 @@ function normalizeFinance(finance, honorarios={}){
       createdAt: p.createdAt || now(),
     };
   }).filter(Boolean);
-  return {expectation, installments};
+  return {expectation, installments, installmentsLocked: finance && finance.installmentsLocked === true};
 }
 function normalizeClient(c){
   if(!c || typeof c !== 'object') return null;
@@ -3926,16 +3955,30 @@ function tabHonorarios(c){
   const alerts = getFinanceAlerts([c]);
   const expFee = summary.expFee;
   const expMine = summary.expMine;
+  const expLocked = exp.locked === true;
+  const installmentsLocked = finance.installmentsLocked === true;
+  const expDisabled = expLocked ? 'disabled' : '';
+  const instDisabled = installmentsLocked ? 'disabled' : '';
   const confidence = exp.confidence || 'media';
   const confidenceOptions = [
     ['baixa','Baixa'],
     ['media','Média'],
     ['alta','Alta']
   ].map(([value,label])=>`<option value="${value}" ${confidence===value?'selected':''}>${label}</option>`).join('');
-  const metric = (label, value, tone='') => `
+  const expectedClientBase = summary.confirmedClient || summary.expClient;
+  const expectedFeeBase = summary.confirmedFees || summary.expFee;
+  const expectedMineBase = summary.confirmedMine || summary.expMine;
+  const pendingNotes = financePendingNotes(finance);
+  const metric = (label, value, tone='', received=0, pending=0) => `
     <div class="finance-metric ${tone}">
       <div class="finance-metric-label">${label}</div>
       <div class="finance-metric-value">${formatMoneyValue(value)}</div>
+      <div class="finance-metric-sub"><strong>Recebi:</strong> ${formatMoneyValue(received)}<br><strong>Falta:</strong> ${formatMoneyValue(Math.max(pending,0))}</div>
+    </div>`;
+  const pendingHtml = `
+    <div class="finance-pending-note">
+      <strong>Parcelas pendentes:</strong>
+      ${pendingNotes.length ? pendingNotes.map(note=>`<div>${esc(note)}</div>`).join('') : '<div>Nenhuma pendência nas parcelas confirmadas.</div>'}
     </div>`;
   const alertHtml = alerts.length ? `
     <div class="finance-alerts">
@@ -3953,68 +3996,74 @@ function tabHonorarios(c){
     const status = financeInstallmentStatus(p);
     const feeAmount = formatMoney(parseMoney(p.clientAmount) * (parsePercent(p.feePercent) || DEFAULT_FEE_PERCENT) / 100);
     const myShareAmount = formatMoney(parseMoney(feeAmount) * (parsePercent(p.mySharePercent) || DEFAULT_MY_SHARE_PERCENT) / 100);
-    const leticiaShareAmount = formatMoney(parseMoney(feeAmount) - parseMoney(myShareAmount));
     return `
-      <div class="finance-row ${status.key}" data-installment="${p.id}">
+      <div class="finance-row ${status.key} ${installmentsLocked?'locked':''}" data-installment="${p.id}">
         <div class="finance-row-main">
-          <input class="fi finance-desc" id="fin-desc-${p.id}" value="${esc(p.description)}" placeholder="Ex: 1º pagamento INSS">
-          <input class="fi finance-date" id="fin-date-${p.id}" type="date" value="${esc(p.expectedDate)}">
-          <input class="fi finance-money" id="fin-client-${p.id}" value="${esc(p.clientAmount)}" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateFinanceInstallmentPreview('${p.id}')">
-          <input class="fi finance-percent" id="fin-fee-percent-${p.id}" value="${esc(p.feePercent)}" placeholder="30%" oninput="formatPercentInput(this); updateFinanceInstallmentPreview('${p.id}')">
-          <input class="fi finance-percent" id="fin-share-percent-${p.id}" value="${esc(p.mySharePercent)}" placeholder="50%" oninput="formatPercentInput(this); updateFinanceInstallmentPreview('${p.id}')">
+          <input class="fi finance-desc" id="fin-desc-${p.id}" value="${esc(p.description)}" placeholder="Ex: 1º pagamento INSS" ${instDisabled}>
+          <input class="fi finance-date" id="fin-date-${p.id}" type="date" value="${esc(p.expectedDate)}" ${instDisabled}>
+          <input class="fi finance-money" id="fin-client-${p.id}" value="${esc(p.clientAmount)}" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateFinanceInstallmentPreview('${p.id}')" ${instDisabled}>
+          <input class="fi finance-percent" id="fin-fee-percent-${p.id}" value="${esc(p.feePercent)}" placeholder="30%" oninput="formatPercentInput(this); updateFinanceInstallmentPreview('${p.id}')" ${instDisabled}>
+          <input class="fi finance-percent" id="fin-share-percent-${p.id}" value="${esc(p.mySharePercent)}" placeholder="50%" oninput="formatPercentInput(this); updateFinanceInstallmentPreview('${p.id}')" ${instDisabled}>
         </div>
         <div class="finance-row-calc">
           <div><span>Honorários</span><strong id="fin-fee-${p.id}">${esc(feeAmount)||'R$ 0,00'}</strong></div>
           <div><span>Minha parte</span><strong id="fin-mine-${p.id}">${esc(myShareAmount)||'R$ 0,00'}</strong></div>
-          <div><span>Letícia</span><strong id="fin-leticia-${p.id}">${esc(leticiaShareAmount)||'R$ 0,00'}</strong></div>
           <span class="finance-status ${status.key}">${status.label}</span>
         </div>
         <div class="finance-checks">
-          <label><input type="checkbox" ${p.clientReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','clientReceived',this.checked)"> Cliente recebeu</label>
-          <label><input type="checkbox" ${p.feeReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','feeReceived',this.checked)"> Honorários recebidos</label>
-          <label><input type="checkbox" ${p.myShareReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','myShareReceived',this.checked)"> Minha parte recebida</label>
-          <button class="finance-remove" onclick="removeFinanceInstallment('${c.id}','${p.id}')" title="Remover parcela">×</button>
+          <label><input type="checkbox" ${p.clientReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','clientReceived',this.checked)" ${instDisabled}> Cliente recebeu</label>
+          <label><input type="checkbox" ${p.feeReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','feeReceived',this.checked)" ${instDisabled}> Honorários recebidos</label>
+          <label><input type="checkbox" ${p.myShareReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','myShareReceived',this.checked)" ${instDisabled}> Minha parte recebida</label>
+          <button class="finance-remove" onclick="removeFinanceInstallment('${c.id}','${p.id}')" title="Remover parcela" ${instDisabled}>×</button>
         </div>
-        <input class="fi finance-note" id="fin-note-${p.id}" value="${esc(p.notes||'')}" placeholder="Observação desta parcela">
+        <input class="fi finance-note" id="fin-note-${p.id}" value="${esc(p.notes||'')}" placeholder="Observação desta parcela" ${instDisabled}>
       </div>`;
   }).join('') : '<div class="finance-empty">Nenhuma parcela confirmada ainda.</div>';
   return `
   <div class="case-stack">
     <div class="finance-hero">
-      ${metric('Expectativa', summary.expClient, 'expectation')}
-      ${metric('Confirmado', summary.confirmedClient, 'confirmed')}
-      ${metric('Honorários', summary.confirmedFees || summary.expFee, 'fees')}
-      ${metric('Minha parte', summary.confirmedMine || summary.expMine, 'mine')}
+      ${metric('Expectativa', summary.expClient, 'expectation', summary.clientReceived, Math.max(expectedClientBase - summary.clientReceived, 0))}
+      ${metric('Confirmado', summary.confirmedClient, 'confirmed', summary.clientReceived, summary.pendingClient)}
+      ${metric('Honorários', expectedFeeBase, 'fees', summary.feesReceived, Math.max(expectedFeeBase - summary.feesReceived, 0))}
+      ${metric('Minha parte', expectedMineBase, 'mine', summary.mineReceived, Math.max(expectedMineBase - summary.mineReceived, 0))}
     </div>
+    ${pendingHtml}
     ${alertHtml}
     <div class="case-section">
-      <div class="case-section-title">Expectativa de recebimento</div>
-      <div class="finance-expectation">
-        <div class="fl"><span class="fl-label">Valor estimado do cliente</span><input class="fi" id="fin-exp-client" value="${esc(exp.estimatedClientReceipt||'')}" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateFinanceExpectationPreview()"></div>
-        <div class="fl"><span class="fl-label">Honorários</span><input class="fi" id="fin-exp-fee-percent" value="${esc(exp.feePercent||formatPercent(DEFAULT_FEE_PERCENT))}" placeholder="30%" oninput="formatPercentInput(this); updateFinanceExpectationPreview()"></div>
-        <div class="fl"><span class="fl-label">Minha parte</span><input class="fi" id="fin-exp-share-percent" value="${esc(exp.mySharePercent||formatPercent(DEFAULT_MY_SHARE_PERCENT))}" placeholder="50%" oninput="formatPercentInput(this); updateFinanceExpectationPreview()"></div>
-        <div class="fl"><span class="fl-label">Data provável</span><input class="fi" id="fin-exp-date" type="date" value="${esc(exp.expectedDate||'')}"></div>
-        <div class="fl"><span class="fl-label">Certeza</span><select class="fi-select" id="fin-exp-confidence">${confidenceOptions}</select></div>
+      <div class="finance-section-head">
+        <div class="case-section-title">Expectativa de recebimento</div>
+        <div class="finance-section-actions">
+          <button class="btn-s p" onclick="saveFinanceExpectation('${c.id}')" ${expLocked?'disabled':''}>Salvar expectativa</button>
+          <button class="btn-s g" onclick="editFinanceExpectation('${c.id}')" ${expLocked?'':'disabled'}>Editar</button>
+        </div>
+      </div>
+      <div class="finance-expectation ${expLocked?'locked':''}">
+        <div class="fl"><span class="fl-label">Valor estimado do cliente</span><input class="fi" id="fin-exp-client" value="${esc(exp.estimatedClientReceipt||'')}" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateFinanceExpectationPreview()" ${expDisabled}></div>
+        <div class="fl"><span class="fl-label">Honorários</span><input class="fi" id="fin-exp-fee-percent" value="${esc(exp.feePercent||formatPercent(DEFAULT_FEE_PERCENT))}" placeholder="30%" oninput="formatPercentInput(this); updateFinanceExpectationPreview()" ${expDisabled}></div>
+        <div class="fl"><span class="fl-label">Minha parte</span><input class="fi" id="fin-exp-share-percent" value="${esc(exp.mySharePercent||formatPercent(DEFAULT_MY_SHARE_PERCENT))}" placeholder="50%" oninput="formatPercentInput(this); updateFinanceExpectationPreview()" ${expDisabled}></div>
+        <div class="fl"><span class="fl-label">Data provável</span><input class="fi" id="fin-exp-date" type="date" value="${esc(exp.expectedDate||'')}" ${expDisabled}></div>
+        <div class="fl"><span class="fl-label">Certeza</span><select class="fi-select" id="fin-exp-confidence" ${expDisabled}>${confidenceOptions}</select></div>
       </div>
       <div class="finance-preview">
         <span>Honorários previstos: <strong id="fin-exp-fee">${formatMoneyValue(expFee)}</strong></span>
         <span>Minha parte prevista: <strong id="fin-exp-mine">${formatMoneyValue(expMine)}</strong></span>
       </div>
-      <textarea class="fi finance-note" id="fin-exp-notes" rows="2" placeholder="Observação sobre expectativa...">${esc(exp.notes||'')}</textarea>
+      <textarea class="fi finance-note ${expLocked?'locked':''}" id="fin-exp-notes" rows="2" placeholder="Observação sobre expectativa..." ${expDisabled}>${esc(exp.notes||'')}</textarea>
     </div>
     <div class="case-section">
       <div class="finance-section-head">
         <div class="case-section-title">Parcelas confirmadas</div>
-        <button class="btn-s g" onclick="addFinanceInstallment('${c.id}')">+ Adicionar parcela</button>
+        <div class="finance-section-actions">
+          <button class="btn-s g" onclick="addFinanceInstallment('${c.id}')" ${instDisabled}>+ Adicionar parcela</button>
+          <button class="btn-s g" onclick="addMaternityFinanceModel('${c.id}')" ${instDisabled}>Modelo salário-maternidade</button>
+          <button class="btn-s p" onclick="saveFinanceInstallments('${c.id}')" ${installmentsLocked?'disabled':''}>Salvar parcelas</button>
+          <button class="btn-s g" onclick="editFinanceInstallments('${c.id}')" ${installmentsLocked?'':'disabled'}>Editar</button>
+        </div>
       </div>
       <div class="finance-table-head">
         <span>Parcela</span><span>Data</span><span>Cliente recebe</span><span>Honorários</span><span>Minha parte</span>
       </div>
       <div class="finance-installments">${rows}</div>
-      <div class="finance-actions">
-        <button class="btn-s g" onclick="addMaternityFinanceModel('${c.id}')">Modelo salário-maternidade</button>
-        <button class="btn-s p" onclick="saveHonorarios('${c.id}')">Salvar financeiro</button>
-      </div>
     </div>
   </div>`;
 }
@@ -4059,13 +4108,11 @@ function updateFinanceInstallmentPreview(installmentId){
   const sharePercentEl = document.getElementById('fin-share-percent-'+installmentId);
   const feeEl = document.getElementById('fin-fee-'+installmentId);
   const mineEl = document.getElementById('fin-mine-'+installmentId);
-  const leticiaEl = document.getElementById('fin-leticia-'+installmentId);
-  if(!clientEl || !feePercentEl || !sharePercentEl || !feeEl || !mineEl || !leticiaEl) return;
+  if(!clientEl || !feePercentEl || !sharePercentEl || !feeEl || !mineEl) return;
   const fee = parseMoney(clientEl.value) * (parsePercent(feePercentEl.value) || DEFAULT_FEE_PERCENT) / 100;
   const mine = fee * (parsePercent(sharePercentEl.value) || DEFAULT_MY_SHARE_PERCENT) / 100;
   feeEl.textContent = formatMoneyValue(fee);
   mineEl.textContent = formatMoneyValue(mine);
-  leticiaEl.textContent = formatMoneyValue(Math.max(fee - mine, 0));
 }
 function formatNewClientHonorariosInput(input){
   if(input.value.includes('%')) formatPercentInput(input);
@@ -4087,6 +4134,8 @@ function syncFinanceFormToClient(c){
   const expFeePercent = document.getElementById('fin-exp-fee-percent').value;
   const expSharePercent = document.getElementById('fin-exp-share-percent').value;
   const finance = c.finance || normalizeFinance(null, c.honorarios || {});
+  const expectationLocked = finance.expectation && finance.expectation.locked === true;
+  const installmentsLocked = finance.installmentsLocked === true;
   finance.expectation = {
     estimatedClientReceipt: formatMoney(expClient),
     feePercent: formatPercent(expFeePercent) || formatPercent(DEFAULT_FEE_PERCENT),
@@ -4094,7 +4143,9 @@ function syncFinanceFormToClient(c){
     expectedDate: document.getElementById('fin-exp-date').value,
     confidence: document.getElementById('fin-exp-confidence').value,
     notes: document.getElementById('fin-exp-notes').value,
+    locked: expectationLocked,
   };
+  finance.installmentsLocked = installmentsLocked;
   finance.installments = (finance.installments||[]).map(p=>{
     const clientAmount = formatMoney(document.getElementById('fin-client-'+p.id)?.value || p.clientAmount || '');
     const feePercent = formatPercent(document.getElementById('fin-fee-percent-'+p.id)?.value || p.feePercent || DEFAULT_FEE_PERCENT);
@@ -4130,11 +4181,52 @@ function saveHonorarios(clientId){
   renderPanelBody();
   renderBoard();
 }
+function saveFinanceExpectation(clientId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c) return;
+  syncFinanceFormToClient(c);
+  if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
+  if(!c.finance.expectation) c.finance.expectation = normalizeFinance(null, c.honorarios || {}).expectation;
+  c.finance.expectation.locked = true;
+  addHistory(c,'Expectativa financeira salva','','default');
+  save();
+  renderPanelBody();
+  renderBoard();
+}
+function editFinanceExpectation(clientId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c) return;
+  if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
+  if(!c.finance.expectation) c.finance.expectation = normalizeFinance(null, c.honorarios || {}).expectation;
+  c.finance.expectation.locked = false;
+  save();
+  renderPanelBody();
+}
+function saveFinanceInstallments(clientId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c) return;
+  syncFinanceFormToClient(c);
+  if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
+  c.finance.installmentsLocked = true;
+  addHistory(c,'Parcelas financeiras salvas','','default');
+  save();
+  renderPanelBody();
+  renderBoard();
+}
+function editFinanceInstallments(clientId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c) return;
+  if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
+  c.finance.installmentsLocked = false;
+  save();
+  renderPanelBody();
+}
 function addFinanceInstallment(clientId){
   const c = clients.find(x=>x.id===clientId);
   if(!c) return;
   syncFinanceFormToClient(c);
   if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
+  if(c.finance.installmentsLocked) return;
   c.finance.installments.push({
     id: uid(),
     description: '',
@@ -4158,6 +4250,7 @@ function addMaternityFinanceModel(clientId){
   if(!c) return;
   syncFinanceFormToClient(c);
   if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
+  if(c.finance.installmentsLocked) return;
   const labels = ['1º pagamento INSS','2ª parcela INSS','3ª parcela INSS','4ª parcela INSS','5ª parcela INSS'];
   labels.forEach(label=>{
     c.finance.installments.push({
@@ -4184,6 +4277,7 @@ function removeFinanceInstallment(clientId, installmentId){
   const c = clients.find(x=>x.id===clientId);
   if(!c || !c.finance) return;
   syncFinanceFormToClient(c);
+  if(c.finance.installmentsLocked) return;
   if(!confirm('Remover esta parcela financeira?')) return;
   c.finance.installments = c.finance.installments.filter(p=>p.id!==installmentId);
   addHistory(c,'Parcela financeira removida','','warn');
@@ -4194,6 +4288,7 @@ function removeFinanceInstallment(clientId, installmentId){
 function toggleFinanceInstallmentStatus(clientId, installmentId, field, checked){
   const c = clients.find(x=>x.id===clientId);
   if(c) syncFinanceFormToClient(c);
+  if(c && c.finance && c.finance.installmentsLocked) return;
   const p = c && c.finance ? c.finance.installments.find(x=>x.id===installmentId) : null;
   if(!p) return;
   p[field] = checked;
