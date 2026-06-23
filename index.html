@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-23-menu-enxuto">
+<meta name="app-build" content="2026-06-23-painel-cliente-amplo">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-23-menu-enxuto';
+  const build = '2026-06-23-painel-cliente-amplo';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1655,7 +1655,7 @@ body{
   --final-purple:#A98BF1;
   --final-green:#6CCB96;
   --sidebar:236px;
-  --panel:460px;
+  --panel:640px;
 }
 body{
   background:radial-gradient(circle at 20% 0,#FBFDFF 0,#F6FAFC 38%,#EEF5F8 100%)!important;
@@ -1791,17 +1791,17 @@ button.nav-kpi{cursor:pointer}
 .nav-page .cal-preview{border-top-color:var(--final-line)}
 .overlay.on{background:transparent!important;backdrop-filter:none!important}
 .panel{width:var(--panel)!important;max-width:calc(100vw - 24px)!important;background:#FFF!important;border-left:1px solid var(--final-line)!important;box-shadow:-22px 0 48px rgba(33,51,74,.12)!important}
-.panel-hd{height:auto!important;padding:26px 22px 18px!important;border-bottom:0!important;gap:14px!important;align-items:flex-start!important}
+.panel-hd{height:auto!important;padding:26px 24px 18px!important;border-bottom:0!important;gap:14px!important;align-items:flex-start!important}
 .panel-avatar{width:42px;height:42px;border-radius:50%;background:#ECE7FF;color:#6957C9;display:grid;place-items:center;font-weight:950;flex:none}
 .panel-hd-info{flex:1!important;min-width:0!important}
 .panel-name{font-size:18px!important;font-weight:800!important;color:var(--final-text)!important;line-height:1.18;margin-bottom:6px}
 .panel-sub{gap:7px!important}
 .panel-icon-btn,.close-btn{width:32px!important;height:32px!important;border-radius:8px!important;border:1px solid var(--final-line)!important;background:#FFF!important;color:#65748A!important;display:grid!important;place-items:center!important;font-weight:900!important;cursor:pointer!important}
-.panel-tabs{padding:0 18px!important;height:48px!important;border-bottom:1px solid var(--final-line)!important;gap:0!important;overflow-x:auto!important}
+.panel-tabs{padding:0 24px!important;height:48px!important;border-bottom:1px solid var(--final-line)!important;gap:0!important;overflow-x:auto!important}
 .ptab{height:48px!important;padding:0 9px!important;display:flex!important;align-items:center!important;border-bottom:2px solid transparent!important;color:#65748A!important;font-size:11px!important;font-weight:850!important;white-space:nowrap!important}
 .ptab.active{color:#365EDB!important;border-color:#365EDB!important;background:transparent!important}
-.panel-body{padding:16px 18px 86px!important;background:#FFF!important;height:calc(100vh - 158px)!important;overflow:auto!important}
-.panel-footer{position:absolute;left:0;right:0;bottom:0;height:70px;border-top:1px solid var(--final-line);background:#FFF;display:grid;grid-template-columns:1fr 1fr 56px;gap:10px;padding:12px}
+.panel-body{padding:18px 24px 86px!important;background:#FFF!important;height:calc(100vh - 158px)!important;overflow:auto!important}
+.panel-footer{position:absolute;left:0;right:0;bottom:0;height:70px;border-top:1px solid var(--final-line);background:#FFF;display:grid;grid-template-columns:1fr 1fr 56px;gap:10px;padding:12px 24px}
 .panel-foot-btn{border:1px solid var(--final-line);background:#FFF;border-radius:8px;color:#536176;font-weight:850;font-size:12px;cursor:pointer}
 .panel-foot-btn:hover{background:#F7FAFD;color:#365EDB}
 .panel-foot-btn.small{font-size:16px}
