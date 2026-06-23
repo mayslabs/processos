@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-23-agenda-audiencia-pericia">
+<meta name="app-build" content="2026-06-23-ajustes-menu-horario">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-23-agenda-audiencia-pericia';
+  const build = '2026-06-23-ajustes-menu-horario';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1877,6 +1877,20 @@ button.nav-kpi{cursor:pointer}
 .tag-add-row{display:grid;grid-template-columns:1fr 42px auto;gap:8px;align-items:center}
 .preset-colors{gap:8px!important}
 .pc{width:22px!important;height:22px!important}
+.sidebar{padding:18px 14px!important;gap:10px!important}
+.sb-logo{padding:0 0 4px!important}
+.sb-logo h1{font-weight:600!important;gap:10px!important}
+.sb-mark{width:38px!important;height:38px!important;border-radius:13px!important;font-size:19px!important}
+.sb-subtitle{margin-left:48px!important;margin-top:-3px!important;font-size:11px!important}
+.kanban-alerts{margin-top:2px!important}
+.kanban-alert-client,.sidebar-user-avatar,.workspace-card>span,.workspace-btn,.workspace-badge,.sync-soft,.sync-card strong,.client-total-pill,.final-col-icon,.final-col-name,.final-card-title,.final-card-date.overdue,.final-card-date.urgent,.final-card-date.warning,.final-card-date.ok,.final-card-alert,.btn-add,.topbar-title,.nav-page-head h2{font-weight:600!important}
+.workspace-card{width:260px!important;height:48px!important;padding:6px 10px!important;gap:3px!important}
+.workspace-switcher{height:24px!important;display:grid!important;grid-auto-flow:column!important;grid-auto-columns:1fr!important;gap:3px!important}
+.workspace-btn,.workspace-badge{height:20px!important;padding:0 9px!important}
+#sync-status{width:150px!important;min-width:150px!important;height:48px!important;padding:0!important}
+.sync-card{width:100%!important;padding:0 12px!important;column-gap:8px!important}
+.sync-card small{font-size:10px!important}
+.final-card-alert{font-weight:600!important}
 @media(max-width:900px){
   .sidebar{display:none!important}
   .topbar{padding:12px!important;flex-direction:column!important;align-items:stretch!important}
@@ -1915,21 +1929,6 @@ button.nav-kpi{cursor:pointer}
   <div class="sb-logo">
     <h1><span class="sb-mark">⚖</span><span class="sb-brand-text">Gestão Jurídica</span></h1>
     <span class="sb-subtitle">Processos Previdenciários</span>
-  </div>
-  <div class="sb-nav">
-    <button class="nav-btn ghost" id="nav-dashboard" onclick="navigate('dashboard')" title="Dashboard">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
-      <span class="nav-label">Dashboard</span>
-    </button>
-    <button class="nav-btn active" id="nav-kanban" onclick="navigate('kanban')" title="Processos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v5h5"/><path d="M10 13h6"/><path d="M10 17h6"/></svg>
-      <span class="nav-label">Processos</span>
-      <span class="sb-count" id="cnt-kanban">0</span>
-    </button>
-    <button class="nav-btn ghost" id="nav-tasks" onclick="navigate('tasks')" title="Tarefas">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg>
-      <span class="nav-label">Tarefas</span>
-    </button>
   </div>
   <div class="kanban-alerts empty" id="kanban-alerts"></div>
   <div class="sidebar-user">
@@ -2258,6 +2257,11 @@ function fmtDate(d){
   if(!d) return '';
   const dt = new Date(d+'T00:00:00');
   return dt.toLocaleDateString('pt-BR');
+}
+function fmtTaskDate(t){
+  if(!t || !t.deadline) return '';
+  const base = fmtDate(t.deadline);
+  return t.time ? `${base} às ${t.time}` : base;
 }
 function fmtDateTime(iso){
   if(!iso) return '';
@@ -2773,8 +2777,8 @@ function mkClient(fields){
   if(!c.history.length) c.history=[{id:uid(),date:n,action:'Cliente cadastrado',details:'Cadastro inicial do sistema',type:'default'}];
   return c;
 }
-function mkTask(desc, deadline='', done=false, kind='internal'){
-  return {id:uid(), description:desc, deadline, done, kind, doneAt:'', createdAt:now()};
+function mkTask(desc, deadline='', done=false, kind='internal', time=''){
+  return {id:uid(), description:desc, deadline, time, done, kind, type:kind, doneAt:'', createdAt:now()};
 }
 function mkGlobalTask(desc, deadline=''){
   return {id:uid(), description:desc, deadline, done:false, doneAt:'', createdAt:now()};
@@ -2990,7 +2994,7 @@ function renderMiniTaskList(tasks, empty='Nenhum item encontrado.'){
         <strong>${esc(t.clientName||'Tarefa interna')}</strong>
         <em>${esc(t.description||'Pendência')}</em>
       </span>
-      <small>${t.deadline?fmtDate(t.deadline):'Sem prazo'}</small>
+      <small>${t.deadline?fmtTaskDate(t):'Sem prazo'}</small>
     </button>
   `).join('')}</div>`;
 }
@@ -3222,7 +3226,7 @@ function renderKanbanDeadlineAlerts(clientList=clients){
     return `<div class="kanban-alert-item" onclick="openPanel('${t.clientId}')">
       <div class="kanban-alert-client">${esc(t.clientName)}</div>
       <div class="kanban-alert-desc">${esc(t.description)}</div>
-      <div class="kanban-alert-date">${suffix}: ${fmtDate(t.deadline)}</div>
+      <div class="kanban-alert-date">${suffix}: ${fmtTaskDate(t)}</div>
     </div>`;
   }).join('');
   const paymentList = paymentItems.slice(0,4).map(t=>{
@@ -3231,7 +3235,7 @@ function renderKanbanDeadlineAlerts(clientList=clients){
     return `<div class="kanban-alert-item payment" onclick="openPanel('${t.clientId}')">
       <div class="kanban-alert-client">${esc(t.clientName)}</div>
       <div class="kanban-alert-desc">${esc(t.description)}</div>
-      <div class="kanban-alert-date">${suffix}: ${fmtDate(t.deadline)}</div>
+      <div class="kanban-alert-date">${suffix}: ${fmtTaskDate(t)}</div>
     </div>`;
   }).join('');
   const taskList = taskItems.slice(0,6).map(t=>{
@@ -3240,7 +3244,7 @@ function renderKanbanDeadlineAlerts(clientList=clients){
     return `<div class="kanban-alert-item task ${t.isGlobal?'global-task':''}" ${t.isGlobal?'':`onclick="openPanel('${t.clientId}')"`}>
       <div class="kanban-alert-client">${esc(t.clientName)}</div>
       <div class="kanban-alert-desc">${esc(t.description)}</div>
-      <div class="kanban-alert-date">${t.deadline ? `${suffix}: ${fmtDate(t.deadline)}` : suffix}</div>
+      <div class="kanban-alert-date">${t.deadline ? `${suffix}: ${fmtTaskDate(t)}` : suffix}</div>
       ${t.isGlobal?`<div class="sidebar-task-actions">
         <button class="sidebar-task-action" onclick="toggleGlobalTask('${t.id}')">Concluir</button>
         <button class="sidebar-task-action" onclick="editGlobalTask('${t.id}')">Editar</button>
@@ -3473,9 +3477,9 @@ function getCaseStatusMeta(c){
   if(next && next.deadline){
     const status = dayStatus(next.deadline);
     const prefix = isProcessDeadline(next) ? 'Prazo processual' : isPaymentDeadline(next) ? 'Pagamento do cliente' : 'Prazo';
-    if(status==='overdue') return {title:`${prefix} vencido`, detail:`${next.description} venceu em ${fmtDate(next.deadline)}`, color:'#D97070'};
-    if(status==='urgent') return {title:`${prefix} urgente`, detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#D97070'};
-    if(status==='warning') return {title:`${prefix} próximo`, detail:`${next.description} até ${fmtDate(next.deadline)}`, color:'#D8B16A'};
+    if(status==='overdue') return {title:`${prefix} vencido`, detail:`${next.description} venceu em ${fmtTaskDate(next)}`, color:'#D97070'};
+    if(status==='urgent') return {title:`${prefix} urgente`, detail:`${next.description} até ${fmtTaskDate(next)}`, color:'#D97070'};
+    if(status==='warning') return {title:`${prefix} próximo`, detail:`${next.description} até ${fmtTaskDate(next)}`, color:'#D8B16A'};
   }
   if(pending.length) return {title:`${pending.length} tarefa${pending.length>1?'s':''} pendente${pending.length>1?'s':''}`, detail:next?next.description:'Há atividades em aberto.', color:'#93C5FD'};
   if(c.column==='finalizado') return {title:'Caso finalizado', detail:'Não há tarefas pendentes para este cliente.', color:'#79BE97'};
@@ -3551,7 +3555,7 @@ function tabResumo(c){
           <div class="next-task-label">${nextLabel}</div>
           <div class="next-task-title">${next?esc(next.description):'Nenhuma tarefa pendente'}</div>
         </div>
-        <div class="next-task-date ${dateStatus}">${next&&next.deadline?fmtDate(next.deadline):(next?'Sem prazo definido':'Tudo em dia')}</div>
+        <div class="next-task-date ${dateStatus}">${next&&next.deadline?fmtTaskDate(next):(next?'Sem prazo definido':'Tudo em dia')}</div>
       </div>
     </div>
     <div class="case-metrics">
@@ -3714,7 +3718,7 @@ function tabTarefas(c){
     tasks.map(t=>{
       const ds = t.deadline ? dayStatus(t.deadline) : null;
       const dateCls = !t.deadline?'none':ds==='overdue'?'overdue':ds==='urgent'?'urgent':ds==='warning'?'warning':'ok';
-      const dateLabel = t.deadline ? `${fmtDate(t.deadline)}${ds==='overdue'?' (vencida)':ds==='urgent'?' (urgente)':ds==='warning'?' (em breve)':''}` : 'Sem prazo';
+      const dateLabel = t.deadline ? `${fmtTaskDate(t)}${ds==='overdue'?' (vencida)':ds==='urgent'?' (urgente)':ds==='warning'?' (em breve)':''}` : 'Sem prazo';
       return `<div class="task-pi ${isProcessDeadline(t)?'process-deadline':isPaymentDeadline(t)?'payment-deadline':''}">
         <div class="task-pcheck ${t.done?'done':''}" onclick="toggleTask('${c.id}','${t.id}')"></div>
         <div class="task-pbody">
@@ -3754,6 +3758,7 @@ function tabTarefas(c){
       </select>
       <input class="fi" id="new-task-desc" placeholder="Descrição da tarefa..." style="margin-bottom:8px;resize:none">
       <input class="fi" id="new-task-date" type="date" style="margin-bottom:8px">
+      <input class="fi" id="new-task-time" type="time" title="Horário da audiência ou perícia" style="margin-bottom:8px">
       <div class="btn-row">
         <button class="btn-s p" onclick="addTask('${c.id}')">Adicionar</button>
       </div>
@@ -3795,12 +3800,20 @@ function editTask(clientId, taskId){
   const newDate = dateValue.trim();
   if(newDate && !/^\d{4}-\d{2}-\d{2}$/.test(newDate)){ alert('Use a data no formato AAAA-MM-DD.'); return; }
   if(taskKindNeedsDate(newKind) && !newDate){ alert('Este tipo de tarefa precisa ter data.'); return; }
+  let newTime = '';
+  if(newKind === 'hearing' || newKind === 'expertise'){
+    const timeValue = prompt('Horário (HH:MM). Opcional:', t.time || '');
+    if(timeValue===null) return;
+    newTime = timeValue.trim();
+    if(newTime && !/^\d{2}:\d{2}$/.test(newTime)){ alert('Use o horário no formato HH:MM.'); return; }
+  }
   const oldDesc = t.description;
   t.description = trimmed;
   t.kind = newKind;
   t.type = newKind;
   t.deadline = newDate;
-  addHistory(c,'Tarefa editada',`${oldDesc} → ${trimmed}${newDate?' — '+fmtDate(newDate):''}`,'task');
+  t.time = newTime;
+  addHistory(c,'Tarefa editada',`${oldDesc} → ${trimmed}${newDate?' — '+fmtTaskDate(t):''}`,'task');
   save();
   renderPanelBody();
   renderBoard();
@@ -3823,11 +3836,14 @@ function addTask(clientId){
   if(!c) return;
   const desc = document.getElementById('new-task-desc').value.trim();
   const date = document.getElementById('new-task-date').value;
+  const timeEl = document.getElementById('new-task-time');
+  const time = timeEl ? timeEl.value : '';
   const kind = document.getElementById('new-task-kind').value;
   if(!desc){ alert('Informe a descrição da tarefa.'); return; }
   if(taskKindNeedsDate(kind) && !date){ alert('Este tipo de tarefa precisa ter data.'); return; }
-  c.tasks.push(mkTask(desc, date, false, kind));
-  addHistory(c, taskKindHistoryLabel(kind), desc+(date?' — data: '+fmtDate(date):''), 'task');
+  const task = mkTask(desc, date, false, kind, (kind==='hearing'||kind==='expertise') ? time : '');
+  c.tasks.push(task);
+  addHistory(c, taskKindHistoryLabel(kind), desc+(date?' — data: '+fmtTaskDate(task):''), 'task');
   save();
   renderPanelBody();
   renderBoard();
@@ -4488,7 +4504,7 @@ function renderTasksList(){
           <div class="ti-client" onclick="openPanel('${t.clientId}')">${esc(t.clientName)}</div>
           <div class="ti-desc">${esc(t.description)}</div>
           <div class="task-kind ${taskKindClass(t)}">${taskKindLabel(t)}</div>
-          ${t.deadline?`<div class="ti-date ${dateCls}">📅 ${fmtDate(t.deadline)}</div>`:'<div class="ti-date none">Sem prazo</div>'}
+          ${t.deadline?`<div class="ti-date ${dateCls}">📅 ${fmtTaskDate(t)}</div>`:'<div class="ti-date none">Sem prazo</div>'}
           ${t.done&&t.doneAt?`<div style="font-size:11px;color:var(--muted);margin-top:2px">Concluída em ${fmtDateTime(t.doneAt)}</div>`:''}
         </div>
       </div>`;
@@ -4639,7 +4655,7 @@ function v2NextLabel(c){
   if(!next.deadline) return 'Sem prazo';
   const s = dayStatus(next.deadline);
   const prefix = s==='overdue'?'Vencido':s==='urgent'?'Urgente':s==='warning'?'Em breve':'Prazo';
-  return `${prefix}: ${fmtDate(next.deadline)}`;
+  return `${prefix}: ${fmtTaskDate(next)}`;
 }
 function renderBoard(){
   const board = document.getElementById('board');
@@ -4749,11 +4765,11 @@ function finalDateClass(date){
 }
 function finalDueLabel(task){
   if(!task || !task.deadline) return 'Sem prazo';
-  if(isProcessDeadline(task)) return `Prazo: ${fmtDate(task.deadline)}`;
-  if(isPaymentDeadline(task)) return `Pagamento: ${fmtDate(task.deadline)}`;
-  if(isHearingTask(task)) return `Audiência: ${fmtDate(task.deadline)}`;
-  if(isExpertiseTask(task)) return `Perícia: ${fmtDate(task.deadline)}`;
-  return fmtDate(task.deadline);
+  if(isProcessDeadline(task)) return `Prazo: ${fmtTaskDate(task)}`;
+  if(isPaymentDeadline(task)) return `Pagamento: ${fmtTaskDate(task)}`;
+  if(isHearingTask(task)) return `Audiência: ${fmtTaskDate(task)}`;
+  if(isExpertiseTask(task)) return `Perícia: ${fmtTaskDate(task)}`;
+  return fmtTaskDate(task);
 }
 function finalTaskStatus(t){
   if(t.done) return ['Concluída','done'];
@@ -4835,7 +4851,7 @@ function renderCard(c){
   const next = getNextTask(c);
   const dateCls = next && next.deadline ? finalDateClass(next.deadline) : '';
   const tags = normalizeClientTagsForDisplay(c).map(t=>`<span class="final-chip" style="${softColorStyle(t.color,.18)}">${esc(t.label)}</span>`).join('');
-  const events = getScheduleItems([c]).slice(0,2).map(t=>`<span class="final-chip ${isHearingTask(t)?'judicial':'admin'}">${taskKindLabel(t)}: ${fmtDate(t.deadline)}</span>`).join('');
+  const events = getScheduleItems([c]).slice(0,2).map(t=>`<span class="final-chip ${isHearingTask(t)?'judicial':'admin'}">${taskKindLabel(t)}: ${fmtTaskDate(t)}</span>`).join('');
   const viaChip = c.via ? `<span class="final-chip ${c.via==='Judicial'?'judicial':'admin'}">${esc(c.via)}</span>` : '';
   const doneChip = c.column==='finalizado' ? '<span class="final-chip done">Concluído</span>' : '';
   const alert = hasAlert(c) ? `<div class="final-card-alert ${next&&(isHearingTask(next)||isExpertiseTask(next))?'event':''}">${next&&(isHearingTask(next)||isExpertiseTask(next))?`${taskKindLabel(next)}: `:''}${next&&next.description?esc(next.description):'Pendência exige atenção'}</div>` : '';
@@ -4876,7 +4892,7 @@ function renderKanbanDeadlineAlerts(clientList=clients){
     <div class="kanban-alert-row">${items.length ? items.map(t=>`<div class="kanban-alert-item ${cls}" onclick="${t.clientId?`openPanel('${t.clientId}')`:''}">
       <div class="kanban-alert-client">${esc(t.clientName||'Tarefa')}</div>
       <div class="kanban-alert-desc">${esc(t.description||'Pendência')}</div>
-      <div class="kanban-alert-date">${t.deadline?`${taskKindLabel(t)}: ${fmtDate(t.deadline)}`:'Sem data'}</div>
+      <div class="kanban-alert-date">${t.deadline?`${taskKindLabel(t)}: ${fmtTaskDate(t)}`:'Sem data'}</div>
     </div>`).join('') : `<div class="kanban-alert-empty">${empty}</div>`}</div>
   </section>`;
   el.className = 'kanban-alerts';
@@ -4937,7 +4953,7 @@ function tabResumo(c){
       <div class="final-section final-next-card">
         <div class="final-section-title">Próximo passo</div>
         <strong>${next?esc(next.description):'Nenhuma tarefa pendente'}</strong>
-        <p class="final-card-date ${nextDate}">${next&&next.deadline ? `Vence em ${fmtDate(next.deadline)}` : 'Sem prazo ativo'}</p>
+        <p class="final-card-date ${nextDate}">${next&&next.deadline ? `Vence em ${fmtTaskDate(next)}` : 'Sem prazo ativo'}</p>
         ${next?`<button class="final-action-btn" onclick="document.querySelector('[data-tab=tarefas]').click()">Ver tarefa</button>`:''}
       </div>
     </div>
@@ -4986,14 +5002,14 @@ function tabTarefas(c){
       <span class="task-radio ${t.done?'done':''}" onclick="toggleTask('${c.id}','${t.id}')"></span>
       <div class="task-main">
         <strong>${esc(t.description)}</strong>
-        <small>${t.done&&t.doneAt?'Concluída em '+fmtDateTime(t.doneAt):(t.deadline?'Vence '+fmtDate(t.deadline):'Sem prazo')}</small>
+        <small>${t.done&&t.doneAt?'Concluída em '+fmtDateTime(t.doneAt):(t.deadline?'Vence '+fmtTaskDate(t):'Sem prazo')}</small>
         <div class="task-actions">
           <button class="task-action-link" onclick="editTask('${c.id}','${t.id}')">Editar</button>
           <button class="task-action-link delete" onclick="deleteTask('${c.id}','${t.id}')">Excluir</button>
         </div>
       </div>
       <span class="final-chip">${taskKindLabel(t)}</span>
-      <span>${t.deadline?fmtDate(t.deadline):'Sem prazo'}</span>
+      <span>${t.deadline?fmtTaskDate(t):'Sem prazo'}</span>
     </div>`;
   }).join('') : '<div class="finance-empty">Nenhuma tarefa cadastrada.</div>';
   return `<div class="case-stack">
@@ -5012,10 +5028,11 @@ function tabTarefas(c){
     </div>
     <div class="final-section">
       <div class="final-section-title">Nova tarefa</div>
-      <div style="display:grid;grid-template-columns:1.4fr .8fr .7fr auto;gap:8px">
+      <div style="display:grid;grid-template-columns:1.3fr .8fr .65fr .55fr auto;gap:8px">
         <input class="fi" id="new-task-desc" placeholder="Descreva a tarefa...">
         <select class="fi-select" id="new-task-kind"><option value="internal">Tarefa interna</option><option value="process_deadline">Prazo processual</option><option value="payment_deadline">Pagamento</option><option value="hearing">Audiência</option><option value="expertise">Perícia</option></select>
         <input class="fi" id="new-task-date" type="date">
+        <input class="fi" id="new-task-time" type="time" title="Horário da audiência ou perícia">
         <button class="btn-s p" onclick="addTask('${c.id}')">Adicionar</button>
       </div>
     </div>
