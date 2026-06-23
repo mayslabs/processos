@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-23-tarefas-audiencia-pericia">
+<meta name="app-build" content="2026-06-23-agenda-audiencia-pericia">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-23-tarefas-audiencia-pericia';
+  const build = '2026-06-23-agenda-audiencia-pericia';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1672,28 +1672,29 @@ body{
   width:var(--sidebar)!important;
   background:rgba(255,255,255,.86)!important;
   border-right:1px solid var(--final-line)!important;
-  padding:22px 18px!important;
-  gap:18px!important;
+  padding:18px 16px!important;
+  gap:12px!important;
   box-shadow:8px 0 28px rgba(33,51,74,.04);
 }
-.sb-logo{padding:0 0 18px!important;border-bottom:0!important}
+.sb-logo{padding:0 0 8px!important;border-bottom:0!important}
 .sb-logo h1{font-size:15px!important;font-weight:750!important;color:var(--final-text)!important;gap:12px!important}
 .sb-logo h1::after{display:none!important;content:''!important}
 .sb-mark{width:40px;height:40px;border-radius:14px;background:#F0F5FF;color:#576DDD;display:inline-grid;place-items:center;font-size:20px!important}
-.sb-subtitle{display:block;margin-left:52px;margin-top:-11px;font-size:12px;color:var(--final-muted)!important}
-.sb-nav{padding:0!important;gap:8px!important;display:grid!important}
+.sb-subtitle{display:block;margin-left:52px;margin-top:-5px;font-size:12px;color:var(--final-muted)!important}
+.sb-nav{padding:0!important;gap:6px!important;display:grid!important}
 .nav-btn{height:44px!important;border-radius:10px!important;border:1px solid transparent!important;background:transparent!important;color:#536176!important;padding:0 12px!important;display:flex!important;align-items:center!important;gap:11px!important;font-weight:650!important;box-shadow:none!important}
 .nav-btn svg{width:18px!important;height:18px!important;color:currentColor!important}
 .nav-btn.active{background:#F1F3FF!important;border-color:#DDE3FF!important;color:#5F6EEA!important}
 .nav-btn.ghost:hover{background:#F7FAFD!important;border-color:#E7EEF5!important}
 .sb-count{margin-left:auto;background:#EEF1FF!important;color:#5F6EEA!important;border-radius:999px;padding:3px 8px!important;font-size:11px!important}
-.kanban-alerts{margin-top:8px!important;border:1px solid var(--final-line)!important;background:rgba(255,255,255,.78)!important;border-radius:14px!important;padding:14px!important;display:flex!important;flex-direction:column!important;gap:10px!important;box-shadow:0 16px 38px rgba(33,51,74,.06)!important}
+.kanban-alerts{margin-top:4px!important;border:1px solid var(--final-line)!important;background:rgba(255,255,255,.78)!important;border-radius:14px!important;padding:12px!important;display:flex!important;flex-direction:column!important;gap:9px!important;box-shadow:0 16px 38px rgba(33,51,74,.06)!important}
 .kanban-alert-title{font-size:12px!important;text-transform:none!important;letter-spacing:0!important;color:var(--final-text)!important}
 .kanban-alert-count,.kanban-alert-empty{font-size:12px!important;color:var(--final-muted)!important}
 .kanban-alert-row{display:grid!important;gap:10px!important}
 .kanban-alert-item{border-radius:10px!important;padding:12px!important;background:#FFF!important;border:1px solid var(--final-line)!important;box-shadow:none!important;display:grid!important;gap:4px!important}
 .kanban-alert-item.overdue,.kanban-alert-item.urgent{background:#FFF5F5!important;border-color:#FFD2D2!important}
 .kanban-alert-item.warning,.kanban-alert-item.task{background:#FFF9ED!important;border-color:#FFE1A8!important}
+.kanban-alert-item.hearing,.kanban-alert-item.expertise{background:#F8F5FF!important;border-color:#DED6FF!important}
 .kanban-alert-item.payment,.kanban-alert-item.finance{background:#F1FBF6!important;border-color:#CDEEDB!important}
 .kanban-alert-client{font-size:12px!important;font-weight:750!important;color:var(--final-text)!important}
 .kanban-alert-desc,.kanban-alert-date{font-size:11px!important;color:#6B7C91!important}
@@ -1751,6 +1752,7 @@ body{
 .final-card-meta-row>span:first-child{font-size:10px;line-height:1;color:#6B7C91}
 .final-card-date.overdue,.final-card-date.urgent,.final-card-date.warning,.final-card-date.ok{color:#D05A5A;font-weight:700}
 .final-card-alert{border-radius:8px;padding:8px 10px;background:#FFF5F5;border:1px solid #FFD2D2;color:#BA4B4B;font-size:11px;font-weight:700;line-height:1.25;margin:0}
+.final-card-alert.event{background:#F8F5FF;border-color:#DED6FF;color:#5F4BA8}
 .nav-page{gap:16px!important}
 .nav-page-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 2px;color:var(--final-text)}
 .nav-page-head h2{font-size:22px;font-weight:750;line-height:1.1;margin:0 0 4px}
@@ -3144,6 +3146,17 @@ function getPaymentDeadlineItems(clientList=clients){
   });
   return items.sort((a,b)=>a.deadline.localeCompare(b.deadline));
 }
+function getScheduleItems(clientList=clients){
+  const items = [];
+  clientList.forEach(c=>{
+    (c.tasks||[]).forEach(t=>{
+      if((isHearingTask(t) || isExpertiseTask(t)) && !t.done && t.deadline){
+        items.push({...t, clientId:c.id, clientName:c.name});
+      }
+    });
+  });
+  return items.sort((a,b)=>a.deadline.localeCompare(b.deadline));
+}
 
 function getSidebarTaskItems(clientList=clients){
   const items = [];
@@ -3154,7 +3167,7 @@ function getSidebarTaskItems(clientList=clients){
   });
   clientList.forEach(c=>{
     (c.tasks||[]).forEach(t=>{
-      if(!t.done && !isProcessDeadline(t) && !isPaymentDeadline(t)){
+      if(!t.done && !isProcessDeadline(t) && !isPaymentDeadline(t) && !isHearingTask(t) && !isExpertiseTask(t)){
         items.push({...t, clientId:c.id, clientName:c.name, isGlobal:false});
       }
     });
@@ -4738,6 +4751,8 @@ function finalDueLabel(task){
   if(!task || !task.deadline) return 'Sem prazo';
   if(isProcessDeadline(task)) return `Prazo: ${fmtDate(task.deadline)}`;
   if(isPaymentDeadline(task)) return `Pagamento: ${fmtDate(task.deadline)}`;
+  if(isHearingTask(task)) return `Audiência: ${fmtDate(task.deadline)}`;
+  if(isExpertiseTask(task)) return `Perícia: ${fmtDate(task.deadline)}`;
   return fmtDate(task.deadline);
 }
 function finalTaskStatus(t){
@@ -4753,10 +4768,10 @@ function renderWorkspaceSwitcher(){
   const allowed = currentUserProfile && currentUserProfile.workspaces && currentUserProfile.workspaces.length ? currentUserProfile.workspaces : WORKSPACES.map(w=>w.id);
   if(allowed.length <= 1){
     const id = allowed[0] || currentWorkspaceId || DEFAULT_WORKSPACE_ID;
-    el.innerHTML = `<span class="workspace-badge">${esc(WORKSPACE_LABELS[id]||'Letícia Carvalho Advocacia')}</span>`;
+    el.innerHTML = `<span class="workspace-badge">${esc(WORKSPACE_LABELS[id]||id)}</span>`;
     return;
   }
-  el.innerHTML = allowed.map(id=>`<button class="workspace-btn ${id===currentWorkspaceId?'active':''}" onclick="switchWorkspace('${id}')">${esc(id==='leticia'?'Letícia Carvalho Advocacia':WORKSPACE_LABELS[id]||id)}</button>`).join('');
+  el.innerHTML = allowed.map(id=>`<button class="workspace-btn ${id===currentWorkspaceId?'active':''}" onclick="switchWorkspace('${id}')">${esc(WORKSPACE_LABELS[id]||id)}</button>`).join('');
 }
 function updateWorkspaceTitle(){
   const el = document.getElementById('topbar-title');
@@ -4820,9 +4835,10 @@ function renderCard(c){
   const next = getNextTask(c);
   const dateCls = next && next.deadline ? finalDateClass(next.deadline) : '';
   const tags = normalizeClientTagsForDisplay(c).map(t=>`<span class="final-chip" style="${softColorStyle(t.color,.18)}">${esc(t.label)}</span>`).join('');
+  const events = getScheduleItems([c]).slice(0,2).map(t=>`<span class="final-chip ${isHearingTask(t)?'judicial':'admin'}">${taskKindLabel(t)}: ${fmtDate(t.deadline)}</span>`).join('');
   const viaChip = c.via ? `<span class="final-chip ${c.via==='Judicial'?'judicial':'admin'}">${esc(c.via)}</span>` : '';
   const doneChip = c.column==='finalizado' ? '<span class="final-chip done">Concluído</span>' : '';
-  const alert = hasAlert(c) ? `<div class="final-card-alert">${next&&next.description?esc(next.description):'Pendência exige atenção'}</div>` : '';
+  const alert = hasAlert(c) ? `<div class="final-card-alert ${next&&(isHearingTask(next)||isExpertiseTask(next))?'event':''}">${next&&(isHearingTask(next)||isExpertiseTask(next))?`${taskKindLabel(next)}: `:''}${next&&next.description?esc(next.description):'Pendência exige atenção'}</div>` : '';
   return `<article class="final-card card" id="card-${c.id}" draggable="true"
     onclick="openPanel('${c.id}')"
     ondragstart="onDragStart(event,'${c.id}')"
@@ -4830,7 +4846,7 @@ function renderCard(c){
     style="--col:${col.color}">
     <div class="final-card-title">${esc(c.name)}</div>
     <div class="final-card-benefit">${esc(c.benefitType||caseTypeLabel()+' não informado')}</div>
-    <div class="final-card-tags">${viaChip}${tags}${doneChip}</div>
+    <div class="final-card-tags">${viaChip}${tags}${events}${doneChip}</div>
     ${alert}
     <div class="final-card-meta">
       <div class="final-card-meta-row"><span>${next&&next.deadline?'⚠':'▣'}</span><span class="final-card-date ${dateCls}">${next ? finalDueLabel(next) : (c.column==='finalizado' ? 'Concluído' : 'Sem prazo')}</span></div>
@@ -4853,20 +4869,20 @@ function renderKanbanDeadlineAlerts(clientList=clients){
   const el = document.getElementById('kanban-alerts');
   if(!el) return;
   const urgent = getProcessDeadlineItems(clientList).filter(t=>['overdue','urgent'].includes(dayStatus(t.deadline))).slice(0,3);
-  const upcoming = getProcessDeadlineItems(clientList).filter(t=>dayStatus(t.deadline)==='warning').slice(0,3);
+  const schedule = getScheduleItems(clientList).slice(0,3);
   const docs = getSidebarTaskItems(clientList).filter(t=>!t.done).slice(0,3);
   const block = (title,count,items,cls,empty) => `<section class="kanban-alert-block">
     <div class="kanban-alert-head"><div class="kanban-alert-title">${title}</div><div class="kanban-alert-count">${count}</div></div>
     <div class="kanban-alert-row">${items.length ? items.map(t=>`<div class="kanban-alert-item ${cls}" onclick="${t.clientId?`openPanel('${t.clientId}')`:''}">
       <div class="kanban-alert-client">${esc(t.clientName||'Tarefa')}</div>
       <div class="kanban-alert-desc">${esc(t.description||'Pendência')}</div>
-      <div class="kanban-alert-date">${t.deadline?fmtDate(t.deadline):'Sem data'}</div>
+      <div class="kanban-alert-date">${t.deadline?`${taskKindLabel(t)}: ${fmtDate(t.deadline)}`:'Sem data'}</div>
     </div>`).join('') : `<div class="kanban-alert-empty">${empty}</div>`}</div>
   </section>`;
   el.className = 'kanban-alerts';
   el.innerHTML =
     block('Alertas', urgent.length ? `${urgent.length} prazo${urgent.length>1?'s':''} vencem hoje` : 'Tudo em dia', urgent, 'overdue', 'Nenhum prazo crítico.') +
-    block('Agenda', upcoming.length ? `${upcoming.length} próximo${upcoming.length>1?'s':''}` : 'Sem urgência', upcoming, 'warning', 'Nenhuma audiência ou prazo próximo.') +
+    block('Agenda', schedule.length ? `${schedule.length} próximo${schedule.length>1?'s':''}` : 'Sem urgência', schedule, 'hearing', 'Nenhuma audiência ou perícia próxima.') +
     block('Documentos', docs.length ? `${docs.length} pendente${docs.length>1?'s':''}` : 'Sem pendência', docs, 'payment', 'Nenhum documento pendente.');
 }
 function openPanel(id){
