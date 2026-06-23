@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-23-painel-cliente-amplo">
+<meta name="app-build" content="2026-06-23-anotacoes-cpf-visao">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-23-painel-cliente-amplo';
+  const build = '2026-06-23-anotacoes-cpf-visao';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -2063,16 +2063,16 @@ button.nav-kpi{cursor:pointer}
   <div class="panel-tabs" id="panel-tabs">
     <div class="ptab active" data-tab="resumo" onclick="switchTab(this)">Visão geral</div>
     <div class="ptab" data-tab="tarefas" onclick="switchTab(this)">Tarefas</div>
+    <div class="ptab" data-tab="anotacoes" onclick="switchTab(this)">Anotações</div>
     <div class="ptab" data-tab="historico" onclick="switchTab(this)">Histórico</div>
     <div class="ptab" data-tab="honorarios" onclick="switchTab(this)">Financeiro</div>
-    <div class="ptab" data-tab="credenciais" onclick="switchTab(this)">Acesso</div>
     <div class="ptab" data-tab="etiquetas" onclick="switchTab(this)">Etiquetas</div>
   </div>
   <div class="panel-body" id="panel-body"></div>
   <div class="panel-footer">
     <button class="panel-foot-btn" onclick="document.querySelector('[data-tab=resumo]').click();enterResumoEdit()">Editar cliente</button>
     <button class="panel-foot-btn" onclick="document.querySelector('[data-tab=tarefas]').click()">Nova tarefa</button>
-    <button class="panel-foot-btn small" onclick="document.querySelector('[data-tab=historico]').click()">•••</button>
+    <button class="panel-foot-btn small" onclick="document.querySelector('[data-tab=anotacoes]').click()">•••</button>
   </div>
 </div>
 
@@ -3442,10 +3442,11 @@ function renderPanelBody(){
   try {
     if(activeTab==='resumo') body.innerHTML = tabResumo(c);
     else if(activeTab==='tarefas') body.innerHTML = tabTarefas(c);
+    else if(activeTab==='anotacoes') body.innerHTML = tabAnotacoes(c);
     else if(activeTab==='historico') body.innerHTML = tabHistorico(c);
-    else if(activeTab==='credenciais') body.innerHTML = tabCredenciais(c);
     else if(activeTab==='honorarios') body.innerHTML = tabHonorarios(c);
     else if(activeTab==='etiquetas') body.innerHTML = tabEtiquetas(c);
+    else body.innerHTML = tabResumo(c);
   } catch(e){
     body.innerHTML = `<div style="color:#EF4444;padding:12px;font-size:13px">Erro ao carregar aba: ${e.message}</div>`;
     console.error('renderPanelBody error:', e);
@@ -3565,6 +3566,7 @@ function tabResumo(c){
   </div>`;
 }
 function tabResumoEdit(c){
+  const cr = c.credentials || {};
   return `
   <div class="edit-mode-banner">Modo de edição: altere os campos e clique em Salvar</div>
   <div class="fl"><span class="fl-label">Nome</span><input class="fi" id="re-name" value="${esc(c.name||'')}"></div>
@@ -3583,6 +3585,8 @@ function tabResumoEdit(c){
   <div class="fl"><span class="fl-label">Número do Processo</span><input class="fi" id="re-proc" value="${esc(c.processNumber||'')}"></div>
   <div class="fl"><span class="fl-label">Descrição curta do processo</span><input class="fi" id="re-short-desc" value="${esc(c.shortDescription||'')}" placeholder="Ex: Embargos de terceiro"></div>
   <div class="fl"><span class="fl-label">Parte contrária</span><input class="fi" id="re-opposing-party" value="${esc(c.opposingParty||'')}" placeholder="Ex: Banco, INSS, empresa, pessoa física"></div>
+  <div class="fl"><span class="fl-label">CPF / usuário GOV.br</span><input class="fi" id="re-cpf" value="${esc(cr.cpf||cr.govUser||'')}" placeholder="000.000.000-00"></div>
+  <div class="fl"><span class="fl-label">Telefone</span><input class="fi" id="re-phone" value="${esc(cr.phone||'')}" inputmode="tel" placeholder="(00) 00000-0000" oninput="formatPhoneInput(this)"></div>
   <div class="fl"><span class="fl-label">Tribunal</span>
     <select class="fi fi-select" id="re-tribunal">
       ${renderTribunalOptions(c.tribunal)}
@@ -3607,6 +3611,10 @@ function saveClientEdit(clientId){
   c.processNumber = document.getElementById('re-proc').value.trim();
   c.shortDescription = document.getElementById('re-short-desc').value.trim();
   c.opposingParty = document.getElementById('re-opposing-party').value.trim();
+  if(!c.credentials || typeof c.credentials !== 'object') c.credentials = {cpf:'',govUser:'',password:'',phone:''};
+  c.credentials.cpf = document.getElementById('re-cpf').value.trim();
+  c.credentials.govUser = c.credentials.cpf;
+  c.credentials.phone = formatPhone(document.getElementById('re-phone').value);
   c.tribunal = document.getElementById('re-tribunal').value;
   c.summary = document.getElementById('re-summary').value.trim();
   addHistory(c,'Cliente atualizado','','default');
@@ -4808,7 +4816,7 @@ function tabResumo(c){
   const pending = getPendingTasks(c);
   const doneCount = (c.tasks||[]).filter(t=>t.done).length;
   const next = getNextTask(c);
-  const notes = c.history.filter(h=>h.type==='note').slice(0,1);
+  const cr = c.credentials || {};
   const nextDate = next&&next.deadline ? dayStatus(next.deadline) : '';
   const info = (label,value) => `<div class="final-info"><span>${label}</span><strong>${value?esc(value):'Não informado'}</strong></div>`;
   const kpi = (label,value) => `<div class="final-kpi"><span>${label}</span><strong>${value}</strong></div>`;
@@ -4842,13 +4850,13 @@ function tabResumo(c){
           ${info('Parte contrária', c.opposingParty)}
           ${info('Data de entrada', c.createdAt ? fmtDate(c.createdAt.slice(0,10)) : '')}
           ${info('Tribunal', c.tribunal)}
+          ${info('CPF / usuário GOV.br', cr.cpf||cr.govUser)}
+          ${info('Telefone', cr.phone)}
         </div>
       </div>
       <div class="final-section">
         <div class="final-section-title">Resumo do caso</div>
         <p>${c.summary||c.currentSituation?esc(c.summary||c.currentSituation):'Nenhum resumo cadastrado.'}</p>
-        <div class="final-section-title" style="margin-top:16px">Anotações recentes</div>
-        ${notes.length ? notes.map(h=>`<p><small>${fmtDateTime(h.date)} · ${esc(h.details||'')}</small></p>`).join('') : '<p><small>Nenhuma anotação recente.</small></p>'}
       </div>
     </div>
     <div class="final-section">
@@ -4856,7 +4864,7 @@ function tabResumo(c){
       <div class="final-actions">
         <button class="final-action-btn" onclick="enterResumoEdit()">Editar cliente</button>
         <button class="final-action-btn" onclick="document.querySelector('[data-tab=tarefas]').click()">Nova tarefa</button>
-        <button class="final-action-btn" onclick="document.querySelector('[data-tab=historico]').click()">Nova anotação</button>
+        <button class="final-action-btn" onclick="document.querySelector('[data-tab=anotacoes]').click()">Nova anotação</button>
         <button class="final-action-btn" onclick="document.querySelector('[data-tab=honorarios]').click()">Financeiro</button>
       </div>
     </div>
@@ -4903,11 +4911,30 @@ function tabTarefas(c){
   </div>`;
 }
 function tabHistorico(c){
-  const items = c.history.length ? c.history.map(h=>`<div class="final-hist-item">
+  const historyItems = (c.history||[]).filter(h=>h.type!=='note');
+  const items = historyItems.length ? historyItems.map(h=>`<div class="final-hist-item">
     <span class="final-hist-dot"></span>
     <div><strong>${esc(h.action)}</strong>${h.details?`<p>${esc(h.details)}</p>`:''}</div>
     <time>${fmtDateTime(h.date)}</time>
   </div>`).join('') : '<div class="finance-empty">Sem registros ainda.</div>';
+  return `<div class="case-stack">
+    <div class="final-section">
+      <div class="final-section-title">Histórico do caso</div>
+      <div class="history-list final-history">${items}</div>
+    </div>
+  </div>`;
+}
+function tabAnotacoes(c){
+  const notes = (c.history||[]).filter(h=>h.type==='note');
+  const items = notes.length ? notes.map(h=>`
+    <div class="note-bubble">
+      <div class="note-bubble-text">${esc(h.details||'').replace(/\n/g,'<br>')}</div>
+      <div class="note-bubble-meta">
+        <span class="note-bubble-time">${fmtDateTime(h.date)}</span>
+        <button class="note-edit-btn" onclick="editNote('${c.id}','${h.id}')" title="Editar anotação">Editar</button>
+        <button class="note-del-btn" onclick="deleteNote('${c.id}','${h.id}')" title="Excluir">×</button>
+      </div>
+    </div>`).join('') : '<div class="empty-note">Nenhuma anotação ainda.</div>';
   return `<div class="case-stack">
     <div class="final-section">
       <div class="final-section-title">Nova anotação</div>
@@ -4915,8 +4942,8 @@ function tabHistorico(c){
       <button class="btn-s p" onclick="addNote('${c.id}')">Salvar anotação</button>
     </div>
     <div class="final-section">
-      <div class="final-section-title">Histórico do caso</div>
-      <div class="history-list final-history">${items}</div>
+      <div class="final-section-title">Anotações do caso</div>
+      <div class="notes-list">${items}</div>
     </div>
   </div>`;
 }
