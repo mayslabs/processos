@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-23-ajustes-menu-horario">
+<meta name="app-build" content="2026-06-23-sidebar-divisoes-tarefa">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-23-ajustes-menu-horario';
+  const build = '2026-06-23-sidebar-divisoes-tarefa';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -2349,7 +2349,7 @@ function taskKindLabel(t){
   if(isPaymentDeadline(t)) return 'Pagamento do cliente';
   if(isHearingTask(t)) return 'Audiência';
   if(isExpertiseTask(t)) return 'Perícia';
-  return 'Tarefa interna';
+  return 'Tarefa';
 }
 function taskKindClass(t){
   if(isProcessDeadline(t)) return 'process';
@@ -2991,7 +2991,7 @@ function renderMiniTaskList(tasks, empty='Nenhum item encontrado.'){
   return `<div class="nav-list">${tasks.map(t=>`
     <button class="nav-list-item" onclick="${t.clientId?`openPanel('${t.clientId}')`:''}">
       <span>
-        <strong>${esc(t.clientName||'Tarefa interna')}</strong>
+        <strong>${esc(t.clientName||'Tarefa')}</strong>
         <em>${esc(t.description||'Pendência')}</em>
       </span>
       <small>${t.deadline?fmtTaskDate(t):'Sem prazo'}</small>
@@ -3166,7 +3166,7 @@ function getSidebarTaskItems(clientList=clients){
   const items = [];
   globalTasks.forEach(t=>{
     if(!t.done){
-      items.push({...t, isGlobal:true, clientName:'Tarefa interna'});
+      items.push({...t, isGlobal:true, clientName:'Tarefa'});
     }
   });
   clientList.forEach(c=>{
@@ -3750,7 +3750,7 @@ function tabTarefas(c){
     <div class="case-section">
       <div class="case-section-title">Nova tarefa</div>
       <select class="fi-select" id="new-task-kind" style="margin-bottom:8px">
-        <option value="internal">Tarefa interna</option>
+        <option value="internal">Tarefa</option>
         <option value="process_deadline">Prazo processual</option>
         <option value="payment_deadline">Pagamento do cliente</option>
         <option value="hearing">Audiência</option>
@@ -3789,7 +3789,7 @@ function editTask(clientId, taskId){
   if(newDesc===null) return;
   const trimmed = newDesc.trim();
   if(!trimmed){ alert('A descrição não pode ficar vazia.'); return; }
-  const kindHint = 'Tipo da tarefa:\n1 - Tarefa interna\n2 - Prazo processual\n3 - Pagamento do cliente\n4 - Audiência\n5 - Perícia';
+  const kindHint = 'Tipo da tarefa:\n1 - Tarefa\n2 - Prazo processual\n3 - Pagamento do cliente\n4 - Audiência\n5 - Perícia';
   const currentKind = isProcessDeadline(t) ? '2' : isPaymentDeadline(t) ? '3' : isHearingTask(t) ? '4' : isExpertiseTask(t) ? '5' : '1';
   const kindChoice = prompt(kindHint, currentKind);
   if(kindChoice===null) return;
@@ -3873,7 +3873,7 @@ function toggleTaskKind(clientId, taskId){
   } else {
     t.kind = 'internal';
     t.type = 'internal';
-    addHistory(c,'Perícia convertida em tarefa interna',t.description,'task');
+    addHistory(c,'Perícia convertida em tarefa',t.description,'task');
   }
   save();
   renderPanelBody();
@@ -4884,9 +4884,21 @@ function normalizeClientTagsForDisplay(c){
 function renderKanbanDeadlineAlerts(clientList=clients){
   const el = document.getElementById('kanban-alerts');
   if(!el) return;
-  const urgent = getProcessDeadlineItems(clientList).filter(t=>['overdue','urgent'].includes(dayStatus(t.deadline))).slice(0,3);
-  const schedule = getScheduleItems(clientList).slice(0,3);
-  const docs = getSidebarTaskItems(clientList).filter(t=>!t.done).slice(0,3);
+  const deadlines = getProcessDeadlineItems(clientList).slice(0,3);
+  const tasks = getSidebarTaskItems(clientList).filter(t=>!t.done).slice(0,3);
+  const payments = getPaymentDeadlineItems(clientList).slice(0,3);
+  const hearings = getScheduleItems(clientList).filter(t=>isHearingTask(t)).slice(0,3);
+  const expertises = getScheduleItems(clientList).filter(t=>isExpertiseTask(t)).slice(0,3);
+  const attentionCount = items => items.filter(t=>{
+    if(!t.deadline) return false;
+    const s = dayStatus(t.deadline);
+    return s==='overdue'||s==='urgent'||s==='warning';
+  }).length;
+  const countLabel = (items, fallback, singular='pendente', plural='pendentes') => {
+    if(!items.length) return fallback;
+    const n = attentionCount(items) || items.length;
+    return `${n} ${n===1?singular:plural}`;
+  };
   const block = (title,count,items,cls,empty) => `<section class="kanban-alert-block">
     <div class="kanban-alert-head"><div class="kanban-alert-title">${title}</div><div class="kanban-alert-count">${count}</div></div>
     <div class="kanban-alert-row">${items.length ? items.map(t=>`<div class="kanban-alert-item ${cls}" onclick="${t.clientId?`openPanel('${t.clientId}')`:''}">
@@ -4897,9 +4909,11 @@ function renderKanbanDeadlineAlerts(clientList=clients){
   </section>`;
   el.className = 'kanban-alerts';
   el.innerHTML =
-    block('Alertas', urgent.length ? `${urgent.length} prazo${urgent.length>1?'s':''} vencem hoje` : 'Tudo em dia', urgent, 'overdue', 'Nenhum prazo crítico.') +
-    block('Agenda', schedule.length ? `${schedule.length} próximo${schedule.length>1?'s':''}` : 'Sem urgência', schedule, 'hearing', 'Nenhuma audiência ou perícia próxima.') +
-    block('Documentos', docs.length ? `${docs.length} pendente${docs.length>1?'s':''}` : 'Sem pendência', docs, 'payment', 'Nenhum documento pendente.');
+    block('Prazos', countLabel(deadlines,'Tudo em dia','prazo','prazos'), deadlines, 'overdue', 'Nenhum prazo ativo.') +
+    block('Tarefas', countLabel(tasks,'Sem pendência'), tasks, 'task', 'Nenhuma tarefa pendente.') +
+    block('Pagamento', countLabel(payments,'Sem cobrança','pagamento','pagamentos'), payments, 'payment', 'Nenhum pagamento para cobrar.') +
+    block('Audiência', countLabel(hearings,'Sem audiência','audiência','audiências'), hearings, 'hearing', 'Nenhuma audiência marcada.') +
+    block('Perícia', countLabel(expertises,'Sem perícia','perícia','perícias'), expertises, 'expertise', 'Nenhuma perícia marcada.');
 }
 function openPanel(id){
   activeClientId = id;
@@ -5030,7 +5044,7 @@ function tabTarefas(c){
       <div class="final-section-title">Nova tarefa</div>
       <div style="display:grid;grid-template-columns:1.3fr .8fr .65fr .55fr auto;gap:8px">
         <input class="fi" id="new-task-desc" placeholder="Descreva a tarefa...">
-        <select class="fi-select" id="new-task-kind"><option value="internal">Tarefa interna</option><option value="process_deadline">Prazo processual</option><option value="payment_deadline">Pagamento</option><option value="hearing">Audiência</option><option value="expertise">Perícia</option></select>
+        <select class="fi-select" id="new-task-kind"><option value="internal">Tarefa</option><option value="process_deadline">Prazo processual</option><option value="payment_deadline">Pagamento</option><option value="hearing">Audiência</option><option value="expertise">Perícia</option></select>
         <input class="fi" id="new-task-date" type="date">
         <input class="fi" id="new-task-time" type="time" title="Horário da audiência ou perícia">
         <button class="btn-s p" onclick="addTask('${c.id}')">Adicionar</button>
