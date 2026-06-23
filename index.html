@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-23-sidebar-divisoes-tarefa">
+<meta name="app-build" content="2026-06-23-finalizados-perdidos">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-23-sidebar-divisoes-tarefa';
+  const build = '2026-06-23-finalizados-perdidos';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -4752,7 +4752,7 @@ const FINAL_COL_META = {
   em_elaboracao: {icon:'•', sub:'Peça em preparo'},
   req_administrativo: {icon:'•', sub:'INSS / protocolo'},
   processo_judicial: {icon:'•', sub:'Ação judicial'},
-  finalizado: {icon:'✓', sub:'Concluídos'},
+  finalizado: {icon:'✓', sub:'Concluídos/Perdidos'},
 };
 function finalInitials(name=''){
   const parts = String(name||'').trim().split(/\s+/).filter(Boolean);
@@ -4853,7 +4853,7 @@ function renderCard(c){
   const tags = normalizeClientTagsForDisplay(c).map(t=>`<span class="final-chip" style="${softColorStyle(t.color,.18)}">${esc(t.label)}</span>`).join('');
   const events = getScheduleItems([c]).slice(0,2).map(t=>`<span class="final-chip ${isHearingTask(t)?'judicial':'admin'}">${taskKindLabel(t)}: ${fmtTaskDate(t)}</span>`).join('');
   const viaChip = c.via ? `<span class="final-chip ${c.via==='Judicial'?'judicial':'admin'}">${esc(c.via)}</span>` : '';
-  const doneChip = c.column==='finalizado' ? '<span class="final-chip done">Concluído</span>' : '';
+  const doneChip = '';
   const alert = hasAlert(c) ? `<div class="final-card-alert ${next&&(isHearingTask(next)||isExpertiseTask(next))?'event':''}">${next&&(isHearingTask(next)||isExpertiseTask(next))?`${taskKindLabel(next)}: `:''}${next&&next.description?esc(next.description):'Pendência exige atenção'}</div>` : '';
   return `<article class="final-card card" id="card-${c.id}" draggable="true"
     onclick="openPanel('${c.id}')"
@@ -4865,7 +4865,7 @@ function renderCard(c){
     <div class="final-card-tags">${viaChip}${tags}${events}${doneChip}</div>
     ${alert}
     <div class="final-card-meta">
-      <div class="final-card-meta-row"><span>${next&&next.deadline?'⚠':'▣'}</span><span class="final-card-date ${dateCls}">${next ? finalDueLabel(next) : (c.column==='finalizado' ? 'Concluído' : 'Sem prazo')}</span></div>
+      <div class="final-card-meta-row"><span>${next&&next.deadline?'⚠':'▣'}</span><span class="final-card-date ${dateCls}">${next ? finalDueLabel(next) : 'Sem prazo'}</span></div>
     </div>
   </article>`;
 }
