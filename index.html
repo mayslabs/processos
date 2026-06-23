@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-23-financeiro-travado-alertas">
+<meta name="app-build" content="2026-06-23-financeiro-resumo-alertas">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-23-financeiro-travado-alertas';
+  const build = '2026-06-23-financeiro-resumo-alertas';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -2433,17 +2433,6 @@ function getFinanceAlerts(clientList=clients){
   });
   return items.sort((a,b)=>(a.date||'9999-99-99').localeCompare(b.date||'9999-99-99'));
 }
-function financePendingNotes(finance){
-  const installments = (finance && finance.installments) || [];
-  const notes = [];
-  installments.forEach((p, index)=>{
-    const name = p.description || `Parcela ${index+1}`;
-    if(!p.clientReceived) notes.push(`${name}: cliente ainda não foi marcado como recebido`);
-    else if(!p.feeReceived) notes.push(`${name}: honorários não foram pagos`);
-    else if(!p.myShareReceived) notes.push(`${name}: minha parte não foi paga`);
-  });
-  return notes;
-}
 function isPersonalWorkspace(){
   return currentWorkspaceId === 'pessoal';
 }
@@ -3968,17 +3957,11 @@ function tabHonorarios(c){
   const expectedClientBase = summary.confirmedClient || summary.expClient;
   const expectedFeeBase = summary.confirmedFees || summary.expFee;
   const expectedMineBase = summary.confirmedMine || summary.expMine;
-  const pendingNotes = financePendingNotes(finance);
-  const metric = (label, value, tone='', received=0, pending=0) => `
+  const metric = (label, value, tone='', received=null, pending=null) => `
     <div class="finance-metric ${tone}">
       <div class="finance-metric-label">${label}</div>
       <div class="finance-metric-value">${formatMoneyValue(value)}</div>
-      <div class="finance-metric-sub"><strong>Recebi:</strong> ${formatMoneyValue(received)}<br><strong>Falta:</strong> ${formatMoneyValue(Math.max(pending,0))}</div>
-    </div>`;
-  const pendingHtml = `
-    <div class="finance-pending-note">
-      <strong>Parcelas pendentes:</strong>
-      ${pendingNotes.length ? pendingNotes.map(note=>`<div>${esc(note)}</div>`).join('') : '<div>Nenhuma pendência nas parcelas confirmadas.</div>'}
+      ${received===null ? '' : `<div class="finance-metric-sub"><strong>Recebi:</strong> ${formatMoneyValue(received)}<br><strong>Falta:</strong> ${formatMoneyValue(Math.max(pending,0))}</div>`}
     </div>`;
   const alertHtml = alerts.length ? `
     <div class="finance-alerts">
@@ -4022,12 +4005,11 @@ function tabHonorarios(c){
   return `
   <div class="case-stack">
     <div class="finance-hero">
-      ${metric('Expectativa', summary.expClient, 'expectation', summary.clientReceived, Math.max(expectedClientBase - summary.clientReceived, 0))}
-      ${metric('Confirmado', summary.confirmedClient, 'confirmed', summary.clientReceived, summary.pendingClient)}
+      ${metric('Expectativa', summary.expClient, 'expectation')}
+      ${metric('Confirmado', summary.confirmedClient, 'confirmed')}
       ${metric('Honorários', expectedFeeBase, 'fees', summary.feesReceived, Math.max(expectedFeeBase - summary.feesReceived, 0))}
       ${metric('Minha parte', expectedMineBase, 'mine', summary.mineReceived, Math.max(expectedMineBase - summary.mineReceived, 0))}
     </div>
-    ${pendingHtml}
     ${alertHtml}
     <div class="case-section">
       <div class="finance-section-head">
