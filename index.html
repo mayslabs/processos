@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-23-etiquetas-prazos-kanban">
+<meta name="app-build" content="2026-06-23-tarefas-audiencia-pericia">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-23-etiquetas-prazos-kanban';
+  const build = '2026-06-23-tarefas-audiencia-pericia';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -212,6 +212,8 @@ body.sidebar-collapsed .sidebar-toggle svg{transform:rotate(180deg)}
 .task-kind.process{background:#FEE2E2;color:#B91C1C}
 .task-kind.internal{background:#E0F2FE;color:#0369A1}
 .task-kind.payment{background:#DCFCE7;color:#166534}
+.task-kind.hearing{background:#EDE9FE;color:#5B21B6}
+.task-kind.expertise{background:#FEF3C7;color:#92400E}
 .ti-check{width:18px;height:18px;border:2px solid var(--border);border-radius:50%;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .ti-check:hover{border-color:var(--primary)}
 .ti-check.done{background:var(--ok);border-color:var(--ok)}
@@ -638,6 +640,8 @@ body.read-only .finance-section-head .btn-s{display:none!important}
 .task-kind.process{background:#FFF1F1;color:#B45D5D}
 .task-kind.payment{background:#EAF7EF;color:#356F52}
 .task-kind.internal{background:#EAF4FF;color:#315F99}
+.task-kind.hearing{background:#F1EDFF;color:#5F4BA8}
+.task-kind.expertise{background:#FFF5D8;color:#8A6424}
 .via-pill,.badge{border-radius:999px}
 .kanban-alert-title{color:#6C7F99!important}
 .kanban-alert-count{
@@ -2332,15 +2336,29 @@ function tagKey(label){ return (label||'').trim().toLowerCase().normalize('NFD')
 function taskKindValue(t){ return (t && (t.kind || t.type)) || 'internal'; }
 function isProcessDeadline(t){ return taskKindValue(t) === 'process_deadline'; }
 function isPaymentDeadline(t){ return taskKindValue(t) === 'payment_deadline'; }
+function isHearingTask(t){ return taskKindValue(t) === 'hearing'; }
+function isExpertiseTask(t){ return taskKindValue(t) === 'expertise'; }
 function taskKindLabel(t){
   if(isProcessDeadline(t)) return 'Prazo processual';
   if(isPaymentDeadline(t)) return 'Pagamento do cliente';
+  if(isHearingTask(t)) return 'Audiência';
+  if(isExpertiseTask(t)) return 'Perícia';
   return 'Tarefa interna';
 }
 function taskKindClass(t){
   if(isProcessDeadline(t)) return 'process';
   if(isPaymentDeadline(t)) return 'payment';
+  if(isHearingTask(t)) return 'hearing';
+  if(isExpertiseTask(t)) return 'expertise';
   return 'internal';
+}
+function taskKindNeedsDate(kind){ return ['process_deadline','payment_deadline','hearing','expertise'].includes(kind); }
+function taskKindHistoryLabel(kind){
+  if(kind==='process_deadline') return 'Prazo processual adicionado';
+  if(kind==='payment_deadline') return 'Pagamento do cliente adicionado';
+  if(kind==='hearing') return 'Audiência adicionada';
+  if(kind==='expertise') return 'Perícia adicionada';
+  return 'Tarefa adicionada';
 }
 function isPastDate(dateStr){
   if(!dateStr) return false;
@@ -3718,6 +3736,8 @@ function tabTarefas(c){
         <option value="internal">Tarefa interna</option>
         <option value="process_deadline">Prazo processual</option>
         <option value="payment_deadline">Pagamento do cliente</option>
+        <option value="hearing">Audiência</option>
+        <option value="expertise">Perícia</option>
       </select>
       <input class="fi" id="new-task-desc" placeholder="Descrição da tarefa..." style="margin-bottom:8px;resize:none">
       <input class="fi" id="new-task-date" type="date" style="margin-bottom:8px">
@@ -3751,17 +3771,17 @@ function editTask(clientId, taskId){
   if(newDesc===null) return;
   const trimmed = newDesc.trim();
   if(!trimmed){ alert('A descrição não pode ficar vazia.'); return; }
-  const kindHint = 'Tipo da tarefa:\n1 - Tarefa interna\n2 - Prazo processual\n3 - Pagamento do cliente';
-  const currentKind = isProcessDeadline(t) ? '2' : isPaymentDeadline(t) ? '3' : '1';
+  const kindHint = 'Tipo da tarefa:\n1 - Tarefa interna\n2 - Prazo processual\n3 - Pagamento do cliente\n4 - Audiência\n5 - Perícia';
+  const currentKind = isProcessDeadline(t) ? '2' : isPaymentDeadline(t) ? '3' : isHearingTask(t) ? '4' : isExpertiseTask(t) ? '5' : '1';
   const kindChoice = prompt(kindHint, currentKind);
   if(kindChoice===null) return;
   const normalizedKind = String(kindChoice).trim();
-  const newKind = normalizedKind === '2' ? 'process_deadline' : normalizedKind === '3' ? 'payment_deadline' : 'internal';
+  const newKind = normalizedKind === '2' ? 'process_deadline' : normalizedKind === '3' ? 'payment_deadline' : normalizedKind === '4' ? 'hearing' : normalizedKind === '5' ? 'expertise' : 'internal';
   const dateValue = prompt('Prazo da tarefa (AAAA-MM-DD). Deixe em branco se não houver prazo:', t.deadline || '');
   if(dateValue===null) return;
   const newDate = dateValue.trim();
   if(newDate && !/^\d{4}-\d{2}-\d{2}$/.test(newDate)){ alert('Use a data no formato AAAA-MM-DD.'); return; }
-  if((newKind==='process_deadline' || newKind==='payment_deadline') && !newDate){ alert('Prazo processual e pagamento precisam ter data.'); return; }
+  if(taskKindNeedsDate(newKind) && !newDate){ alert('Este tipo de tarefa precisa ter data.'); return; }
   const oldDesc = t.description;
   t.description = trimmed;
   t.kind = newKind;
@@ -3792,10 +3812,9 @@ function addTask(clientId){
   const date = document.getElementById('new-task-date').value;
   const kind = document.getElementById('new-task-kind').value;
   if(!desc){ alert('Informe a descrição da tarefa.'); return; }
-  if(kind==='process_deadline' && !date){ alert('Prazo processual precisa ter data.'); return; }
-  if(kind==='payment_deadline' && !date){ alert('Pagamento do cliente precisa ter data.'); return; }
+  if(taskKindNeedsDate(kind) && !date){ alert('Este tipo de tarefa precisa ter data.'); return; }
   c.tasks.push(mkTask(desc, date, false, kind));
-  addHistory(c, kind==='process_deadline'?'Prazo processual adicionado':kind==='payment_deadline'?'Pagamento do cliente adicionado':'Tarefa adicionada', desc+(date?' — data: '+fmtDate(date):''), 'task');
+  addHistory(c, taskKindHistoryLabel(kind), desc+(date?' — data: '+fmtDate(date):''), 'task');
   save();
   renderPanelBody();
   renderBoard();
@@ -3805,16 +3824,27 @@ function toggleTaskKind(clientId, taskId){
   if(!c) return;
   const t = c.tasks.find(x=>x.id===taskId);
   if(!t) return;
-  if(!isProcessDeadline(t) && !isPaymentDeadline(t)){
+  if(!isProcessDeadline(t) && !isPaymentDeadline(t) && !isHearingTask(t) && !isExpertiseTask(t)){
     if(!t.deadline){ alert('Para marcar como prazo processual, informe uma data de prazo.'); return; }
     t.kind = 'process_deadline';
+    t.type = 'process_deadline';
     addHistory(c,'Tarefa marcada como prazo processual',t.description,'warn');
   } else if(isProcessDeadline(t)) {
     t.kind = 'payment_deadline';
+    t.type = 'payment_deadline';
     addHistory(c,'Prazo convertido em pagamento do cliente',t.description,'task');
+  } else if(isPaymentDeadline(t)) {
+    t.kind = 'hearing';
+    t.type = 'hearing';
+    addHistory(c,'Pagamento convertido em audiência',t.description,'task');
+  } else if(isHearingTask(t)) {
+    t.kind = 'expertise';
+    t.type = 'expertise';
+    addHistory(c,'Audiência convertida em perícia',t.description,'task');
   } else {
     t.kind = 'internal';
-    addHistory(c,'Pagamento convertido em tarefa interna',t.description,'task');
+    t.type = 'internal';
+    addHistory(c,'Perícia convertida em tarefa interna',t.description,'task');
   }
   save();
   renderPanelBody();
@@ -4968,7 +4998,7 @@ function tabTarefas(c){
       <div class="final-section-title">Nova tarefa</div>
       <div style="display:grid;grid-template-columns:1.4fr .8fr .7fr auto;gap:8px">
         <input class="fi" id="new-task-desc" placeholder="Descreva a tarefa...">
-        <select class="fi-select" id="new-task-kind"><option value="internal">Tarefa interna</option><option value="process_deadline">Prazo processual</option><option value="payment_deadline">Pagamento</option></select>
+        <select class="fi-select" id="new-task-kind"><option value="internal">Tarefa interna</option><option value="process_deadline">Prazo processual</option><option value="payment_deadline">Pagamento</option><option value="hearing">Audiência</option><option value="expertise">Perícia</option></select>
         <input class="fi" id="new-task-date" type="date">
         <button class="btn-s p" onclick="addTask('${c.id}')">Adicionar</button>
       </div>
