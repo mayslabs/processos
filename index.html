@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-23-topo-sincronizacao">
+<meta name="app-build" content="2026-06-23-menu-lateral">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-23-topo-sincronizacao';
+  const build = '2026-06-23-menu-lateral';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1749,6 +1749,46 @@ body{
 .final-card-date.warning{color:#C57F21;font-weight:700}
 .final-card-date.ok{color:#2A7D50;font-weight:700}
 .final-card-alert{border-radius:8px;padding:8px 10px;background:#FFF5F5;border:1px solid #FFD2D2;color:#BA4B4B;font-size:11px;font-weight:700;line-height:1.25;margin:0}
+.nav-page{gap:16px!important}
+.nav-page-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 2px;color:var(--final-text)}
+.nav-page-head h2{font-size:22px;font-weight:750;line-height:1.1;margin:0 0 4px}
+.nav-page-head p{margin:0;color:var(--final-muted);font-size:13px}
+.nav-page-grid{display:grid;gap:14px}
+.nav-page-grid.two{grid-template-columns:minmax(0,1fr) minmax(320px,.62fr)}
+.nav-section{border:1px solid var(--final-line);border-radius:10px;background:#FFF;padding:16px;box-shadow:0 14px 32px rgba(33,51,74,.045)}
+.nav-section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#6D7B91;margin-bottom:14px}
+.nav-kpis{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}
+.nav-kpi{border:1px solid var(--final-line);border-radius:10px;background:#FFF;padding:14px;text-align:left;color:var(--final-text);box-shadow:0 12px 26px rgba(33,51,74,.04);cursor:default}
+button.nav-kpi{cursor:pointer}
+.nav-kpi span{display:block;font-size:11px;color:#6D7B91;font-weight:750;margin-bottom:8px}
+.nav-kpi strong{display:block;font-size:24px;line-height:1;font-weight:750}
+.nav-kpi.danger{border-color:#FFD2D2;background:#FFF8F8}
+.nav-kpi.ok{border-color:#CDEEDB;background:#F7FCF9}
+.nav-bars{display:grid;gap:12px}
+.nav-bar-row{display:grid;grid-template-columns:1fr 34px;gap:8px;align-items:center;color:#52647A;font-size:12px}
+.nav-bar-row strong{text-align:right;color:var(--final-text)}
+.nav-bar-row i{grid-column:1/3;height:7px;border-radius:999px;background:#F1F5F9;overflow:hidden}
+.nav-bar-row b{display:block;height:100%;border-radius:999px}
+.nav-list{display:grid;gap:8px}
+.nav-list-item{width:100%;border:1px solid var(--final-line);border-radius:9px;background:#FBFDFF;padding:11px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;color:var(--final-text);cursor:pointer}
+.nav-list-item:hover{border-color:#CFE2FA;background:#F7FBFF}
+.nav-list-item strong{display:block;font-size:12px;margin-bottom:3px}
+.nav-list-item em{display:block;font-style:normal;font-size:12px;color:#6D7B91}
+.nav-list-item small{font-size:11px;color:#6D7B91;white-space:nowrap}
+.nav-empty{border:1px dashed #D5E2EC;border-radius:10px;background:#FBFDFF;padding:22px;text-align:center;color:#7C8CA2;font-size:12px}
+.nav-tag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.nav-tag-card{border:1px solid var(--final-line);border-radius:9px;background:#FBFDFF;padding:12px;display:grid;gap:8px}
+.nav-tag-card strong{font-size:22px;line-height:1;color:var(--final-text)}
+.nav-tag-card small,.nav-settings-row span{font-size:12px;color:#6D7B91}
+.nav-settings-row{border:1px solid var(--final-line);border-radius:9px;background:#FBFDFF;padding:12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:12px}
+.nav-settings-row strong{font-size:13px;color:var(--final-text)}
+.nav-action{width:100%;height:42px;border:1px solid var(--final-line);border-radius:9px;background:#FFF;color:#2F63A4;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.nav-action:hover{background:#F7FBFF;border-color:#CFE2FA}
+.task-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.task-filters .tf-btn{border:1px solid var(--final-line);border-radius:9px;background:#FFF;padding:8px 12px;color:#64748B}
+.task-filters .tf-btn.active{background:#EAF2FF;color:#2F63A4;border-color:#CFE2FA}
+.nav-page .tasks-list{padding:0;overflow:visible}
+.nav-page .cal-preview{border-top-color:var(--final-line)}
 .overlay.on{background:transparent!important;backdrop-filter:none!important}
 .panel{width:var(--panel)!important;max-width:calc(100vw - 24px)!important;background:#FFF!important;border-left:1px solid var(--final-line)!important;box-shadow:-22px 0 48px rgba(33,51,74,.12)!important}
 .panel-hd{height:auto!important;padding:26px 22px 18px!important;border-bottom:0!important;gap:14px!important;align-items:flex-start!important}
@@ -1857,7 +1897,7 @@ body{
     <span class="sb-subtitle">Processos Previdenciários</span>
   </div>
   <div class="sb-nav">
-    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Dashboard">
+    <button class="nav-btn ghost" id="nav-dashboard" onclick="navigate('dashboard')" title="Dashboard">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
       <span class="nav-label">Dashboard</span>
     </button>
@@ -1866,23 +1906,23 @@ body{
       <span class="nav-label">Processos</span>
       <span class="sb-count" id="cnt-kanban">0</span>
     </button>
-    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Agenda">
+    <button class="nav-btn ghost" id="nav-agenda" onclick="navigate('agenda')" title="Agenda">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>
       <span class="nav-label">Agenda</span>
     </button>
-    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Tarefas">
+    <button class="nav-btn ghost" id="nav-tasks" onclick="navigate('tasks')" title="Tarefas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg>
       <span class="nav-label">Tarefas</span>
     </button>
-    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Etiquetas">
+    <button class="nav-btn ghost" id="nav-tags" onclick="navigate('tags')" title="Etiquetas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13l-7 7-9-9V4h7z"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
       <span class="nav-label">Etiquetas</span>
     </button>
-    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Relatórios">
+    <button class="nav-btn ghost" id="nav-reports" onclick="navigate('reports')" title="Relatórios">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="11" width="3" height="5"/><rect x="12" y="8" width="3" height="8"/><rect x="17" y="13" width="3" height="3"/></svg>
       <span class="nav-label">Relatórios</span>
     </button>
-    <button class="nav-btn ghost" onclick="navigate('kanban')" title="Configurações">
+    <button class="nav-btn ghost" id="nav-settings" onclick="navigate('settings')" title="Configurações">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2 3-.2-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21h-3.4v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.2.1-2-3 .1-.1A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.5-1H3v-3.4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.2 3-2 .2.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V4h3.4v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.2-.1 3 2-.1.2a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1V14h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       <span class="nav-label">Configurações</span>
     </button>
@@ -1933,6 +1973,93 @@ body{
       <span class="client-total-pill" id="client-total-pill">0 clientes</span>
     </div>
     <div class="board" id="board"></div>
+  </div>
+
+  <div class="page nav-page" id="page-dashboard">
+    <div class="nav-page-head">
+      <div>
+        <h2>Dashboard</h2>
+        <p>Resumo rápido dos processos, prazos e pendências.</p>
+      </div>
+    </div>
+    <div id="dashboard-content"></div>
+  </div>
+
+  <div class="page nav-page" id="page-agenda">
+    <div class="nav-page-head">
+      <div>
+        <h2>Agenda</h2>
+        <p>Próximos prazos, audiências e pagamentos previstos.</p>
+      </div>
+    </div>
+    <div class="nav-page-grid two">
+      <section class="nav-section">
+        <div class="nav-section-title">Calendário</div>
+        <div id="calendar"></div>
+        <div id="cal-preview"></div>
+      </section>
+      <section class="nav-section">
+        <div class="nav-section-title">Próximos compromissos</div>
+        <div id="agenda-list"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="page nav-page" id="page-tasks">
+    <div class="nav-page-head">
+      <div>
+        <h2>Tarefas</h2>
+        <p>Controle de pendências por prazo e por cliente.</p>
+      </div>
+    </div>
+    <div class="task-filters">
+      <button class="tf-btn active" onclick="setFilter(this,'pending')">Pendentes</button>
+      <button class="tf-btn" onclick="setFilter(this,'today')">Hoje</button>
+      <button class="tf-btn" onclick="setFilter(this,'week')">Semana</button>
+      <button class="tf-btn" onclick="setFilter(this,'overdue')">Atrasadas</button>
+      <button class="tf-btn" onclick="setFilter(this,'done')">Concluídas</button>
+    </div>
+    <div class="nav-page-grid two">
+      <section class="nav-section">
+        <div class="nav-section-title">Lista de tarefas</div>
+        <div class="tasks-list" id="tasks-list"></div>
+      </section>
+      <section class="nav-section">
+        <div class="nav-section-title">Calendário</div>
+        <div id="tasks-calendar"></div>
+        <div id="tasks-cal-preview"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="page nav-page" id="page-tags">
+    <div class="nav-page-head">
+      <div>
+        <h2>Etiquetas</h2>
+        <p>Visão geral das etiquetas usadas nos processos.</p>
+      </div>
+    </div>
+    <div id="tags-content"></div>
+  </div>
+
+  <div class="page nav-page" id="page-reports">
+    <div class="nav-page-head">
+      <div>
+        <h2>Relatórios</h2>
+        <p>Indicadores simples para acompanhar a carteira.</p>
+      </div>
+    </div>
+    <div id="reports-content"></div>
+  </div>
+
+  <div class="page nav-page" id="page-settings">
+    <div class="nav-page-head">
+      <div>
+        <h2>Configurações</h2>
+        <p>Informações do ambiente e preferências do painel.</p>
+      </div>
+    </div>
+    <div id="settings-content"></div>
   </div>
 
 </div>
@@ -2568,7 +2695,7 @@ function renderAll(){
   updateWorkspaceTitle();
   renderBoard();
   if(activeClientId) renderPanel();
-  if(isTasksPageActive()) renderTasksPage();
+  renderActivePage();
   updateCounts();
 }
 
@@ -2795,8 +2922,152 @@ function navigate(page){
   const pageEl = document.getElementById('page-'+page);
   const navEl = document.getElementById('nav-'+page);
   if(pageEl) pageEl.classList.add('active');
+  else document.getElementById('page-kanban')?.classList.add('active');
   if(navEl) navEl.classList.add('active');
+  else document.getElementById('nav-kanban')?.classList.add('active');
   updateWorkspaceTitle();
+  renderActivePage();
+}
+
+function activePageId(){
+  const active = document.querySelector('.page.active');
+  return active ? active.id.replace('page-','') : 'kanban';
+}
+function renderActivePage(){
+  const page = activePageId();
+  if(page==='dashboard') renderDashboardPage();
+  else if(page==='agenda') renderAgendaPage();
+  else if(page==='tasks') renderTasksPage();
+  else if(page==='tags') renderTagsPage();
+  else if(page==='reports') renderReportsPage();
+  else if(page==='settings') renderSettingsPage();
+}
+function openTasksFiltered(filter){
+  navigate('tasks');
+  const btn = document.querySelector(`.tf-btn[onclick*="'${filter}'"]`);
+  if(btn) setFilter(btn, filter);
+}
+function taskSummary(){
+  const all = getAllTasks();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sunday = new Date(today); sunday.setDate(today.getDate() + (6-today.getDay()));
+  return {
+    all,
+    pending: all.filter(t=>!t.done),
+    overdue: all.filter(t=>!t.done && t.deadline && dayStatus(t.deadline)==='overdue'),
+    today: all.filter(t=>!t.done && t.deadline && dayStatus(t.deadline)==='urgent'),
+    week: all.filter(t=>{
+      if(t.done || !t.deadline) return false;
+      const d = new Date(t.deadline+'T00:00:00');
+      return d>=today && d<=sunday;
+    })
+  };
+}
+function renderMiniTaskList(tasks, empty='Nenhum item encontrado.'){
+  if(!tasks.length) return `<div class="nav-empty">${empty}</div>`;
+  return `<div class="nav-list">${tasks.map(t=>`
+    <button class="nav-list-item" onclick="${t.clientId?`openPanel('${t.clientId}')`:''}">
+      <span>
+        <strong>${esc(t.clientName||'Tarefa interna')}</strong>
+        <em>${esc(t.description||'Pendência')}</em>
+      </span>
+      <small>${t.deadline?fmtDate(t.deadline):'Sem prazo'}</small>
+    </button>
+  `).join('')}</div>`;
+}
+function renderDashboardPage(){
+  const el = document.getElementById('dashboard-content');
+  if(!el) return;
+  const tasks = taskSummary();
+  const finalized = clients.filter(c=>c.column==='finalizado').length;
+  const overdue = tasks.overdue.slice(0,5);
+  el.innerHTML = `
+    <div class="nav-kpis">
+      <button class="nav-kpi" onclick="navigate('kanban')"><span>Processos</span><strong>${clients.length}</strong></button>
+      <button class="nav-kpi" onclick="openTasksFiltered('pending')"><span>Tarefas pendentes</span><strong>${tasks.pending.length}</strong></button>
+      <button class="nav-kpi danger" onclick="openTasksFiltered('overdue')"><span>Atrasadas</span><strong>${tasks.overdue.length}</strong></button>
+      <button class="nav-kpi ok" onclick="navigate('kanban')"><span>Finalizados</span><strong>${finalized}</strong></button>
+    </div>
+    <div class="nav-page-grid two">
+      <section class="nav-section">
+        <div class="nav-section-title">Processos por etapa</div>
+        <div class="nav-bars">${COLS.map(col=>{
+          const count = clients.filter(c=>c.column===col.id).length;
+          const pct = clients.length ? Math.max(5, Math.round(count/clients.length*100)) : 0;
+          return `<div class="nav-bar-row"><span>${esc(col.label)}</span><strong>${count}</strong><i><b style="width:${pct}%;background:${col.color}"></b></i></div>`;
+        }).join('')}</div>
+      </section>
+      <section class="nav-section">
+        <div class="nav-section-title">Prazos que exigem atenção</div>
+        ${renderMiniTaskList(overdue, 'Nenhum prazo atrasado.')}
+      </section>
+    </div>`;
+}
+function renderAgendaPage(){
+  renderCalendar('calendar','cal-preview');
+  const list = document.getElementById('agenda-list');
+  if(!list) return;
+  const upcoming = getAllTasks()
+    .filter(t=>!t.done && t.deadline)
+    .sort((a,b)=>a.deadline.localeCompare(b.deadline))
+    .slice(0,10);
+  list.innerHTML = renderMiniTaskList(upcoming, 'Nenhum prazo próximo.');
+}
+function renderTagsPage(){
+  const el = document.getElementById('tags-content');
+  if(!el) return;
+  const tags = globalTags.length ? globalTags : extractGlobalTags(clients);
+  const countFor = tag => clients.filter(c=>(c.tags||[]).some(t=>tagKey(t.label)===tagKey(tag.label))).length;
+  el.innerHTML = `<section class="nav-section">
+    <div class="nav-section-title">Etiquetas disponíveis</div>
+    ${tags.length ? `<div class="nav-tag-grid">${tags.map(t=>`
+      <div class="nav-tag-card">
+        <span class="final-chip" style="${softColorStyle(t.color,.18)}">${esc(t.label)}</span>
+        <strong>${countFor(t)}</strong>
+        <small>processo${countFor(t)===1?'':'s'}</small>
+      </div>`).join('')}</div>` : '<div class="nav-empty">Nenhuma etiqueta criada ainda.</div>'}
+  </section>`;
+}
+function renderReportsPage(){
+  const el = document.getElementById('reports-content');
+  if(!el) return;
+  const tasks = taskSummary();
+  const judicial = clients.filter(c=>c.via==='Judicial').length;
+  const admin = clients.filter(c=>c.via==='Administrativa').length;
+  el.innerHTML = `
+    <div class="nav-kpis">
+      <div class="nav-kpi"><span>Judiciais</span><strong>${judicial}</strong></div>
+      <div class="nav-kpi"><span>Administrativos</span><strong>${admin}</strong></div>
+      <div class="nav-kpi"><span>Com prazo</span><strong>${tasks.pending.filter(t=>t.deadline).length}</strong></div>
+      <div class="nav-kpi danger"><span>Atrasadas</span><strong>${tasks.overdue.length}</strong></div>
+    </div>
+    <section class="nav-section">
+      <div class="nav-section-title">Distribuição da carteira</div>
+      <div class="nav-bars">${COLS.map(col=>{
+        const count = clients.filter(c=>c.column===col.id).length;
+        const pct = clients.length ? Math.max(5, Math.round(count/clients.length*100)) : 0;
+        return `<div class="nav-bar-row"><span>${esc(col.label)}</span><strong>${count}</strong><i><b style="width:${pct}%;background:${col.color}"></b></i></div>`;
+      }).join('')}</div>
+    </section>`;
+}
+function renderSettingsPage(){
+  const el = document.getElementById('settings-content');
+  if(!el) return;
+  const workspace = WORKSPACE_LABELS[currentWorkspaceId] || currentWorkspaceId;
+  const profileName = currentUserProfile && currentUserProfile.name ? currentUserProfile.name : 'Mayssa';
+  el.innerHTML = `<div class="nav-page-grid two">
+    <section class="nav-section">
+      <div class="nav-section-title">Ambiente atual</div>
+      <div class="nav-settings-row"><span>Ambiente</span><strong>${esc(workspace)}</strong></div>
+      <div class="nav-settings-row"><span>Usuária</span><strong>${esc(profileName)}</strong></div>
+      <div class="nav-settings-row"><span>Perfil</span><strong>${currentUserProfile && currentUserProfile.role === 'admin' ? 'Administrador' : 'Usuário'}</strong></div>
+    </section>
+    <section class="nav-section">
+      <div class="nav-section-title">Ações rápidas</div>
+      <button class="nav-action" onclick="toggleSidebar()">Ocultar ou mostrar menu lateral</button>
+      <button class="nav-action" onclick="navigate('kanban')">Voltar para processos</button>
+    </section>
+  </div>`;
 }
 
 // ─────────────────────────────────────────────
@@ -4049,12 +4320,12 @@ function setFilter(el, f){
 }
 function renderTasksPage(){
   renderTasksList();
-  renderCalendar();
+  renderCalendar('tasks-calendar','tasks-cal-preview');
 }
 function getAllTasks(){
   const all = [];
   clients.forEach(c=>{
-    c.tasks.forEach(t=>{
+    (c.tasks||[]).forEach(t=>{
       all.push({...t, clientName:c.name, clientId:c.id});
     });
   });
@@ -4087,6 +4358,7 @@ function filterTasks(tasks){
 }
 function renderTasksList(){
   const list = document.getElementById('tasks-list');
+  if(!list) return;
   const all = getAllTasks();
   let tasks = filterTasks(all);
   tasks.sort((a,b)=>{
@@ -4158,9 +4430,10 @@ function toggleTaskGlobal(clientId, taskId){
 // ─────────────────────────────────────────────
 //  CALENDAR
 // ─────────────────────────────────────────────
-function renderCalendar(){
-  const cal = document.getElementById('calendar');
-  const preview = document.getElementById('cal-preview');
+function renderCalendar(calendarId='calendar', previewId='cal-preview'){
+  const cal = document.getElementById(calendarId);
+  const preview = document.getElementById(previewId);
+  if(!cal || !preview) return;
   const y = calDate.getFullYear(), m = calDate.getMonth();
   const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
