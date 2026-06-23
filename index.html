@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-23-tarefas-sem-rolagem">
+<meta name="app-build" content="2026-06-23-etiquetas-prazos-kanban">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-23-tarefas-sem-rolagem';
+  const build = '2026-06-23-etiquetas-prazos-kanban';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1745,9 +1745,7 @@ body{
 .final-card-meta{display:grid;gap:0;margin:0;color:#6B7C91;font-size:11px}
 .final-card-meta-row{display:flex;align-items:center;gap:6px;line-height:1.2}
 .final-card-meta-row>span:first-child{font-size:10px;line-height:1;color:#6B7C91}
-.final-card-date.overdue,.final-card-date.urgent{color:#D05A5A;font-weight:700}
-.final-card-date.warning{color:#C57F21;font-weight:700}
-.final-card-date.ok{color:#2A7D50;font-weight:700}
+.final-card-date.overdue,.final-card-date.urgent,.final-card-date.warning,.final-card-date.ok{color:#D05A5A;font-weight:700}
 .final-card-alert{border-radius:8px;padding:8px 10px;background:#FFF5F5;border:1px solid #FFD2D2;color:#BA4B4B;font-size:11px;font-weight:700;line-height:1.25;margin:0}
 .nav-page{gap:16px!important}
 .nav-page-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 2px;color:var(--final-text)}
@@ -1864,9 +1862,13 @@ button.nav-kpi{cursor:pointer}
 .finance-table-head,.finance-row{min-width:680px}
 .finance-installments{overflow:auto}
 .finance-row-calc{grid-template-columns:repeat(3,minmax(0,1fr)) auto!important}
-.global-tags-list{display:flex!important;flex-direction:column!important;gap:8px!important}
-.global-tag-item{display:grid!important;grid-template-columns:1fr auto auto!important;gap:8px!important;align-items:center!important}
-.tag-ed{border-radius:8px!important;padding:9px 12px!important;font-size:12px!important}
+.global-tags-list{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;gap:8px!important;margin:0!important}
+.global-tag-item{display:inline-flex!important;align-items:center!important;gap:5px!important;max-width:100%!important}
+.tag-ed{border-radius:999px!important;padding:6px 10px!important;font-size:11px!important;line-height:1!important;max-width:220px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.tag-edit-btn,.tag-del-global,.tag-del{border:1px solid var(--final-line)!important;background:#FFF!important;border-radius:999px!important;min-width:24px!important;height:24px!important;padding:0 7px!important;color:#536176!important;font-size:11px!important;cursor:pointer!important}
+.tag-edit-btn:hover,.tag-del-global:hover,.tag-del:hover{background:#F7FBFF!important;color:#365E93!important}
+.tag-del-global{color:#A05252!important}
+.tag-add-row{display:grid;grid-template-columns:1fr 42px auto;gap:8px;align-items:center}
 .preset-colors{gap:8px!important}
 .pc{width:22px!important;height:22px!important}
 @media(max-width:900px){
@@ -4195,6 +4197,7 @@ function applyGlobalTag(clientId, tagId){
   const c = clients.find(x=>x.id===clientId);
   const tag = globalTags.find(t=>t.id===tagId);
   if(!c||!tag) return;
+  if(!Array.isArray(c.tags)) c.tags = [];
   if(c.tags.some(t=>t.id===tagId || tagKey(t.label)===tagKey(tag.label))) return;
   c.tags.push({...tag});
   addHistory(c,'Etiqueta aplicada',tag.label,'default');
@@ -4203,6 +4206,7 @@ function applyGlobalTag(clientId, tagId){
 function removeTagById(clientId, tagId){
   const c = clients.find(x=>x.id===clientId);
   if(!c) return;
+  if(!Array.isArray(c.tags)) c.tags = [];
   const globalTag = globalTags.find(x=>x.id===tagId);
   const key = globalTag ? tagKey(globalTag.label) : '';
   const t = c.tags.find(x=>x.id===tagId || (key && tagKey(x.label)===key));
@@ -4217,6 +4221,7 @@ function removeTag(clientId, tagId){ removeTagById(clientId, tagId); }
 function addGlobalTag(clientId){
   const c = clients.find(x=>x.id===clientId);
   if(!c) return;
+  if(!Array.isArray(c.tags)) c.tags = [];
   const label = document.getElementById('tag-label').value.trim();
   const color = document.getElementById('tag-color').value;
   if(!label) return;
@@ -4240,15 +4245,28 @@ function editGlobalTag(tagId){
   const tag = globalTags.find(t=>t.id===tagId);
   if(!tag) return;
   const newLabel = prompt('Nome da etiqueta:', tag.label);
-  if(!newLabel||newLabel.trim()===tag.label) return;
+  if(newLabel===null) return;
+  const label = newLabel.trim();
+  if(!label){ alert('O nome da etiqueta não pode ficar vazio.'); return; }
+  const newColor = prompt('Cor da etiqueta em hexadecimal:', tag.color || '#93C5FD');
+  if(newColor===null) return;
+  const color = (newColor.trim() || tag.color || '#93C5FD').toUpperCase();
+  if(!/^#[0-9A-F]{6}$/.test(color)){ alert('Use uma cor no formato #RRGGBB.'); return; }
   const oldKey = tagKey(tag.label);
-  tag.label = newLabel.trim();
+  tag.label = label;
+  tag.color = color;
   clients.forEach(c=>{
-    const ct=c.tags.find(t=>t.id===tagId || tagKey(t.label)===oldKey);
-    if(ct) ct.label=tag.label;
+    if(!Array.isArray(c.tags)) c.tags = [];
+    c.tags.forEach(ct=>{
+      if(ct.id===tagId || tagKey(ct.label)===oldKey){
+        ct.id = tag.id;
+        ct.label = tag.label;
+        ct.color = tag.color;
+      }
+    });
     const seen = {};
     c.tags = c.tags.filter(t=>{
-      const key = tagKey(t.label);
+      const key = t.id || tagKey(t.label);
       if(!key || seen[key]) return false;
       seen[key] = true;
       return true;
@@ -4262,7 +4280,10 @@ function deleteGlobalTag(tagId){
   if(!confirm(`Excluir etiqueta "${tag.label}" de todos os clientes?`)) return;
   globalTags = globalTags.filter(t=>t.id!==tagId);
   const key = tagKey(tag.label);
-  clients.forEach(c=>{ c.tags=c.tags.filter(t=>t.id!==tagId && tagKey(t.label)!==key); });
+  clients.forEach(c=>{
+    if(!Array.isArray(c.tags)) c.tags = [];
+    c.tags = c.tags.filter(t=>t.id!==tagId && tagKey(t.label)!==key);
+  });
   save(); renderPanelBody(); renderBoard();
 }
 // legacy addTag (não usada no novo fluxo mas mantida por segurança)
@@ -4768,7 +4789,7 @@ function renderCard(c){
   const col = COLS.find(x=>x.id===c.column) || COLS[0];
   const next = getNextTask(c);
   const dateCls = next && next.deadline ? finalDateClass(next.deadline) : '';
-  const tags = (c.tags||[]).slice(0,1).map(t=>`<span class="final-chip" style="${softColorStyle(t.color,.18)}">${esc(t.label)}</span>`).join('');
+  const tags = normalizeClientTagsForDisplay(c).map(t=>`<span class="final-chip" style="${softColorStyle(t.color,.18)}">${esc(t.label)}</span>`).join('');
   const viaChip = c.via ? `<span class="final-chip ${c.via==='Judicial'?'judicial':'admin'}">${esc(c.via)}</span>` : '';
   const doneChip = c.column==='finalizado' ? '<span class="final-chip done">Concluído</span>' : '';
   const alert = hasAlert(c) ? `<div class="final-card-alert">${next&&next.description?esc(next.description):'Pendência exige atenção'}</div>` : '';
@@ -4782,9 +4803,21 @@ function renderCard(c){
     <div class="final-card-tags">${viaChip}${tags}${doneChip}</div>
     ${alert}
     <div class="final-card-meta">
-      <div class="final-card-meta-row"><span>▣</span><span class="final-card-date ${dateCls}">${next ? finalDueLabel(next) : (c.column==='finalizado' ? 'Concluído' : 'Sem prazo')}</span></div>
+      <div class="final-card-meta-row"><span>${next&&next.deadline?'⚠':'▣'}</span><span class="final-card-date ${dateCls}">${next ? finalDueLabel(next) : (c.column==='finalizado' ? 'Concluído' : 'Sem prazo')}</span></div>
     </div>
   </article>`;
+}
+function normalizeClientTagsForDisplay(c){
+  const seen = {};
+  return (c.tags||[]).map(tag=>{
+    const global = globalTags.find(g=>g.id===tag.id || tagKey(g.label)===tagKey(tag.label));
+    return global ? {...tag, ...global} : tag;
+  }).filter(tag=>{
+    const key = tag.id || tagKey(tag.label);
+    if(!key || seen[key]) return false;
+    seen[key] = true;
+    return true;
+  });
 }
 function renderKanbanDeadlineAlerts(clientList=clients){
   const el = document.getElementById('kanban-alerts');
@@ -5004,15 +5037,20 @@ function tabCredenciais(c){
   </div>`;
 }
 function tabEtiquetas(c){
-  const applied = (c.tags||[]).map(t=>`<span class="tag-ed" style="${softColorStyle(t.color,.18)}">${esc(t.label)} <button class="tag-del" onclick="removeTagById('${c.id}','${t.id}')">×</button></span>`).join('') || '<span style="color:#65748A;font-size:12px">Nenhuma etiqueta aplicada.</span>';
+  const appliedTags = normalizeClientTagsForDisplay(c);
+  const applied = appliedTags.length ? appliedTags.map(t=>`
+    <span class="global-tag-item">
+      <button class="tag-ed" style="${softColorStyle(t.color,.18)}" onclick="removeTagById('${c.id}','${t.id}')">${esc(t.label)}</button>
+      <button class="tag-del" onclick="removeTagById('${c.id}','${t.id}')" title="Remover do cliente">×</button>
+    </span>`).join('') : '<span style="color:#65748A;font-size:12px">Nenhuma etiqueta aplicada.</span>';
   const presets = ALL_PRESET_COLORS.map(pc=>`<div class="pc" style="background:${pc}" data-color="${pc}" onclick="selectPreset(this)" title="${pc}"></div>`).join('');
   const available = globalTags.length ? globalTags.map(t=>{
-    const isApplied = c.tags.some(ct=>ct.id===t.id || tagKey(ct.label)===tagKey(t.label));
-    return `<div class="global-tag-item">
-      <div class="tag-ed" style="${softColorStyle(t.color,.18)}">${esc(t.label)}</div>
-      <button class="tag-edit-btn" onclick="${isApplied?`removeTagById('${c.id}','${t.id}')`:`applyGlobalTag('${c.id}','${t.id}')`}">${isApplied?'×':'+'}</button>
-      <button class="tag-del-global" onclick="deleteGlobalTag('${t.id}')">Excluir</button>
-    </div>`;
+    const isApplied = appliedTags.some(ct=>ct.id===t.id || tagKey(ct.label)===tagKey(t.label));
+    return `<span class="global-tag-item">
+      <button class="tag-ed" style="${softColorStyle(t.color,.18)}" onclick="${isApplied?`removeTagById('${c.id}','${t.id}')`:`applyGlobalTag('${c.id}','${t.id}')`}" title="${isApplied?'Remover do cliente':'Aplicar ao cliente'}">${esc(t.label)}</button>
+      <button class="tag-edit-btn" onclick="editGlobalTag('${t.id}')" title="Editar nome e cor">Editar</button>
+      <button class="tag-del-global" onclick="deleteGlobalTag('${t.id}')" title="Excluir de todos">Excluir</button>
+    </span>`;
   }).join('') : '<div class="finance-empty">Nenhuma etiqueta criada ainda.</div>';
   return `<div class="case-stack">
     <div class="final-section"><div class="final-section-title">Etiquetas aplicadas</div><div class="global-tags-list" style="flex-direction:row!important;flex-wrap:wrap!important">${applied}</div></div>
