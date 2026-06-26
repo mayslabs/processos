@@ -1,2 +1,5 @@
 auth-screen.png
 panel-*.png
+
+# Arquivos locais de teste/mockup. Nao publicar perfil, cache ou dados do Chrome.
+mockups/

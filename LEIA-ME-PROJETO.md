@@ -1,4 +1,4 @@
-# Sistema de Processos Previdenciarios
+# Sistema de Processos Juridicos
 
 Este projeto e um site estatico em um unico arquivo principal, usado para organizar processos em Kanban, tarefas, prazos, pagamentos, honorarios e dados de acesso dos clientes.
 
@@ -6,8 +6,12 @@ Este projeto e um site estatico em um unico arquivo principal, usado para organi
 
 - `index.html`: arquivo principal do site. Contem HTML, CSS e JavaScript.
 - `firebase-database.rules.json`: regras de seguranca do Realtime Database.
-- `.github/`: configuracao de publicacao no GitHub Pages.
-- `auth-screen.png`, `panel-desktop.png`, `panel-mobile.png`: imagens antigas de referencia.
+- `LEIA-ME-PROJETO.md`: este arquivo, com as instrucoes para abrir, editar, publicar e configurar o projeto.
+- `diagnostico.html`: pagina auxiliar para conferir se o arquivo publicado no GitHub Pages esta atualizando.
+- `versao.txt`: arquivo simples usado como prova de deploy/cache.
+- `antigo/index.html`: copia de uma versao anterior do site.
+- `v2/index.html`: versao de referencia usada antes de virar a pagina principal.
+- `mockups/`: materiais locais de referencia visual. Esta pasta nao faz parte do site publicado e fica ignorada no Git.
 
 O site publicado fica em:
 
@@ -21,7 +25,7 @@ https://github.com/mayslabs/processos
 
 1. Entre no OneDrive no outro computador com a mesma conta.
 2. Aguarde a pasta sincronizar:
-   `Documentos > Advocacia > Kanban`
+   `Documentos > Site dos processos`
 3. Abra a pasta no editor de codigo.
 4. Edite principalmente o arquivo `index.html`.
 5. Para publicar alteracoes no site, e necessario fazer commit e push para o GitHub.
@@ -30,12 +34,21 @@ Comandos usados normalmente:
 
 ```powershell
 git status
-git add index.html firebase-database.rules.json LEIA-ME-PROJETO.md
+git add index.html firebase-database.rules.json LEIA-ME-PROJETO.md .gitignore diagnostico.html versao.txt antigo/index.html v2/index.html
 git commit -m "Descricao da alteracao"
 git push
 ```
 
 Depois do `git push`, o GitHub Pages costuma levar alguns segundos ou poucos minutos para atualizar.
+
+Antes de publicar, confira sempre:
+
+```powershell
+git status
+git diff --stat
+```
+
+Se aparecer algum arquivo dentro de `mockups/`, nao publique essa pasta. Ela deve ficar somente local.
 
 ## Como testar localmente
 
@@ -153,14 +166,19 @@ Isso deixa os dados expostos.
 - Tarefas internas avulsas, sem cliente.
 - Prazos processuais em destaque.
 - Pagamentos de cliente em destaque.
+- Financeiro com parcelas, pendencias, valores recebidos e alertas laterais.
 - Honorarios com campo de valor e calculo percentual.
 - Campo de celular com formatacao.
 - Separacao entre ambiente `Leticia` e ambiente `Pessoal`.
+- Tipos e tribunais especificos para o ambiente `Pessoal`.
+- Campo de descricao curta do processo para diferenciar processos da mesma area.
+- Campo de parte contraria nos dados do processo.
 
 ## Cuidados importantes
 
 - Nao coloque senhas de usuarios neste arquivo.
 - Senhas de clientes/GOV.br nao devem ser armazenadas no site.
+- Nao publique a pasta `mockups/`.
 - Antes de importar JSON no Firebase, exporte um backup.
 - Ao mexer em permissoes, confira se o UID do usuario no Authentication e exatamente o mesmo usado em `users`.
 - Se trocar/criar usuario no Authentication, o UID muda e precisa ser atualizado no Realtime Database.
