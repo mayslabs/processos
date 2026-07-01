@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-06-24-pagamento-financeiro-sidebar">
+<meta name="app-build" content="2026-07-01-sidebar-sem-limite">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-06-24-pagamento-financeiro-sidebar';
+  const build = '2026-07-01-sidebar-sem-limite';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1689,15 +1689,25 @@ body{
 .sb-count{margin-left:auto;background:#EEF1FF!important;color:#5F6EEA!important;border-radius:999px;padding:3px 8px!important;font-size:11px!important}
 .kanban-alerts{margin-top:4px!important;border:1px solid var(--final-line)!important;background:rgba(255,255,255,.78)!important;border-radius:14px!important;padding:12px!important;display:flex!important;flex-direction:column!important;gap:9px!important;box-shadow:0 16px 38px rgba(33,51,74,.06)!important}
 .kanban-alert-title{font-size:12px!important;text-transform:none!important;letter-spacing:0!important;color:var(--final-text)!important}
-.kanban-alert-count,.kanban-alert-empty{font-size:12px!important;color:var(--final-muted)!important}
+.kanban-alert-count,.kanban-alert-empty{font-size:12px!important;color:var(--final-text)!important}
 .kanban-alert-row{display:grid!important;gap:10px!important}
 .kanban-alert-item{border-radius:10px!important;padding:12px!important;background:#FFF!important;border:1px solid var(--final-line)!important;box-shadow:none!important;display:grid!important;gap:4px!important}
 .kanban-alert-item.overdue,.kanban-alert-item.urgent{background:#FFF5F5!important;border-color:#FFD2D2!important}
 .kanban-alert-item.warning,.kanban-alert-item.task{background:#FFF9ED!important;border-color:#FFE1A8!important}
-.kanban-alert-item.hearing,.kanban-alert-item.expertise{background:#F8F5FF!important;border-color:#DED6FF!important}
+.kanban-alert-item.hearing{background:#EEF6FF!important;border-color:#CFE2FA!important}
+.kanban-alert-item.expertise{background:#F8F5FF!important;border-color:#DED6FF!important}
 .kanban-alert-item.payment,.kanban-alert-item.finance{background:#F1FBF6!important;border-color:#CDEEDB!important}
 .kanban-alert-client{font-size:12px!important;font-weight:750!important;color:var(--final-text)!important}
-.kanban-alert-desc,.kanban-alert-date{font-size:11px!important;color:#6B7C91!important}
+.kanban-alert-desc,.kanban-alert-date{font-size:11px!important;color:var(--final-text)!important}
+.kanban-alert-item.payment .kanban-alert-client,
+.kanban-alert-item.payment .kanban-alert-desc,
+.kanban-alert-item.payment .kanban-alert-date,
+.kanban-alert-item.task .kanban-alert-client,
+.kanban-alert-item.task .kanban-alert-desc,
+.kanban-alert-item.task .kanban-alert-date,
+.kanban-alert-item.finance .kanban-alert-client,
+.kanban-alert-item.finance .kanban-alert-desc,
+.kanban-alert-item.finance .kanban-alert-date{color:var(--final-text)!important}
 .sidebar-user{margin-top:auto;border:1px solid var(--final-line);background:#FFF;border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 28px rgba(33,51,74,.04)}
 .sidebar-user-avatar{width:36px;height:36px;border-radius:50%;background:#E7E1FF;color:#6656C7;display:grid;place-items:center;font-weight:750}
 .sidebar-user strong{display:block;font-size:12px;color:var(--final-text)}
@@ -4781,7 +4791,7 @@ function renderBoard(){
       ${stat('Financeiro', finance + payments, 'cobranças e alertas')}
     </div>
     <div class="v2-kanban">${columns}</div>`;
-  renderKanbanDeadlineAlerts(filtered);
+  renderKanbanDeadlineAlerts(clients);
   updateCounts();
 }
 function renderCard(c){
@@ -4920,7 +4930,7 @@ function renderBoard(){
       <button class="final-add-client" onclick="openModal()">+ Adicionar cliente</button>
     </section>`;
   }).join('');
-  renderKanbanDeadlineAlerts(filtered);
+  renderKanbanDeadlineAlerts(clients);
   updateCounts();
 }
 function renderCard(c){
@@ -4961,8 +4971,8 @@ function normalizeClientTagsForDisplay(c){
 function renderKanbanDeadlineAlerts(clientList=clients){
   const el = document.getElementById('kanban-alerts');
   if(!el) return;
-  const deadlines = getProcessDeadlineItems(clientList).slice(0,3);
-  const tasks = getSidebarTaskItems(clientList).filter(t=>!t.done).slice(0,3);
+  const deadlines = getProcessDeadlineItems(clientList);
+  const tasks = getSidebarTaskItems(clientList).filter(t=>!t.done);
   const paymentTasks = getPaymentDeadlineItems(clientList).map(t=>({...t, sidebarKind:'paymentTask'}));
   const financePayments = getFinanceAlerts(clientList).map(item=>({
     ...item,
@@ -4971,10 +4981,10 @@ function renderKanbanDeadlineAlerts(clientList=clients){
     description:`${item.title}: ${item.installment && item.installment.description ? item.installment.description : 'Parcela'}`,
   }));
   const payments = paymentTasks.concat(financePayments)
-    .sort((a,b)=>(a.deadline||'9999-99-99').localeCompare(b.deadline||'9999-99-99'))
-    .slice(0,3);
-  const hearings = getScheduleItems(clientList).filter(t=>isHearingTask(t)).slice(0,3);
-  const expertises = getScheduleItems(clientList).filter(t=>isExpertiseTask(t)).slice(0,3);
+    .sort((a,b)=>(a.deadline||'9999-99-99').localeCompare(b.deadline||'9999-99-99'));
+  const scheduleItems = getScheduleItems(clientList);
+  const hearings = scheduleItems.filter(t=>isHearingTask(t));
+  const expertises = scheduleItems.filter(t=>isExpertiseTask(t));
   const attentionCount = items => items.filter(t=>{
     if(!t.deadline) return false;
     const s = dayStatus(t.deadline);
