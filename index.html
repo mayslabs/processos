@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-07-01-sidebar-tipografia-leve">
+<meta name="app-build" content="2026-07-01-alertas-vencidos-sidebar">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-07-01-sidebar-tipografia-leve';
+  const build = '2026-07-01-alertas-vencidos-sidebar';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1698,7 +1698,11 @@ body{
 .kanban-alert-item.hearing{background:#EEF6FF!important;border-color:#CFE2FA!important}
 .kanban-alert-item.expertise{background:#F8F5FF!important;border-color:#DED6FF!important}
 .kanban-alert-item.payment,.kanban-alert-item.finance{background:#F1FBF6!important;border-color:#CDEEDB!important}
-.kanban-alert-client{font-size:12px!important;font-weight:500!important;color:var(--final-text)!important}
+.kanban-alert-item.task.overdue,
+.kanban-alert-item.payment.overdue,
+.kanban-alert-item.finance.overdue{background:#FFF5F5!important;border-color:#F7BFC4!important}
+.kanban-alert-client{font-size:12px!important;font-weight:500!important;color:var(--final-text)!important;display:flex!important;align-items:flex-start!important;gap:6px!important}
+.sidebar-overdue-icon{margin-left:auto;color:#D64555;font-size:13px;line-height:1;font-weight:600;flex:0 0 auto}
 .kanban-alert-desc{font-size:11px!important;font-weight:400!important;color:var(--final-text)!important}
 .kanban-alert-date{font-size:11px!important;font-weight:600!important;color:var(--final-text)!important}
 .kanban-alert-item.payment .kanban-alert-client,
@@ -4999,11 +5003,14 @@ function renderKanbanDeadlineAlerts(clientList=clients){
   };
   const block = (title,count,items,cls,empty) => `<section class="kanban-alert-block">
     <div class="kanban-alert-head"><div class="kanban-alert-title">${title}</div><div class="kanban-alert-count">${count}</div></div>
-    <div class="kanban-alert-row">${items.length ? items.map(t=>`<div class="kanban-alert-item ${cls}${t.sidebarKind==='finance'?` finance ${t.tone||''}`:''}" onclick="${t.clientId?`openPanel('${t.clientId}');${t.sidebarKind==='finance'?`setTimeout(()=>document.querySelector('[data-tab=honorarios]')?.click(),0);`:''}`:''}">
-      <div class="kanban-alert-client">${esc(t.clientName||'Tarefa')}</div>
+    <div class="kanban-alert-row">${items.length ? items.map(t=>{
+      const overdue = (cls==='task' || cls==='payment') && t.deadline && dayStatus(t.deadline)==='overdue';
+      return `<div class="kanban-alert-item ${cls}${overdue?' overdue':''}${t.sidebarKind==='finance'?` finance ${t.tone||''}`:''}" onclick="${t.clientId?`openPanel('${t.clientId}');${t.sidebarKind==='finance'?`setTimeout(()=>document.querySelector('[data-tab=honorarios]')?.click(),0);`:''}`:''}">
+      <div class="kanban-alert-client">${esc(t.clientName||'Tarefa')}${overdue?'<span class="sidebar-overdue-icon" title="Prazo vencido" aria-label="Prazo vencido">⚠</span>':''}</div>
       <div class="kanban-alert-desc">${esc(t.description||'Pendência')}</div>
       <div class="kanban-alert-date">${t.deadline?`${t.sidebarKind==='finance' ? 'Financeiro' : taskKindLabel(t)}: ${fmtTaskDate(t)}`:'Sem data'}</div>
-    </div>`).join('') : `<div class="kanban-alert-empty">${empty}</div>`}</div>
+    </div>`;
+    }).join('') : `<div class="kanban-alert-empty">${empty}</div>`}</div>
   </section>`;
   el.className = 'kanban-alerts';
   el.innerHTML =
