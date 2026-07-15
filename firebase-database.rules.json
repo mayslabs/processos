@@ -1,20 +1,26 @@
 {
   "rules": {
+    ".read": false,
+    ".write": false,
     "workspaces": {
       "$workspaceId": {
-        ".read": "auth != null && root.child('users').child(auth.uid).child('workspaces').child($workspaceId).val() === true",
-        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin' && root.child('users').child(auth.uid).child('workspaces').child($workspaceId).val() === true"
+        "kanban": {
+          ".read": "auth != null && ($workspaceId === 'leticia' || $workspaceId === 'pessoal') && root.child('users').child(auth.uid).child('workspaces').child($workspaceId).val() === true",
+          ".write": "auth != null && newData.exists() && ($workspaceId === 'leticia' || $workspaceId === 'pessoal') && root.child('users').child(auth.uid).child('role').val() === 'admin' && root.child('users').child(auth.uid).child('workspaces').child($workspaceId).val() === true",
+          ".validate": "newData.isString() && newData.val().length <= 5000000"
+        }
       }
     },
     "users": {
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
-        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+        ".write": false
       }
     },
     "kanban": {
       ".read": "auth != null && root.child('users').child(auth.uid).child('workspaces').child('leticia').val() === true",
-      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+      ".write": "auth != null && newData.exists() && root.child('users').child(auth.uid).child('role').val() === 'admin' && root.child('users').child(auth.uid).child('workspaces').child('leticia').val() === true",
+      ".validate": "newData.isString() && newData.val().length <= 5000000"
     },
     "authorizedUsers": {
       ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",

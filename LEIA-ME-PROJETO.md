@@ -183,6 +183,21 @@ Isso deixa os dados expostos.
 - Ao mexer em permissoes, confira se o UID do usuario no Authentication e exatamente o mesmo usado em `users`.
 - Se trocar/criar usuario no Authentication, o UID muda e precisa ser atualizado no Realtime Database.
 
+## Protecoes de seguranca
+
+O site usa sessao temporaria: ao fechar o navegador, sera necessario entrar novamente. Uma sessao aberta tambem e encerrada automaticamente depois de 1 hora sem atividade.
+
+As regras do banco permitem leitura apenas dos ambientes liberados para o usuario e escrita apenas para administradores. O caminho `users` nao pode ser alterado pelo site; perfis, papeis e ambientes devem ser administrados diretamente no Console do Firebase.
+
+Antes de considerar a configuracao concluida, ainda e necessario fazer no Console do Firebase:
+
+1. Publicar o conteudo de `firebase-database.rules.json` em Realtime Database > Regras.
+2. Em Authentication, ativar uma politica de senha forte e a protecao contra descoberta de e-mails.
+3. Em Authentication > Configuracoes > Dominios autorizados, manter apenas os dominios realmente usados pelo sistema.
+4. Criar o App Check para o dominio publicado e, depois de validar as metricas, exigir App Check no Realtime Database.
+
+O App Check depende de uma chave criada no Console e nao deve ser ativado no codigo antes dessa chave existir, pois isso impediria o site de acessar o banco.
+
 ## Publicacao
 
 O site e publicado automaticamente pelo GitHub Pages quando ha `git push` para a branch principal.
