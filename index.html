@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-07-15-seguranca-sessao-regras">
+<meta name="app-build" content="2026-07-24-acompanhamento-tarefas">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-07-15-seguranca-sessao-regras';
+  const build = '2026-07-24-acompanhamento-tarefas';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1839,6 +1839,7 @@ button.nav-kpi{cursor:pointer}
 .final-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .final-overview-grid{display:grid;grid-template-columns:1fr;gap:10px}
 .final-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.final-kpis.task-kpis{grid-template-columns:repeat(5,minmax(0,1fr))}
 .final-kpi{border:1px solid var(--final-line);border-radius:8px;background:#FFF;padding:12px}
 .final-kpi span{display:block;font-size:10px;color:#65748A;font-weight:600;margin-bottom:8px}
 .final-kpi strong{display:block;font-size:20px;color:var(--final-text);font-weight:600}
@@ -1862,6 +1863,13 @@ button.nav-kpi{cursor:pointer}
 .task-main{min-width:0}
 .task-main strong{display:block;line-height:1.3;font-weight:600}
 .task-main small{display:block;margin-top:3px;color:#65748A}
+.task-status-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px}
+.task-workflow-chip{display:inline-flex;align-items:center;min-height:22px;border:1px solid #DFE7EF;border-radius:999px;padding:2px 8px;background:#F7F9FC;color:#536176;font-size:10px;font-weight:600}
+.task-workflow-chip.in-progress{border-color:#C9DCF7;background:#EEF5FF;color:#376AA8}
+.task-workflow-chip.waiting{border-color:#D8D0FA;background:#F3F0FF;color:#6550A5}
+.task-workflow-chip.done{border-color:#CBEAD9;background:#EFFAF4;color:#347C58}
+.task-waiting-meta{color:#6550A5!important}
+.task-original-deadline{color:#7B8799}
 .task-actions{display:flex;gap:8px;margin-top:7px;flex-wrap:wrap}
 .task-action-link{border:0;background:transparent;color:#365E93;font-size:11px;font-weight:600;padding:0;cursor:pointer}
 .task-action-link.delete{color:#B85A5A}
@@ -1869,6 +1877,12 @@ button.nav-kpi{cursor:pointer}
 .task-table-row:last-child{border-bottom:0}
 .task-radio{width:15px;height:15px;border:1px solid #9AAABC;border-radius:50%;cursor:pointer}
 .task-radio.done{background:#6CCB96;border-color:#6CCB96}
+.task-create-grid{display:grid;grid-template-columns:1.35fr .85fr .9fr;gap:10px;align-items:end}
+.task-waiting-fields{display:grid;grid-template-columns:.8fr .7fr 1.5fr;gap:8px;margin-top:10px;padding:12px;border:1px solid #DDD8F7;border-radius:8px;background:#FAF9FF}
+.task-waiting-fields[hidden]{display:none}
+.task-field{display:grid;gap:5px;min-width:0}
+.task-field label{font-size:10px;color:#65748A;font-weight:600}
+.task-table-row>span small{display:block;margin-top:4px;font-size:10px;line-height:1.35}
 .history-list.final-history{border:1px solid var(--final-line);border-radius:8px;padding:12px 16px;background:#FFF}
 .final-hist-item{display:grid;grid-template-columns:14px 1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid #EDF2F6}
 .final-hist-item:last-child{border-bottom:0}
@@ -1928,6 +1942,7 @@ button.nav-kpi{cursor:pointer}
   .board,.final-board{min-width:980px!important}
   .panel{width:100vw!important;max-width:100vw!important}
   .final-grid-2,.final-kpis,.final-data-grid,.finance-hero,.finance-expectation{grid-template-columns:1fr!important}
+  .task-create-grid,.task-waiting-fields{grid-template-columns:1fr!important}
 }
 </style>
 </head>
@@ -2374,10 +2389,53 @@ function formatPhoneInput(input){
 }
 function tagKey(label){ return (label||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 function taskKindValue(t){ return (t && (t.kind || t.type)) || 'internal'; }
+function isInternalTask(t){ return taskKindValue(t) === 'internal'; }
 function isProcessDeadline(t){ return taskKindValue(t) === 'process_deadline'; }
 function isPaymentDeadline(t){ return taskKindValue(t) === 'payment_deadline'; }
 function isHearingTask(t){ return taskKindValue(t) === 'hearing'; }
 function isExpertiseTask(t){ return taskKindValue(t) === 'expertise'; }
+function taskWorkflowStatus(t){
+  if(t && t.done) return 'done';
+  const status = t && t.status;
+  return ['pending','in_progress','waiting_external'].includes(status) ? status : 'pending';
+}
+function taskWorkflowLabel(t){
+  const status = taskWorkflowStatus(t);
+  if(status === 'done') return 'Concluída';
+  if(status === 'in_progress') return 'Em andamento';
+  if(status === 'waiting_external') return 'Aguardando retorno';
+  return 'Pendente';
+}
+function taskWorkflowClass(t){
+  const status = taskWorkflowStatus(t);
+  if(status === 'done') return 'done';
+  if(status === 'in_progress') return 'in-progress';
+  if(status === 'waiting_external') return 'waiting';
+  return 'pending';
+}
+function waitingOnLabel(value){
+  const labels = {
+    client:'cliente',
+    inss:'INSS',
+    expert:'perito',
+    leticia:'Letícia',
+    documents:'documentos',
+    other:'terceiro',
+  };
+  return labels[value] || 'retorno externo';
+}
+function canWaitForExternal(t){ return isInternalTask(t); }
+function isWaitingExternal(t){
+  return canWaitForExternal(t) && taskWorkflowStatus(t) === 'waiting_external';
+}
+function taskTrackingDate(t){
+  if(isWaitingExternal(t) && t.followUpDate) return t.followUpDate;
+  return (t && t.deadline) || '';
+}
+function taskWithTrackingDate(t){
+  const trackingDate = taskTrackingDate(t);
+  return {...t, originalDeadline:(t&&t.deadline)||'', deadline:trackingDate, trackingDate, waitingExternal:isWaitingExternal(t)};
+}
 function taskKindLabel(t){
   if(isProcessDeadline(t)) return 'Prazo processual';
   if(isPaymentDeadline(t)) return 'Pagamento do cliente';
@@ -2491,14 +2549,15 @@ function hasAlert(c){
   if(getFinanceAlerts([c]).length) return true;
   return c.tasks.some(t=>{
     if(t.done) return false;
-    if(!t.deadline) return false;
-    const s = dayStatus(t.deadline);
+    const trackingDate = taskTrackingDate(t);
+    if(!trackingDate) return false;
+    const s = dayStatus(trackingDate);
     return s==='overdue'||s==='urgent'||s==='warning';
   });
 }
 function nextDeadline(c){
-  const active = c.tasks.filter(t=>!t.done&&t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
-  return active.length ? active[0].deadline : null;
+  const active = c.tasks.filter(t=>!t.done&&taskTrackingDate(t)).sort((a,b)=>taskTrackingDate(a).localeCompare(taskTrackingDate(b)));
+  return active.length ? taskTrackingDate(active[0]) : null;
 }
 function nextProcessDeadline(c){
   const active = c.tasks.filter(t=>isProcessDeadline(t)&&!t.done&&t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
@@ -2511,7 +2570,8 @@ function nextPaymentDeadline(c){
 function pendingCount(){
   let n=0;
   clients.forEach(c=>c.tasks.forEach(t=>{
-    if(!t.done&&t.deadline){const s=dayStatus(t.deadline);if(s==='overdue'||s==='urgent'||s==='warning')n++;}
+    const trackingDate = taskTrackingDate(t);
+    if(!t.done&&trackingDate){const s=dayStatus(trackingDate);if(s==='overdue'||s==='urgent'||s==='warning')n++;}
   }));
   return n;
 }
@@ -2873,8 +2933,12 @@ function mkClient(fields){
   if(!c.history.length) c.history=[{id:uid(),date:n,action:'Cliente cadastrado',details:'Cadastro inicial do sistema',type:'default'}];
   return c;
 }
-function mkTask(desc, deadline='', done=false, kind='internal', time=''){
-  return {id:uid(), description:desc, deadline, time, done, kind, type:kind, doneAt:'', createdAt:now()};
+function mkTask(desc, deadline='', done=false, kind='internal', time='', status='pending', waitingOn='', followUpDate='', waitingNote=''){
+  return {
+    id:uid(), description:desc, deadline, time, done, kind, type:kind,
+    status:done?'done':status, waitingOn, followUpDate, waitingNote,
+    doneAt:'', createdAt:now()
+  };
 }
 function mkGlobalTask(desc, deadline=''){
   return {id:uid(), description:desc, deadline, done:false, doneAt:'', createdAt:now()};
@@ -2974,8 +3038,24 @@ function normalizeClient(c){
     if(!t.id) t.id = uid();
     if(!t.description) t.description = '';
     if(typeof t.done !== 'boolean') t.done = false;
-    if(!t.kind) t.kind = 'internal';
+    t.kind = taskKindValue(t);
+    t.type = t.kind;
     if(!t.deadline) t.deadline = '';
+    if(!t.time) t.time = '';
+    if(!t.waitingOn) t.waitingOn = '';
+    if(!t.followUpDate) t.followUpDate = '';
+    if(!t.waitingNote) t.waitingNote = '';
+    if(t.done){
+      t.status = 'done';
+    } else {
+      t.status = ['pending','in_progress','waiting_external'].includes(t.status) ? t.status : 'pending';
+      if(!isInternalTask(t) && t.status === 'waiting_external'){
+        t.status = 'in_progress';
+        t.waitingOn = '';
+        t.followUpDate = '';
+        t.waitingNote = '';
+      }
+    }
     if(!t.doneAt) t.doneAt = '';
     if(!t.createdAt) t.createdAt = now();
     return t;
@@ -3266,13 +3346,13 @@ function getSidebarTaskItems(clientList=clients){
   const items = [];
   globalTasks.forEach(t=>{
     if(!t.done){
-      items.push({...t, isGlobal:true, clientName:'Tarefa'});
+      items.push({...taskWithTrackingDate(t), isGlobal:true, clientName:'Tarefa'});
     }
   });
   clientList.forEach(c=>{
     (c.tasks||[]).forEach(t=>{
       if(!t.done && !isProcessDeadline(t) && !isPaymentDeadline(t) && !isHearingTask(t) && !isExpertiseTask(t)){
-        items.push({...t, clientId:c.id, clientName:c.name, isGlobal:false});
+        items.push({...taskWithTrackingDate(t), clientId:c.id, clientName:c.name, isGlobal:false});
       }
     });
   });
@@ -3567,7 +3647,7 @@ function getNextTask(c){
   if(process.length) return process[0];
   const payments = pending.filter(t=>isPaymentDeadline(t)&&t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
   if(payments.length) return payments[0];
-  const withDate = pending.filter(t=>t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
+  const withDate = pending.map(taskWithTrackingDate).filter(t=>t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
   return withDate[0] || pending[0] || null;
 }
 function getCaseStatusMeta(c){
@@ -3576,7 +3656,7 @@ function getCaseStatusMeta(c){
   const col = COLS.find(x=>x.id===c.column);
   if(next && next.deadline){
     const status = dayStatus(next.deadline);
-    const prefix = isProcessDeadline(next) ? 'Prazo processual' : isPaymentDeadline(next) ? 'Pagamento do cliente' : 'Prazo';
+    const prefix = next.waitingExternal ? 'Acompanhamento' : isProcessDeadline(next) ? 'Prazo processual' : isPaymentDeadline(next) ? 'Pagamento do cliente' : 'Prazo';
     if(status==='overdue') return {title:`${prefix} vencido`, detail:`${next.description} venceu em ${fmtTaskDate(next)}`, color:'#D97070'};
     if(status==='urgent') return {title:`${prefix} urgente`, detail:`${next.description} até ${fmtTaskDate(next)}`, color:'#D97070'};
     if(status==='warning') return {title:`${prefix} próximo`, detail:`${next.description} até ${fmtTaskDate(next)}`, color:'#D8B16A'};
@@ -3866,15 +3946,34 @@ function tabTarefas(c){
   </div>`;
 }
 
+function updateNewTaskStatusFields(){
+  const kindEl = document.getElementById('new-task-kind');
+  const statusEl = document.getElementById('new-task-status');
+  const waitingFields = document.getElementById('new-task-waiting-fields');
+  if(!kindEl || !statusEl || !waitingFields) return;
+  const waitingOption = statusEl.querySelector('option[value="waiting_external"]');
+  const canWait = kindEl.value === 'internal';
+  if(waitingOption) waitingOption.disabled = !canWait;
+  if(!canWait && statusEl.value === 'waiting_external') statusEl.value = 'in_progress';
+  waitingFields.hidden = !(canWait && statusEl.value === 'waiting_external');
+}
 function toggleTask(clientId, taskId){
   const c = clients.find(x=>x.id===clientId);
   if(!c) return;
   const t = c.tasks.find(x=>x.id===taskId);
   if(!t) return;
+  const previousStatus = taskWorkflowStatus(t);
   t.done = !t.done;
   t.doneAt = t.done ? now() : '';
-  if(t.done) addHistory(c,'Tarefa concluída', t.description, 'task');
-  else addHistory(c,'Tarefa reaberta', t.description, 'default');
+  if(t.done){
+    t.statusBeforeDone = previousStatus;
+    t.status = 'done';
+    addHistory(c,'Tarefa concluída', t.description, 'task');
+  } else {
+    t.status = ['pending','in_progress','waiting_external'].includes(t.statusBeforeDone) ? t.statusBeforeDone : 'pending';
+    if(t.status === 'waiting_external' && (!isInternalTask(t) || !t.followUpDate)) t.status = 'pending';
+    addHistory(c,'Tarefa reaberta', `${t.description} — ${taskWorkflowLabel(t)}`, 'default');
+  }
   save();
   renderPanelBody();
   renderBoard();
@@ -3907,13 +4006,52 @@ function editTask(clientId, taskId){
     newTime = timeValue.trim();
     if(newTime && !/^\d{2}:\d{2}$/.test(newTime)){ alert('Use o horário no formato HH:MM.'); return; }
   }
+  let newStatus = t.done ? 'done' : taskWorkflowStatus(t);
+  let waitingOn = '';
+  let followUpDate = '';
+  let waitingNote = '';
+  if(!t.done){
+    const statusHint = newKind === 'internal'
+      ? 'Status da tarefa:\n1 - Pendente\n2 - Em andamento\n3 - Aguardando retorno'
+      : 'Status da tarefa:\n1 - Pendente\n2 - Em andamento\n\nA opção “Aguardando retorno” só pode ser usada em tarefas.';
+    const currentStatus = newStatus === 'in_progress' ? '2' : newStatus === 'waiting_external' ? '3' : '1';
+    const statusChoice = prompt(statusHint, currentStatus);
+    if(statusChoice===null) return;
+    const normalizedStatus = String(statusChoice).trim();
+    if(normalizedStatus === '3' && newKind !== 'internal'){
+      alert('Prazos processuais, pagamentos, audiências e perícias não podem ter o alerta suspenso.');
+      return;
+    }
+    newStatus = normalizedStatus === '3' ? 'waiting_external' : normalizedStatus === '2' ? 'in_progress' : 'pending';
+    if(newStatus === 'waiting_external'){
+      const waitingChoices = 'Aguardando quem/qual retorno?\n1 - Cliente\n2 - INSS\n3 - Perito\n4 - Letícia\n5 - Documentos\n6 - Outro';
+      const currentWaiting = {client:'1',inss:'2',expert:'3',leticia:'4',documents:'5',other:'6'}[t.waitingOn] || '1';
+      const waitingChoice = prompt(waitingChoices, currentWaiting);
+      if(waitingChoice===null) return;
+      waitingOn = ({'1':'client','2':'inss','3':'expert','4':'leticia','5':'documents','6':'other'})[String(waitingChoice).trim()] || 'other';
+      const followValue = prompt('Próxima data de acompanhamento (AAAA-MM-DD):', t.followUpDate || '');
+      if(followValue===null) return;
+      followUpDate = followValue.trim();
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(followUpDate)){ alert('Informe a próxima data de acompanhamento no formato AAAA-MM-DD.'); return; }
+      const noteValue = prompt('Observação sobre o que está pendente (opcional):', t.waitingNote || '');
+      if(noteValue===null) return;
+      waitingNote = noteValue.trim();
+    }
+  }
   const oldDesc = t.description;
   t.description = trimmed;
   t.kind = newKind;
   t.type = newKind;
   t.deadline = newDate;
   t.time = newTime;
-  addHistory(c,'Tarefa editada',`${oldDesc} → ${trimmed}${newDate?' — '+fmtTaskDate(t):''}`,'task');
+  t.status = newStatus;
+  t.waitingOn = waitingOn;
+  t.followUpDate = followUpDate;
+  t.waitingNote = waitingNote;
+  const trackingDetail = newStatus === 'waiting_external'
+    ? ` — aguardando ${waitingOnLabel(waitingOn)}; acompanhar em ${fmtDate(followUpDate)}`
+    : ` — ${taskWorkflowLabel(t)}`;
+  addHistory(c,'Tarefa editada',`${oldDesc} → ${trimmed}${newDate?' — prazo original: '+fmtTaskDate(t):''}${trackingDetail}`,'task');
   save();
   renderPanelBody();
   renderBoard();
@@ -3939,11 +4077,34 @@ function addTask(clientId){
   const timeEl = document.getElementById('new-task-time');
   const time = timeEl ? timeEl.value : '';
   const kind = document.getElementById('new-task-kind').value;
+  const statusEl = document.getElementById('new-task-status');
+  const status = statusEl ? statusEl.value : 'pending';
+  const waitingOnEl = document.getElementById('new-task-waiting-on');
+  const followUpEl = document.getElementById('new-task-follow-up');
+  const waitingNoteEl = document.getElementById('new-task-waiting-note');
+  const waitingOn = waitingOnEl ? waitingOnEl.value : '';
+  const followUpDate = followUpEl ? followUpEl.value : '';
+  const waitingNote = waitingNoteEl ? waitingNoteEl.value.trim() : '';
   if(!desc){ alert('Informe a descrição da tarefa.'); return; }
   if(taskKindNeedsDate(kind) && !date){ alert('Este tipo de tarefa precisa ter data.'); return; }
-  const task = mkTask(desc, date, false, kind, (kind==='hearing'||kind==='expertise') ? time : '');
+  if(status === 'waiting_external' && kind !== 'internal'){
+    alert('Somente tarefas podem ficar como “Aguardando retorno”.');
+    return;
+  }
+  if(status === 'waiting_external' && (!waitingOn || !followUpDate)){
+    alert('Informe de quem você aguarda o retorno e a próxima data de acompanhamento.');
+    return;
+  }
+  const task = mkTask(
+    desc, date, false, kind, (kind==='hearing'||kind==='expertise') ? time : '',
+    status, status==='waiting_external'?waitingOn:'', status==='waiting_external'?followUpDate:'',
+    status==='waiting_external'?waitingNote:''
+  );
   c.tasks.push(task);
-  addHistory(c, taskKindHistoryLabel(kind), desc+(date?' — data: '+fmtTaskDate(task):''), 'task');
+  const trackingDetail = status === 'waiting_external'
+    ? ` — aguardando ${waitingOnLabel(waitingOn)}; acompanhar em ${fmtDate(followUpDate)}`
+    : ` — ${taskWorkflowLabel(task)}`;
+  addHistory(c, taskKindHistoryLabel(kind), desc+(date?' — prazo original: '+fmtTaskDate(task):'')+trackingDetail, 'task');
   save();
   renderPanelBody();
   renderBoard();
@@ -3974,6 +4135,12 @@ function toggleTaskKind(clientId, taskId){
     t.kind = 'internal';
     t.type = 'internal';
     addHistory(c,'Perícia convertida em tarefa',t.description,'task');
+  }
+  if(!isInternalTask(t) && t.status === 'waiting_external'){
+    t.status = 'in_progress';
+    t.waitingOn = '';
+    t.followUpDate = '';
+    t.waitingNote = '';
   }
   save();
   renderPanelBody();
@@ -4924,6 +5091,7 @@ function finalDateClass(date){
 }
 function finalDueLabel(task){
   if(!task || !task.deadline) return 'Sem prazo';
+  if(task.waitingExternal || isWaitingExternal(task)) return `Acompanhamento: ${fmtDate(task.deadline)}`;
   if(isProcessDeadline(task)) return `Prazo: ${fmtTaskDate(task)}`;
   if(isPaymentDeadline(task)) return `Pagamento: ${fmtTaskDate(task)}`;
   if(isHearingTask(task)) return `Audiência: ${fmtTaskDate(task)}`;
@@ -4932,10 +5100,12 @@ function finalDueLabel(task){
 }
 function finalTaskStatus(t){
   if(t.done) return ['Concluída','done'];
-  const s = t.deadline ? dayStatus(t.deadline) : '';
+  if(isWaitingExternal(t)) return ['Aguardando retorno','waiting'];
+  if(taskWorkflowStatus(t) === 'in_progress') return ['Em andamento','active'];
+  const trackingDate = taskTrackingDate(t);
+  const s = trackingDate ? dayStatus(trackingDate) : '';
   if(s==='overdue') return ['Atrasada','late'];
-  if(s==='urgent' || s==='warning') return ['Pendente','pending'];
-  return ['Em andamento','active'];
+  return ['Pendente','pending'];
 }
 function renderWorkspaceSwitcher(){
   const el = document.getElementById('workspace-switcher');
@@ -5071,11 +5241,12 @@ function renderKanbanDeadlineAlerts(clientList=clients){
     <div class="kanban-alert-head"><div class="kanban-alert-title">${title}</div><div class="kanban-alert-count">${count}</div></div>
     <div class="kanban-alert-row">${items.length ? items.map(t=>{
       const overdue = t.deadline && dayStatus(t.deadline)==='overdue';
-      const overdueLabel = cls==='task' ? 'Atrasada' : cls==='hearing' || cls==='expertise' ? 'Data expirada' : 'Vencido';
+      const overdueLabel = cls==='task' && t.waitingExternal ? 'Acompanhamento vencido' : cls==='task' ? 'Atrasada' : cls==='hearing' || cls==='expertise' ? 'Data expirada' : 'Vencido';
       return `<div class="kanban-alert-item ${cls}${overdue?' overdue':''}${t.sidebarKind==='finance'?` finance ${t.tone||''}`:''}" onclick="${t.clientId?`openPanel('${t.clientId}');${t.sidebarKind==='finance'?`setTimeout(()=>document.querySelector('[data-tab=honorarios]')?.click(),0);`:''}`:''}">
       <div class="kanban-alert-client">${esc(t.clientName||'Tarefa')}${overdue?`<span class="sidebar-overdue-icon" title="${overdueLabel}" aria-label="${overdueLabel}">⚠ ${overdueLabel}</span>`:''}</div>
       <div class="kanban-alert-desc">${esc(t.description||'Pendência')}</div>
-      <div class="kanban-alert-date">${t.deadline?`${t.sidebarKind==='finance' ? 'Financeiro' : taskKindLabel(t)}: ${fmtTaskDate(t)}`:'Sem data'}</div>
+      ${t.waitingExternal?`<div class="kanban-alert-desc">Aguardando ${esc(waitingOnLabel(t.waitingOn))}</div>`:''}
+      <div class="kanban-alert-date">${t.deadline?`${t.sidebarKind==='finance' ? 'Financeiro' : t.waitingExternal ? 'Acompanhamento' : taskKindLabel(t)}: ${fmtTaskDate(t)}`:'Sem data'}</div>
     </div>`;
     }).join('') : `<div class="kanban-alert-empty">${empty}</div>`}</div>
   </section>`;
@@ -5139,7 +5310,7 @@ function tabResumo(c){
       <div class="final-section final-next-card">
         <div class="final-section-title">Próximo passo</div>
         <strong>${next?esc(next.description):'Nenhuma tarefa pendente'}</strong>
-        <p class="final-card-date ${nextDate}">${next&&next.deadline ? `Vence em ${fmtTaskDate(next)}` : 'Sem prazo ativo'}</p>
+        <p class="final-card-date ${nextDate}">${next&&next.deadline ? `${next.waitingExternal?'Acompanhar em':'Vence em'} ${fmtTaskDate(next)}` : 'Sem prazo ativo'}</p>
         ${next?`<button class="final-action-btn" onclick="document.querySelector('[data-tab=tarefas]').click()">Ver tarefa</button>`:''}
       </div>
     </div>
@@ -5183,27 +5354,42 @@ function tabTarefas(c){
   const tasks = c.tasks || [];
   const pending = tasks.filter(t=>!t.done);
   const done = tasks.filter(t=>t.done);
+  const inProgress = pending.filter(t=>taskWorkflowStatus(t)==='in_progress');
+  const waiting = pending.filter(t=>isWaitingExternal(t));
+  const overdue = pending.filter(t=>{
+    const trackingDate = taskTrackingDate(t);
+    return trackingDate && dayStatus(trackingDate)==='overdue';
+  });
   const rows = tasks.length ? tasks.map(t=>{
+    const trackingDate = taskTrackingDate(t);
+    const workflowLabel = taskWorkflowLabel(t);
+    const workflowClass = taskWorkflowClass(t);
     return `<div class="task-table-row">
       <span class="task-radio ${t.done?'done':''}" onclick="toggleTask('${c.id}','${t.id}')"></span>
       <div class="task-main">
         <strong>${esc(t.description)}</strong>
-        <small>${t.done&&t.doneAt?'Concluída em '+fmtDateTime(t.doneAt):(t.deadline?'Vence '+fmtTaskDate(t):'Sem prazo')}</small>
+        <small>${t.done&&t.doneAt?'Concluída em '+fmtDateTime(t.doneAt):(t.deadline?'Prazo original: '+fmtTaskDate(t):'Sem prazo original')}</small>
+        <div class="task-status-line">
+          <span class="task-workflow-chip ${workflowClass}">${workflowLabel}</span>
+          ${isWaitingExternal(t)?`<small class="task-waiting-meta">Aguardando ${esc(waitingOnLabel(t.waitingOn))} · acompanhar em ${fmtDate(t.followUpDate)}</small>`:''}
+        </div>
+        ${isWaitingExternal(t)&&t.waitingNote?`<small>${esc(t.waitingNote)}</small>`:''}
         <div class="task-actions">
           <button class="task-action-link" onclick="editTask('${c.id}','${t.id}')">Editar</button>
           <button class="task-action-link delete" onclick="deleteTask('${c.id}','${t.id}')">Excluir</button>
         </div>
       </div>
       <span class="final-chip">${taskKindLabel(t)}</span>
-      <span>${t.deadline?fmtTaskDate(t):'Sem prazo'}</span>
+      <span>${t.deadline?fmtTaskDate(t):'Sem prazo'}${isWaitingExternal(t)&&trackingDate?`<small class="task-waiting-meta">Acompanhar ${fmtDate(trackingDate)}</small>`:''}</span>
     </div>`;
   }).join('') : '<div class="finance-empty">Nenhuma tarefa cadastrada.</div>';
   return `<div class="case-stack">
-    <div class="final-kpis">
-      <div class="final-kpi"><span>Pendentes</span><strong>${pending.length}</strong></div>
-      <div class="final-kpi"><span>Em andamento</span><strong>${pending.filter(t=>t.deadline).length}</strong></div>
+    <div class="final-kpis task-kpis">
+      <div class="final-kpi"><span>Pendentes</span><strong>${pending.filter(t=>taskWorkflowStatus(t)==='pending').length}</strong></div>
+      <div class="final-kpi"><span>Em andamento</span><strong>${inProgress.length}</strong></div>
+      <div class="final-kpi"><span>Aguardando retorno</span><strong>${waiting.length}</strong></div>
+      <div class="final-kpi"><span>Atrasadas</span><strong>${overdue.length}</strong></div>
       <div class="final-kpi"><span>Concluídas</span><strong>${done.length}</strong></div>
-      <div class="final-kpi"><span>Atrasadas</span><strong>${pending.filter(t=>t.deadline&&dayStatus(t.deadline)==='overdue').length}</strong></div>
     </div>
     <div class="final-section">
       <div class="final-section-title">Tarefas do cliente</div>
@@ -5214,12 +5400,18 @@ function tabTarefas(c){
     </div>
     <div class="final-section">
       <div class="final-section-title">Nova tarefa</div>
-      <div style="display:grid;grid-template-columns:1.3fr .8fr .65fr .55fr auto;gap:8px">
-        <input class="fi" id="new-task-desc" placeholder="Descreva a tarefa...">
-        <select class="fi-select" id="new-task-kind"><option value="internal">Tarefa</option><option value="process_deadline">Prazo processual</option><option value="payment_deadline">Pagamento</option><option value="hearing">Audiência</option><option value="expertise">Perícia</option></select>
-        <input class="fi" id="new-task-date" type="date">
-        <input class="fi" id="new-task-time" type="time" title="Horário da audiência ou perícia">
+      <div class="task-create-grid">
+        <div class="task-field"><label>Descrição</label><input class="fi" id="new-task-desc" placeholder="Descreva a tarefa..."></div>
+        <div class="task-field"><label>Tipo</label><select class="fi-select" id="new-task-kind" onchange="updateNewTaskStatusFields()"><option value="internal">Tarefa</option><option value="process_deadline">Prazo processual</option><option value="payment_deadline">Pagamento</option><option value="hearing">Audiência</option><option value="expertise">Perícia</option></select></div>
+        <div class="task-field"><label>Status</label><select class="fi-select" id="new-task-status" onchange="updateNewTaskStatusFields()"><option value="pending">Pendente</option><option value="in_progress">Em andamento</option><option value="waiting_external">Aguardando retorno</option></select></div>
+        <div class="task-field"><label>Prazo original</label><input class="fi" id="new-task-date" type="date"></div>
+        <div class="task-field"><label>Horário</label><input class="fi" id="new-task-time" type="time" title="Horário da audiência ou perícia"></div>
         <button class="btn-s p" onclick="addTask('${c.id}')">Adicionar</button>
+      </div>
+      <div class="task-waiting-fields" id="new-task-waiting-fields" hidden>
+        <div class="task-field"><label>Aguardando</label><select class="fi-select" id="new-task-waiting-on"><option value="client">Cliente</option><option value="inss">INSS</option><option value="expert">Perito</option><option value="leticia">Letícia</option><option value="documents">Documentos</option><option value="other">Outro</option></select></div>
+        <div class="task-field"><label>Próximo acompanhamento</label><input class="fi" id="new-task-follow-up" type="date"></div>
+        <div class="task-field"><label>Observação (opcional)</label><input class="fi" id="new-task-waiting-note" placeholder="Ex.: documentos solicitados em 24/07"></div>
       </div>
     </div>
   </div>`;
