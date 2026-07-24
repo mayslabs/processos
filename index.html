@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-07-24-destaque-aguardando">
+<meta name="app-build" content="2026-07-24-tarefas-inline">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-07-24-destaque-aguardando';
+  const build = '2026-07-24-tarefas-inline';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1879,12 +1879,30 @@ button.nav-kpi{cursor:pointer}
 .task-table-row:last-child{border-bottom:0}
 .task-radio{width:15px;height:15px;border:1px solid #9AAABC;border-radius:50%;cursor:pointer}
 .task-radio.done{background:#6CCB96;border-color:#6CCB96}
+.task-section-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.task-section-toolbar .final-section-title{margin:0}
+.task-new-toggle{height:34px!important;padding:0 12px!important}
+.task-inline-form{border:1px solid #DCE5F3;border-radius:8px;background:#F8FAFE;padding:14px;margin-bottom:12px}
+.task-inline-form.edit{margin:0;background:#F7F9FF;border-color:#D8E1F5}
+.task-inline-form-title{font-size:12px;font-weight:600;color:#27344A;margin-bottom:12px}
+.task-table-row.editor{display:block;padding:10px;background:#FBFCFF}
 .task-create-grid{display:grid;grid-template-columns:1.35fr .85fr .9fr;gap:10px;align-items:end}
 .task-waiting-fields{display:grid;grid-template-columns:.8fr .7fr 1.5fr;gap:8px;margin-top:10px;padding:12px;border:1px solid #DDD8F7;border-radius:8px;background:#FAF9FF}
 .task-waiting-fields[hidden]{display:none}
 .task-field{display:grid;gap:5px;min-width:0}
 .task-field label{font-size:10px;color:#65748A;font-weight:600}
+.task-description-field{grid-column:1/-1}
 .task-table-row>span small{display:block;margin-top:4px;font-size:10px;line-height:1.35}
+.task-form-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:12px}
+.task-form-actions .final-action-btn{width:auto;min-width:92px;padding:0 14px}
+.task-form-error{display:none;margin-top:10px;border:1px solid #F5CACA;border-radius:7px;background:#FFF5F5;color:#A83E4B;padding:8px 10px;font-size:11px;line-height:1.4}
+.task-form-error.visible{display:block}
+.task-delete-confirm{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:9px;padding:9px 10px;border:1px solid #F2D0D0;border-radius:7px;background:#FFF7F7;color:#783E45}
+.task-delete-confirm span{font-size:11px;line-height:1.35}
+.task-delete-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+.task-delete-actions button{height:28px;border-radius:7px;padding:0 10px;font-size:10px;font-weight:600;cursor:pointer}
+.task-delete-cancel{border:1px solid #DCE5EE;background:#FFF;color:#536176}
+.task-delete-confirm-btn{border:1px solid #D97070;background:#D97070;color:#FFF}
 .history-list.final-history{border:1px solid var(--final-line);border-radius:8px;padding:12px 16px;background:#FFF}
 .final-hist-item{display:grid;grid-template-columns:14px 1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid #EDF2F6}
 .final-hist-item:last-child{border-bottom:0}
@@ -1945,6 +1963,9 @@ button.nav-kpi{cursor:pointer}
   .panel{width:100vw!important;max-width:100vw!important}
   .final-grid-2,.final-kpis,.final-data-grid,.finance-hero,.finance-expectation{grid-template-columns:1fr!important}
   .task-create-grid,.task-waiting-fields{grid-template-columns:1fr!important}
+  .task-description-field{grid-column:auto}
+  .task-delete-confirm{align-items:flex-start;flex-direction:column}
+  .task-delete-actions{width:100%;justify-content:flex-end}
 }
 </style>
 </head>
@@ -2286,6 +2307,9 @@ let globalTasks = [];
 let activeClientId = null;
 let activeTab = 'resumo';
 let resumoEditMode = false;
+let taskComposerOpen = false;
+let editingTaskId = null;
+let deletingTaskId = null;
 let taskFilter = 'pending';
 let searchQ = '';
 let calDate = new Date();
@@ -3609,6 +3633,9 @@ function openPanel(id){
   activeClientId = id;
   activeTab = 'resumo';
   resumoEditMode = false;
+  taskComposerOpen = false;
+  editingTaskId = null;
+  deletingTaskId = null;
   document.querySelectorAll('.ptab').forEach(t=>t.classList.toggle('active', t.dataset.tab==='resumo'));
   renderPanel();
   document.getElementById('overlay').classList.add('on');
@@ -3618,6 +3645,9 @@ function closePanel(){
   document.getElementById('overlay').classList.remove('on');
   document.getElementById('panel').classList.remove('on');
   activeClientId = null;
+  taskComposerOpen = false;
+  editingTaskId = null;
+  deletingTaskId = null;
 }
 function switchTab(el){
   activeTab = el.dataset.tab;
@@ -3948,16 +3978,37 @@ function tabTarefas(c){
   </div>`;
 }
 
-function updateNewTaskStatusFields(){
-  const kindEl = document.getElementById('new-task-kind');
-  const statusEl = document.getElementById('new-task-status');
-  const waitingFields = document.getElementById('new-task-waiting-fields');
+function setTaskFormError(prefix, message=''){
+  const el = document.getElementById(`${prefix}-error`);
+  if(!el) return;
+  el.textContent = message;
+  el.classList.toggle('visible', !!message);
+}
+function updateTaskFormFields(prefix){
+  const kindEl = document.getElementById(`${prefix}-kind`);
+  const statusEl = document.getElementById(`${prefix}-status`);
+  const waitingFields = document.getElementById(`${prefix}-waiting-fields`);
+  const timeField = document.getElementById(`${prefix}-time-field`);
   if(!kindEl || !statusEl || !waitingFields) return;
   const waitingOption = statusEl.querySelector('option[value="waiting_external"]');
-  const canWait = kindEl.value === 'internal';
+  const canWait = kindEl.value === 'internal' && !statusEl.disabled;
   if(waitingOption) waitingOption.disabled = !canWait;
   if(!canWait && statusEl.value === 'waiting_external') statusEl.value = 'in_progress';
   waitingFields.hidden = !(canWait && statusEl.value === 'waiting_external');
+  if(timeField) timeField.hidden = !(kindEl.value === 'hearing' || kindEl.value === 'expertise');
+  setTaskFormError(prefix);
+}
+function updateNewTaskStatusFields(){ updateTaskFormFields('new-task'); }
+function openTaskComposer(){
+  taskComposerOpen = true;
+  editingTaskId = null;
+  deletingTaskId = null;
+  renderPanelBody();
+  requestAnimationFrame(()=>document.getElementById('new-task-desc')?.focus());
+}
+function cancelTaskComposer(){
+  taskComposerOpen = false;
+  renderPanelBody();
 }
 function toggleTask(clientId, taskId){
   const c = clients.find(x=>x.id===clientId);
@@ -3986,74 +4037,85 @@ function editTask(clientId, taskId){
   if(!c) return;
   const t = c.tasks.find(x=>x.id===taskId);
   if(!t) return;
-  const newDesc = prompt('Editar tarefa:', t.description);
-  if(newDesc===null) return;
-  const trimmed = newDesc.trim();
-  if(!trimmed){ alert('A descrição não pode ficar vazia.'); return; }
-  const kindHint = 'Tipo da tarefa:\n1 - Tarefa\n2 - Prazo processual\n3 - Pagamento do cliente\n4 - Audiência\n5 - Perícia';
-  const currentKind = isProcessDeadline(t) ? '2' : isPaymentDeadline(t) ? '3' : isHearingTask(t) ? '4' : isExpertiseTask(t) ? '5' : '1';
-  const kindChoice = prompt(kindHint, currentKind);
-  if(kindChoice===null) return;
-  const normalizedKind = String(kindChoice).trim();
-  const newKind = normalizedKind === '2' ? 'process_deadline' : normalizedKind === '3' ? 'payment_deadline' : normalizedKind === '4' ? 'hearing' : normalizedKind === '5' ? 'expertise' : 'internal';
-  const dateValue = prompt('Prazo da tarefa (AAAA-MM-DD). Deixe em branco se não houver prazo:', t.deadline || '');
-  if(dateValue===null) return;
-  const newDate = dateValue.trim();
-  if(newDate && !/^\d{4}-\d{2}-\d{2}$/.test(newDate)){ alert('Use a data no formato AAAA-MM-DD.'); return; }
-  if(taskKindNeedsDate(newKind) && !newDate){ alert('Este tipo de tarefa precisa ter data.'); return; }
-  let newTime = '';
-  if(newKind === 'hearing' || newKind === 'expertise'){
-    const timeValue = prompt('Horário (HH:MM). Opcional:', t.time || '');
-    if(timeValue===null) return;
-    newTime = timeValue.trim();
-    if(newTime && !/^\d{2}:\d{2}$/.test(newTime)){ alert('Use o horário no formato HH:MM.'); return; }
+  taskComposerOpen = false;
+  deletingTaskId = null;
+  editingTaskId = taskId;
+  renderPanelBody();
+  requestAnimationFrame(()=>document.getElementById(`edit-task-${taskId}-desc`)?.focus());
+}
+function cancelTaskEdit(){
+  editingTaskId = null;
+  renderPanelBody();
+}
+function requestTaskDelete(taskId){
+  deletingTaskId = taskId;
+  editingTaskId = null;
+  renderPanelBody();
+}
+function cancelTaskDelete(){
+  deletingTaskId = null;
+  renderPanelBody();
+}
+function readTaskForm(prefix){
+  const read = suffix => document.getElementById(`${prefix}-${suffix}`);
+  return {
+    description:(read('desc')?.value || '').trim(),
+    kind:read('kind')?.value || 'internal',
+    status:read('status')?.value || 'pending',
+    deadline:read('date')?.value || '',
+    time:read('time')?.value || '',
+    waitingOn:read('waiting-on')?.value || '',
+    followUpDate:read('follow-up')?.value || '',
+    waitingNote:(read('waiting-note')?.value || '').trim(),
+  };
+}
+function validateTaskForm(data, prefix){
+  if(!data.description){
+    setTaskFormError(prefix, 'Informe a descrição da tarefa.');
+    document.getElementById(`${prefix}-desc`)?.focus();
+    return false;
   }
-  let newStatus = t.done ? 'done' : taskWorkflowStatus(t);
-  let waitingOn = '';
-  let followUpDate = '';
-  let waitingNote = '';
-  if(!t.done){
-    const statusHint = newKind === 'internal'
-      ? 'Status da tarefa:\n1 - Pendente\n2 - Em andamento\n3 - Aguardando retorno'
-      : 'Status da tarefa:\n1 - Pendente\n2 - Em andamento\n\nA opção “Aguardando retorno” só pode ser usada em tarefas.';
-    const currentStatus = newStatus === 'in_progress' ? '2' : newStatus === 'waiting_external' ? '3' : '1';
-    const statusChoice = prompt(statusHint, currentStatus);
-    if(statusChoice===null) return;
-    const normalizedStatus = String(statusChoice).trim();
-    if(normalizedStatus === '3' && newKind !== 'internal'){
-      alert('Prazos processuais, pagamentos, audiências e perícias não podem ter o alerta suspenso.');
-      return;
-    }
-    newStatus = normalizedStatus === '3' ? 'waiting_external' : normalizedStatus === '2' ? 'in_progress' : 'pending';
-    if(newStatus === 'waiting_external'){
-      const waitingChoices = 'Aguardando quem/qual retorno?\n1 - Cliente\n2 - INSS\n3 - Perito\n4 - Letícia\n5 - Documentos\n6 - Outro';
-      const currentWaiting = {client:'1',inss:'2',expert:'3',leticia:'4',documents:'5',other:'6'}[t.waitingOn] || '1';
-      const waitingChoice = prompt(waitingChoices, currentWaiting);
-      if(waitingChoice===null) return;
-      waitingOn = ({'1':'client','2':'inss','3':'expert','4':'leticia','5':'documents','6':'other'})[String(waitingChoice).trim()] || 'other';
-      const followValue = prompt('Próxima data de acompanhamento (AAAA-MM-DD):', t.followUpDate || '');
-      if(followValue===null) return;
-      followUpDate = followValue.trim();
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(followUpDate)){ alert('Informe a próxima data de acompanhamento no formato AAAA-MM-DD.'); return; }
-      const noteValue = prompt('Observação sobre o que está pendente (opcional):', t.waitingNote || '');
-      if(noteValue===null) return;
-      waitingNote = noteValue.trim();
-    }
+  if(taskKindNeedsDate(data.kind) && !data.deadline){
+    setTaskFormError(prefix, 'Informe a data deste prazo, pagamento, audiência ou perícia.');
+    document.getElementById(`${prefix}-date`)?.focus();
+    return false;
   }
+  if(data.status === 'waiting_external' && data.kind !== 'internal'){
+    setTaskFormError(prefix, 'Somente tarefas podem ficar como “Aguardando retorno”.');
+    return false;
+  }
+  if(data.status === 'waiting_external' && (!data.waitingOn || !data.followUpDate)){
+    setTaskFormError(prefix, 'Informe de quem você aguarda o retorno e a próxima data de acompanhamento.');
+    return false;
+  }
+  setTaskFormError(prefix);
+  return true;
+}
+function saveTaskEdit(clientId, taskId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c) return;
+  const t = c.tasks.find(x=>x.id===taskId);
+  if(!t) return;
+  const prefix = `edit-task-${taskId}`;
+  const data = readTaskForm(prefix);
+  if(!validateTaskForm(data, prefix)) return;
   const oldDesc = t.description;
-  t.description = trimmed;
-  t.kind = newKind;
-  t.type = newKind;
-  t.deadline = newDate;
-  t.time = newTime;
-  t.status = newStatus;
-  t.waitingOn = waitingOn;
-  t.followUpDate = followUpDate;
-  t.waitingNote = waitingNote;
-  const trackingDetail = newStatus === 'waiting_external'
-    ? ` — aguardando ${waitingOnLabel(waitingOn)}; acompanhar em ${fmtDate(followUpDate)}`
+  t.description = data.description;
+  t.kind = data.kind;
+  t.type = data.kind;
+  t.deadline = data.deadline;
+  t.time = (data.kind==='hearing'||data.kind==='expertise') ? data.time : '';
+  if(!t.done){
+    t.status = data.status;
+    t.waitingOn = data.status==='waiting_external' ? data.waitingOn : '';
+    t.followUpDate = data.status==='waiting_external' ? data.followUpDate : '';
+    t.waitingNote = data.status==='waiting_external' ? data.waitingNote : '';
+  }
+  const trackingDetail = t.status === 'waiting_external'
+    ? ` — aguardando ${waitingOnLabel(t.waitingOn)}; acompanhar em ${fmtDate(t.followUpDate)}`
     : ` — ${taskWorkflowLabel(t)}`;
-  addHistory(c,'Tarefa editada',`${oldDesc} → ${trimmed}${newDate?' — prazo original: '+fmtTaskDate(t):''}${trackingDetail}`,'task');
+  addHistory(c,'Tarefa editada',`${oldDesc} → ${t.description}${t.deadline?' — prazo original: '+fmtTaskDate(t):''}${trackingDetail}`,'task');
+  editingTaskId = null;
   save();
   renderPanelBody();
   renderBoard();
@@ -4064,9 +4126,9 @@ function deleteTask(clientId, taskId){
   if(!c) return;
   const t = c.tasks.find(x=>x.id===taskId);
   if(!t) return;
-  if(!confirm('Remover esta tarefa?')) return;
   c.tasks = c.tasks.filter(x=>x.id!==taskId);
   addHistory(c,'Tarefa removida', t.description, 'warn');
+  deletingTaskId = null;
   save();
   renderPanelBody();
   renderBoard();
@@ -4074,39 +4136,19 @@ function deleteTask(clientId, taskId){
 function addTask(clientId){
   const c = clients.find(x=>x.id===clientId);
   if(!c) return;
-  const desc = document.getElementById('new-task-desc').value.trim();
-  const date = document.getElementById('new-task-date').value;
-  const timeEl = document.getElementById('new-task-time');
-  const time = timeEl ? timeEl.value : '';
-  const kind = document.getElementById('new-task-kind').value;
-  const statusEl = document.getElementById('new-task-status');
-  const status = statusEl ? statusEl.value : 'pending';
-  const waitingOnEl = document.getElementById('new-task-waiting-on');
-  const followUpEl = document.getElementById('new-task-follow-up');
-  const waitingNoteEl = document.getElementById('new-task-waiting-note');
-  const waitingOn = waitingOnEl ? waitingOnEl.value : '';
-  const followUpDate = followUpEl ? followUpEl.value : '';
-  const waitingNote = waitingNoteEl ? waitingNoteEl.value.trim() : '';
-  if(!desc){ alert('Informe a descrição da tarefa.'); return; }
-  if(taskKindNeedsDate(kind) && !date){ alert('Este tipo de tarefa precisa ter data.'); return; }
-  if(status === 'waiting_external' && kind !== 'internal'){
-    alert('Somente tarefas podem ficar como “Aguardando retorno”.');
-    return;
-  }
-  if(status === 'waiting_external' && (!waitingOn || !followUpDate)){
-    alert('Informe de quem você aguarda o retorno e a próxima data de acompanhamento.');
-    return;
-  }
+  const data = readTaskForm('new-task');
+  if(!validateTaskForm(data, 'new-task')) return;
   const task = mkTask(
-    desc, date, false, kind, (kind==='hearing'||kind==='expertise') ? time : '',
-    status, status==='waiting_external'?waitingOn:'', status==='waiting_external'?followUpDate:'',
-    status==='waiting_external'?waitingNote:''
+    data.description, data.deadline, false, data.kind, (data.kind==='hearing'||data.kind==='expertise') ? data.time : '',
+    data.status, data.status==='waiting_external'?data.waitingOn:'', data.status==='waiting_external'?data.followUpDate:'',
+    data.status==='waiting_external'?data.waitingNote:''
   );
   c.tasks.push(task);
-  const trackingDetail = status === 'waiting_external'
-    ? ` — aguardando ${waitingOnLabel(waitingOn)}; acompanhar em ${fmtDate(followUpDate)}`
+  const trackingDetail = data.status === 'waiting_external'
+    ? ` — aguardando ${waitingOnLabel(data.waitingOn)}; acompanhar em ${fmtDate(data.followUpDate)}`
     : ` — ${taskWorkflowLabel(task)}`;
-  addHistory(c, taskKindHistoryLabel(kind), desc+(date?' — prazo original: '+fmtTaskDate(task):'')+trackingDetail, 'task');
+  addHistory(c, taskKindHistoryLabel(data.kind), data.description+(data.deadline?' — prazo original: '+fmtTaskDate(task):'')+trackingDetail, 'task');
+  taskComposerOpen = false;
   save();
   renderPanelBody();
   renderBoard();
@@ -5264,6 +5306,9 @@ function openPanel(id){
   activeClientId = id;
   activeTab = 'resumo';
   resumoEditMode = false;
+  taskComposerOpen = false;
+  editingTaskId = null;
+  deletingTaskId = null;
   document.querySelectorAll('.ptab').forEach(t=>t.classList.toggle('active', t.dataset.tab==='resumo'));
   renderPanel();
   document.getElementById('overlay').classList.add('on');
@@ -5352,6 +5397,80 @@ function tabResumo(c){
     </div>
   </div>`;
 }
+function renderTaskInlineForm(c, task=null){
+  const isEdit = !!task;
+  const prefix = isEdit ? `edit-task-${task.id}` : 'new-task';
+  const kind = task ? taskKindValue(task) : 'internal';
+  const status = task ? taskWorkflowStatus(task) : 'pending';
+  const waitingVisible = !task?.done && kind === 'internal' && status === 'waiting_external';
+  const timeVisible = kind === 'hearing' || kind === 'expertise';
+  const kindOptions = [
+    ['internal','Tarefa'],
+    ['process_deadline','Prazo processual'],
+    ['payment_deadline','Pagamento'],
+    ['hearing','Audiência'],
+    ['expertise','Perícia'],
+  ].map(([value,label])=>`<option value="${value}" ${kind===value?'selected':''}>${label}</option>`).join('');
+  const statusOptions = task?.done
+    ? '<option value="done" selected>Concluída</option>'
+    : [
+        ['pending','Pendente'],
+        ['in_progress','Em andamento'],
+        ['waiting_external','Aguardando retorno'],
+      ].map(([value,label])=>`<option value="${value}" ${status===value?'selected':''} ${value==='waiting_external'&&kind!=='internal'?'disabled':''}>${label}</option>`).join('');
+  const waitingOptions = [
+    ['client','Cliente'],
+    ['inss','INSS'],
+    ['expert','Perito'],
+    ['leticia','Letícia'],
+    ['documents','Documentos'],
+    ['other','Outro'],
+  ].map(([value,label])=>`<option value="${value}" ${(task?.waitingOn||'client')===value?'selected':''}>${label}</option>`).join('');
+  return `<div class="task-inline-form ${isEdit?'edit':'new'}">
+    <div class="task-inline-form-title">${isEdit?'Editar tarefa':'Nova tarefa'}</div>
+    <div class="task-create-grid">
+      <div class="task-field task-description-field">
+        <label>Descrição</label>
+        <input class="fi" id="${prefix}-desc" value="${esc(task?.description||'')}" placeholder="Descreva a tarefa...">
+      </div>
+      <div class="task-field">
+        <label>Tipo</label>
+        <select class="fi-select" id="${prefix}-kind" onchange="updateTaskFormFields('${prefix}')">${kindOptions}</select>
+      </div>
+      <div class="task-field">
+        <label>Status</label>
+        <select class="fi-select" id="${prefix}-status" onchange="updateTaskFormFields('${prefix}')" ${task?.done?'disabled':''}>${statusOptions}</select>
+      </div>
+      <div class="task-field">
+        <label>Prazo original</label>
+        <input class="fi" id="${prefix}-date" type="date" value="${esc(task?.deadline||'')}">
+      </div>
+      <div class="task-field" id="${prefix}-time-field" ${timeVisible?'':'hidden'}>
+        <label>Horário</label>
+        <input class="fi" id="${prefix}-time" type="time" value="${esc(task?.time||'')}" title="Horário da audiência ou perícia">
+      </div>
+    </div>
+    <div class="task-waiting-fields" id="${prefix}-waiting-fields" ${waitingVisible?'':'hidden'}>
+      <div class="task-field">
+        <label>Aguardando</label>
+        <select class="fi-select" id="${prefix}-waiting-on">${waitingOptions}</select>
+      </div>
+      <div class="task-field">
+        <label>Próximo acompanhamento</label>
+        <input class="fi" id="${prefix}-follow-up" type="date" value="${esc(task?.followUpDate||'')}">
+      </div>
+      <div class="task-field">
+        <label>Observação (opcional)</label>
+        <input class="fi" id="${prefix}-waiting-note" value="${esc(task?.waitingNote||'')}" placeholder="Ex.: documentos solicitados em 24/07">
+      </div>
+    </div>
+    <div class="task-form-error" id="${prefix}-error" role="alert"></div>
+    <div class="task-form-actions">
+      <button class="final-action-btn" onclick="${isEdit?'cancelTaskEdit()':'cancelTaskComposer()'}">Cancelar</button>
+      <button class="btn-s p" onclick="${isEdit?`saveTaskEdit('${c.id}','${task.id}')`:`addTask('${c.id}')`}">${isEdit?'Salvar alterações':'Adicionar tarefa'}</button>
+    </div>
+  </div>`;
+}
 function tabTarefas(c){
   const tasks = c.tasks || [];
   const pending = tasks.filter(t=>!t.done);
@@ -5363,6 +5482,9 @@ function tabTarefas(c){
     return trackingDate && dayStatus(trackingDate)==='overdue';
   });
   const rows = tasks.length ? tasks.map(t=>{
+    if(editingTaskId===t.id){
+      return `<div class="task-table-row editor">${renderTaskInlineForm(c,t)}</div>`;
+    }
     const trackingDate = taskTrackingDate(t);
     const workflowLabel = taskWorkflowLabel(t);
     const workflowClass = taskWorkflowClass(t);
@@ -5378,8 +5500,15 @@ function tabTarefas(c){
         ${isWaitingExternal(t)&&t.waitingNote?`<small>${esc(t.waitingNote)}</small>`:''}
         <div class="task-actions">
           <button class="task-action-link" onclick="editTask('${c.id}','${t.id}')">Editar</button>
-          <button class="task-action-link delete" onclick="deleteTask('${c.id}','${t.id}')">Excluir</button>
+          <button class="task-action-link delete" onclick="requestTaskDelete('${t.id}')">Excluir</button>
         </div>
+        ${deletingTaskId===t.id?`<div class="task-delete-confirm">
+          <span>Excluir esta tarefa? O registro da remoção permanecerá no histórico.</span>
+          <div class="task-delete-actions">
+            <button class="task-delete-cancel" onclick="cancelTaskDelete()">Cancelar</button>
+            <button class="task-delete-confirm-btn" onclick="deleteTask('${c.id}','${t.id}')">Excluir</button>
+          </div>
+        </div>`:''}
       </div>
       <span class="final-chip">${taskKindLabel(t)}</span>
       <span>${t.deadline?fmtTaskDate(t):'Sem prazo'}${isWaitingExternal(t)&&trackingDate?`<small class="task-waiting-meta">Acompanhar ${fmtDate(trackingDate)}</small>`:''}</span>
@@ -5394,26 +5523,14 @@ function tabTarefas(c){
       <div class="final-kpi"><span>Concluídas</span><strong>${done.length}</strong></div>
     </div>
     <div class="final-section">
-      <div class="final-section-title">Tarefas do cliente</div>
+      <div class="task-section-toolbar">
+        <div class="final-section-title">Tarefas do cliente</div>
+        ${taskComposerOpen?'':`<button class="final-action-btn task-new-toggle" onclick="openTaskComposer()">+ Nova tarefa</button>`}
+      </div>
+      ${taskComposerOpen?renderTaskInlineForm(c):''}
       <div class="task-table">
         <div class="task-table-row head"><span></span><span>Tarefa</span><span>Tipo</span><span>Prazo</span></div>
         ${rows}
-      </div>
-    </div>
-    <div class="final-section">
-      <div class="final-section-title">Nova tarefa</div>
-      <div class="task-create-grid">
-        <div class="task-field"><label>Descrição</label><input class="fi" id="new-task-desc" placeholder="Descreva a tarefa..."></div>
-        <div class="task-field"><label>Tipo</label><select class="fi-select" id="new-task-kind" onchange="updateNewTaskStatusFields()"><option value="internal">Tarefa</option><option value="process_deadline">Prazo processual</option><option value="payment_deadline">Pagamento</option><option value="hearing">Audiência</option><option value="expertise">Perícia</option></select></div>
-        <div class="task-field"><label>Status</label><select class="fi-select" id="new-task-status" onchange="updateNewTaskStatusFields()"><option value="pending">Pendente</option><option value="in_progress">Em andamento</option><option value="waiting_external">Aguardando retorno</option></select></div>
-        <div class="task-field"><label>Prazo original</label><input class="fi" id="new-task-date" type="date"></div>
-        <div class="task-field"><label>Horário</label><input class="fi" id="new-task-time" type="time" title="Horário da audiência ou perícia"></div>
-        <button class="btn-s p" onclick="addTask('${c.id}')">Adicionar</button>
-      </div>
-      <div class="task-waiting-fields" id="new-task-waiting-fields" hidden>
-        <div class="task-field"><label>Aguardando</label><select class="fi-select" id="new-task-waiting-on"><option value="client">Cliente</option><option value="inss">INSS</option><option value="expert">Perito</option><option value="leticia">Letícia</option><option value="documents">Documentos</option><option value="other">Outro</option></select></div>
-        <div class="task-field"><label>Próximo acompanhamento</label><input class="fi" id="new-task-follow-up" type="date"></div>
-        <div class="task-field"><label>Observação (opcional)</label><input class="fi" id="new-task-waiting-note" placeholder="Ex.: documentos solicitados em 24/07"></div>
       </div>
     </div>
   </div>`;
