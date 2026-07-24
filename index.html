@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-07-24-acompanhamento-tarefas">
+<meta name="app-build" content="2026-07-24-destaque-aguardando">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-07-24-acompanhamento-tarefas';
+  const build = '2026-07-24-destaque-aguardando';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1708,6 +1708,8 @@ body{
 .kanban-alert-client{font-size:12px!important;font-weight:500!important;color:var(--final-text)!important;display:flex!important;align-items:flex-start!important;gap:6px!important}
 .sidebar-overdue-icon{margin-left:auto;color:#D64555;font-size:10px;line-height:1.2;font-weight:600;flex:0 0 auto;white-space:nowrap}
 .kanban-alert-desc{font-size:11px!important;font-weight:400!important;color:var(--final-text)!important}
+.sidebar-waiting-badge{display:inline-flex!important;align-items:center;gap:7px;width:max-content;max-width:100%;margin-top:2px;padding:4px 8px;border:1px solid #D8D0FA;border-radius:999px;background:#F3F0FF;color:#6550A5!important;font-size:10px!important;font-weight:600!important;line-height:1.2}
+.sidebar-waiting-badge::before{content:'';width:6px;height:6px;flex:0 0 auto;border-radius:50%;background:#8F7DDB;box-shadow:0 0 0 3px #E8E2FF}
 .kanban-alert-date{font-size:11px!important;font-weight:600!important;color:var(--final-text)!important}
 .kanban-alert-item.payment .kanban-alert-client,
 .kanban-alert-item.payment .kanban-alert-desc,
@@ -5245,7 +5247,7 @@ function renderKanbanDeadlineAlerts(clientList=clients){
       return `<div class="kanban-alert-item ${cls}${overdue?' overdue':''}${t.sidebarKind==='finance'?` finance ${t.tone||''}`:''}" onclick="${t.clientId?`openPanel('${t.clientId}');${t.sidebarKind==='finance'?`setTimeout(()=>document.querySelector('[data-tab=honorarios]')?.click(),0);`:''}`:''}">
       <div class="kanban-alert-client">${esc(t.clientName||'Tarefa')}${overdue?`<span class="sidebar-overdue-icon" title="${overdueLabel}" aria-label="${overdueLabel}">⚠ ${overdueLabel}</span>`:''}</div>
       <div class="kanban-alert-desc">${esc(t.description||'Pendência')}</div>
-      ${t.waitingExternal?`<div class="kanban-alert-desc">Aguardando ${esc(waitingOnLabel(t.waitingOn))}</div>`:''}
+      ${t.waitingExternal?`<div class="sidebar-waiting-badge">Aguardando: ${esc(waitingOnLabel(t.waitingOn))}</div>`:''}
       <div class="kanban-alert-date">${t.deadline?`${t.sidebarKind==='finance' ? 'Financeiro' : t.waitingExternal ? 'Acompanhamento' : taskKindLabel(t)}: ${fmtTaskDate(t)}`:'Sem data'}</div>
     </div>`;
     }).join('') : `<div class="kanban-alert-empty">${empty}</div>`}</div>
