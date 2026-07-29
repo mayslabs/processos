@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-07-24-tarefas-inline">
+<meta name="app-build" content="2026-07-29-coluna-pagamento">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-07-24-tarefas-inline';
+  const build = '2026-07-29-coluna-pagamento';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1750,7 +1750,7 @@ body{
 .topbar-title{display:block!important;font-size:22px!important;font-weight:750!important;color:var(--final-text)!important;line-height:1.1}
 .page-head p{margin:0;color:var(--final-muted);font-size:14px;line-height:1.2}
 .client-total-pill{align-self:center;border:1px solid var(--final-line);background:#FFF;border-radius:10px;padding:7px 12px;color:#66748A;font-size:12px;font-weight:800}
-.board,.final-board{min-width:calc(100vw - var(--sidebar) - 28px)!important;display:grid!important;grid-template-columns:repeat(6,minmax(190px,1fr))!important;gap:10px!important;align-items:start!important;padding:0!important}
+.board,.final-board{min-width:calc(100vw - var(--sidebar) - 28px)!important;display:grid!important;grid-template-columns:repeat(7,minmax(190px,1fr))!important;gap:10px!important;align-items:start!important;padding:0!important}
 .final-col{min-height:610px;border:1px solid var(--final-line);border-radius:9px;background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.38));padding:8px;box-shadow:0 14px 32px rgba(33,51,74,.045)}
 .final-col-head{height:64px;border:1px solid color-mix(in srgb,var(--col),#FFF 64%);border-radius:8px;background:color-mix(in srgb,var(--col),#FFF 90%);padding:12px 12px;display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;column-gap:8px;row-gap:5px;align-items:center}
 .final-col-icon{grid-row:1/3;color:var(--col);font-weight:750;font-size:17px;line-height:1;align-self:center}
@@ -1959,7 +1959,7 @@ button.nav-kpi{cursor:pointer}
   .topbar{padding:12px!important;flex-direction:column!important;align-items:stretch!important}
   .topbar-left,.topbar-right{width:100%;flex-wrap:wrap!important}
   .workspace-card,#sync-status,.search,.btn-add{width:100%!important}
-  .board,.final-board{min-width:980px!important}
+  .board,.final-board{min-width:1390px!important}
   .panel{width:100vw!important;max-width:100vw!important}
   .final-grid-2,.final-kpis,.final-data-grid,.finance-hero,.finance-expectation{grid-template-columns:1fr!important}
   .task-create-grid,.task-waiting-fields{grid-template-columns:1fr!important}
@@ -2198,6 +2198,7 @@ button.nav-kpi{cursor:pointer}
             <option value="em_elaboracao">Em elaboração</option>
             <option value="req_administrativo">Processo administrativo</option>
             <option value="processo_judicial">Processo judicial</option>
+            <option value="aguardando_pagamento">Aguardando pagamento</option>
             <option value="finalizado">Finalizado</option>
           </select>
         </div>
@@ -2270,7 +2271,8 @@ const COLS = [
   {id:'em_elaboracao',      label:'Em elaboração',             color:'#F3A66F'},
   {id:'req_administrativo', label:'Processo administrativo',   color:'#8FC1F4'},
   {id:'processo_judicial',  label:'Processo judicial',         color:'#B79AF4'},
-  {id:'finalizado',         label:'Finalizado',           color:'#6CCB96'},
+  {id:'aguardando_pagamento', label:'Aguardando pagamento',     color:'#E9A8BC'},
+  {id:'finalizado',         label:'Finalizado',                 color:'#6CCB96'},
 ];
 const COL_LABELS = Object.fromEntries(COLS.map(c=>[c.id,c.label]));
 const COL_SHORT_LABELS = {
@@ -2279,8 +2281,10 @@ const COL_SHORT_LABELS = {
   em_elaboracao: 'Em elaboração',
   req_administrativo: 'Processo administrativo',
   processo_judicial: 'Processo judicial',
+  aguardando_pagamento: 'Aguardando pagamento',
   finalizado: 'Finalizado',
 };
+const DATA_SCHEMA_VERSION = 2;
 const PRESET_COLORS = ['#FCA5A5','#FCD34D','#86EFAC','#93C5FD','#C4B5FD','#F9A8D4','#CBD5E1','#67E8F9'];
 const BENEFIT_OPTIONS = ['BPC - Deficiência','BPC - Idoso','Salário-maternidade rural','Salário-maternidade urbano','Auxílio-doença','Auxílio-acidente','Aposentadoria por invalidez','Aposentadoria por tempo de contribuição','Aposentadoria por idade','Aposentadoria rural','Pensão por morte','Outro'];
 const PERSONAL_PROCESS_OPTIONS = ['Consumidor','Cível','Inventário','Previdenciário','Imobiliário','Trabalhista','Outro'];
@@ -2747,23 +2751,38 @@ function parseSavedKanban(raw){
     try {
       const parsed = JSON.parse(raw);
       if(Array.isArray(parsed)){
-        return {clients: parsed.map(normalizeClient).filter(Boolean), globalTags: extractGlobalTags(parsed), globalTasks: []};
+        const parsedClients = parsed.map(normalizeClient).filter(Boolean);
+        migratePaymentStage(parsedClients);
+        return {clients: parsedClients, globalTags: extractGlobalTags(parsedClients), globalTasks: [], migrated: true};
       }
+      const parsedClients = (parsed.clients||[]).map(normalizeClient).filter(Boolean);
+      const migrated = Number(parsed.schemaVersion||0) < DATA_SCHEMA_VERSION;
+      if(migrated) migratePaymentStage(parsedClients);
       return {
-        clients: (parsed.clients||[]).map(normalizeClient).filter(Boolean),
-        globalTags: parsed.globalTags||extractGlobalTags(parsed.clients||[]),
-        globalTasks: normalizeGlobalTasks(parsed.globalTasks)
+        clients: parsedClients,
+        globalTags: parsed.globalTags||extractGlobalTags(parsedClients),
+        globalTasks: normalizeGlobalTasks(parsed.globalTasks),
+        migrated
       };
     } catch(e){
       console.error('Erro ao ler dados salvos:', e);
-      return {clients: [], globalTags: [], globalTasks: []};
+      return {clients: [], globalTags: [], globalTasks: [], migrated: false};
     }
   }
   if(raw && typeof raw === 'object'){
     const parsedClients = (raw.clients||[]).map(normalizeClient).filter(Boolean);
-    return {clients: parsedClients, globalTags: raw.globalTags||extractGlobalTags(parsedClients), globalTasks: normalizeGlobalTasks(raw.globalTasks)};
+    const migrated = Number(raw.schemaVersion||0) < DATA_SCHEMA_VERSION;
+    if(migrated) migratePaymentStage(parsedClients);
+    return {clients: parsedClients, globalTags: raw.globalTags||extractGlobalTags(parsedClients), globalTasks: normalizeGlobalTasks(raw.globalTasks), migrated};
   }
-  return {clients: [], globalTags: [], globalTasks: []};
+  return {clients: [], globalTags: [], globalTasks: [], migrated: false};
+}
+
+function migratePaymentStage(clientList){
+  (clientList||[]).forEach(c=>{
+    const awaitingPayment = (c.tags||[]).some(t=>tagKey(t.label)==='aguardando pagamento');
+    if(c.column === 'finalizado' && awaitingPayment) c.column = 'aguardando_pagamento';
+  });
 }
 
 function listenKanban(){
@@ -2794,6 +2813,7 @@ function listenKanban(){
     fbReady = true;
     setSyncStatus('synced');
     renderAll();
+    if(parsed.migrated && canEdit()) save();
   }, err => { setSyncStatus('error'); console.error(err); });
 }
 
@@ -2878,7 +2898,7 @@ function save(){
   }
   if(currentUser && fbReady && fbRef){
     setSyncStatus('saving');
-    fbRef.set(JSON.stringify({clients, globalTags, globalTasks})).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error'));
+    fbRef.set(JSON.stringify({schemaVersion:DATA_SCHEMA_VERSION, clients, globalTags, globalTasks})).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error'));
   }
 }
 function extractGlobalTags(clientList){
@@ -5122,6 +5142,7 @@ const FINAL_COL_META = {
   em_elaboracao: {icon:'•', sub:'Peça em preparo'},
   req_administrativo: {icon:'•', sub:'INSS / protocolo'},
   processo_judicial: {icon:'•', sub:'Ação judicial'},
+  aguardando_pagamento: {icon:'•', sub:'Honorários pendentes'},
   finalizado: {icon:'✓', sub:'Concluídos/Perdidos'},
 };
 function finalInitials(name=''){
