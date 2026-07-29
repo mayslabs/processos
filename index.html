@@ -3864,6 +3864,11 @@ function tabResumoEdit(c){
       <option value="Judicial" ${c.via==='Judicial'?'selected':''}>Judicial</option>
     </select>
   </div>
+  <div class="fl"><span class="fl-label">Etapa do Kanban</span>
+    <select class="fi fi-select" id="re-column">
+      ${COLS.map(col=>`<option value="${col.id}" ${c.column===col.id?'selected':''}>${col.label}</option>`).join('')}
+    </select>
+  </div>
   <div class="fl"><span class="fl-label">Número do Processo</span><input class="fi" id="re-proc" value="${esc(c.processNumber||'')}"></div>
   <div class="fl"><span class="fl-label">Descrição curta do processo</span><input class="fi" id="re-short-desc" value="${esc(c.shortDescription||'')}" placeholder="Ex: Embargos de terceiro"></div>
   <div class="fl"><span class="fl-label">Parte contrária</span><input class="fi" id="re-opposing-party" value="${esc(c.opposingParty||'')}" placeholder="Ex: Banco, INSS, empresa, pessoa física"></div>
@@ -3887,9 +3892,11 @@ function saveClientEdit(clientId){
   if(!c) return;
   const name = document.getElementById('re-name').value.trim();
   if(!name){ alert('Informe o nome.'); return; }
+  const oldColumn = c.column;
   c.name = name;
   c.benefitType = document.getElementById('re-benefit').value;
   c.via = document.getElementById('re-via').value;
+  c.column = document.getElementById('re-column').value;
   c.processNumber = document.getElementById('re-proc').value.trim();
   c.shortDescription = document.getElementById('re-short-desc').value.trim();
   c.opposingParty = document.getElementById('re-opposing-party').value.trim();
@@ -3899,6 +3906,9 @@ function saveClientEdit(clientId){
   c.credentials.phone = formatPhone(document.getElementById('re-phone').value);
   c.tribunal = document.getElementById('re-tribunal').value;
   c.summary = document.getElementById('re-summary').value.trim();
+  if(oldColumn !== c.column){
+    addHistory(c,'Movido de coluna',`De "${COL_LABELS[oldColumn]}" para "${COL_LABELS[c.column]}"`, 'move');
+  }
   addHistory(c,'Cliente atualizado','','default');
   save();
   document.getElementById('panel-name').textContent = c.name;
