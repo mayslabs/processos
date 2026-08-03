@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-08-03-financeiro-flexivel">
+<meta name="app-build" content="2026-08-03-expectativas-multiplas">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-08-03-financeiro-flexivel';
+  const build = '2026-08-03-expectativas-multiplas';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1919,6 +1919,10 @@ button.nav-kpi{cursor:pointer}
 .finance-metric-sub strong{color:#1A2740;font-weight:600}
 .finance-pending-note{margin-top:10px;border:1px solid #E4EDF5;background:#F8FBFE;border-radius:8px;padding:10px 12px;color:#536176;font-size:12px;line-height:1.45}
 .finance-pending-note strong{color:#1A2740;font-weight:600}
+.finance-expectations{display:grid;gap:12px}
+.finance-expectation-item{border:1px solid #D8E3EF;border-radius:8px;padding:12px;background:#FCFDFE;display:grid;gap:10px}
+.finance-expectation-item-head{display:flex;align-items:center;gap:10px}
+.finance-expectation-item-head .fi{flex:1;margin:0!important}
 .finance-expectation{grid-template-columns:1.12fr 1.1fr .72fr .9fr .68fr!important;align-items:end!important}
 .finance-expectation .fl{display:grid;gap:6px;align-content:end}
 .finance-expectation .fi,.finance-expectation .fi-select{height:36px!important;margin:0!important}
@@ -1933,7 +1937,7 @@ button.nav-kpi{cursor:pointer}
 .finance-table-head,.finance-row{min-width:680px}
 .finance-installments{overflow:auto}
 .finance-row-calc{grid-template-columns:repeat(3,minmax(0,1fr)) auto!important}
-.finance-row.locked input,.finance-row.locked textarea,.finance-row.locked select,.finance-expectation.locked input,.finance-expectation.locked select,.finance-note.locked{background:#F7FAFC!important;color:#536176!important}
+.finance-row.locked input,.finance-row.locked textarea,.finance-row.locked select,.finance-expectation-item.locked input,.finance-expectation-item.locked textarea,.finance-expectation-item.locked select,.finance-note.locked{background:#F7FAFC!important;color:#536176!important}
 .finance-alert.upcoming{background:#F8F5FF!important;border-color:#DED6FF!important;color:#5F4BA8!important}
 .finance-section-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 .global-tags-list{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;gap:8px!important;margin:0!important}
@@ -2289,7 +2293,7 @@ const COL_SHORT_LABELS = {
   aguardando_pagamento: 'Aguardando pagamento',
   finalizado: 'Finalizado',
 };
-const DATA_SCHEMA_VERSION = 3;
+const DATA_SCHEMA_VERSION = 4;
 const PRESET_COLORS = ['#FCA5A5','#FCD34D','#86EFAC','#93C5FD','#C4B5FD','#F9A8D4','#CBD5E1','#67E8F9'];
 const BENEFIT_OPTIONS = ['BPC - Deficiência','BPC - Idoso','Salário-maternidade rural','Salário-maternidade urbano','Auxílio-doença','Auxílio-acidente','Aposentadoria por invalidez','Aposentadoria por tempo de contribuição','Aposentadoria por idade','Aposentadoria rural','Pensão por morte','Outro'];
 const PERSONAL_PROCESS_OPTIONS = ['Consumidor','Cível','Inventário','Previdenciário','Imobiliário','Trabalhista','Outro'];
@@ -2522,11 +2526,11 @@ function isPastDate(dateStr){
 }
 function calcFinanceSummary(c){
   const finance = c.finance || normalizeFinance(null, c.honorarios || {});
-  const exp = finance.expectation || {};
-  const expAmounts = calculateFinanceAmounts(exp.estimatedClientReceipt, exp.feeMode, exp.feePercent, exp.mySharePercent);
-  const expClient = expAmounts.total;
-  const expFee = expAmounts.fee;
-  const expMine = expAmounts.mine;
+  const expectations = Array.isArray(finance.expectations) ? finance.expectations : (finance.expectation ? [finance.expectation] : []);
+  const expectationAmounts = expectations.map(exp=>calculateFinanceAmounts(exp.estimatedClientReceipt, exp.feeMode, exp.feePercent, exp.mySharePercent));
+  const expClient = expectationAmounts.reduce((sum,item)=>sum+item.total,0);
+  const expFee = expectationAmounts.reduce((sum,item)=>sum+item.fee,0);
+  const expMine = expectationAmounts.reduce((sum,item)=>sum+item.mine,0);
   const installments = finance.installments || [];
   const confirmedClient = installments.reduce((sum,p)=>sum+parseMoney(p.clientAmount),0);
   const confirmedClientNet = installments.reduce((sum,p)=>sum+parseMoney(p.clientNetAmount),0);
@@ -3052,17 +3056,28 @@ function normalizeFinance(finance, honorarios={}){
   const baseExpectation = finance && finance.expectation && typeof finance.expectation === 'object' ? finance.expectation : {};
   const legacyPercent = percentOrDefault(honorarios.percentual, DEFAULT_FEE_PERCENT);
   const legacyBase = parseMoney(honorarios.valorCausa);
-  const expectationMode = normalizeFeeMode(baseExpectation.feeMode);
-  const expectation = {
-    estimatedClientReceipt: formatMoney(baseExpectation.estimatedClientReceipt || legacyBase || ''),
-    expectedDate: baseExpectation.expectedDate || '',
-    confidence: baseExpectation.confidence || 'media',
-    feeMode: expectationMode,
-    feePercent: formatFinancePercent(baseExpectation.feePercent, legacyPercent),
-    mySharePercent: formatFinancePercent(baseExpectation.mySharePercent, DEFAULT_MY_SHARE_PERCENT),
-    notes: baseExpectation.notes || honorarios.observacao || '',
-    locked: baseExpectation.locked === true,
-  };
+  const storedExpectations = finance && Array.isArray(finance.expectations) && finance.expectations.length
+    ? finance.expectations
+    : [baseExpectation];
+  const expectationsLocked = finance && typeof finance.expectationsLocked === 'boolean'
+    ? finance.expectationsLocked
+    : baseExpectation.locked === true;
+  const expectations = storedExpectations.map((item,index)=>{
+    const exp = item && typeof item === 'object' ? item : {};
+    return {
+      id: exp.id || uid(),
+      description: exp.description || (index ? `Pagamento previsto ${index+1}` : 'Pagamento previsto'),
+      estimatedClientReceipt: formatMoney(exp.estimatedClientReceipt || (index===0 ? legacyBase : '') || ''),
+      expectedDate: exp.expectedDate || '',
+      confidence: exp.confidence || 'media',
+      feeMode: normalizeFeeMode(exp.feeMode),
+      feePercent: formatFinancePercent(exp.feePercent, legacyPercent),
+      mySharePercent: formatFinancePercent(exp.mySharePercent, DEFAULT_MY_SHARE_PERCENT),
+      notes: exp.notes || (index===0 ? honorarios.observacao : '') || '',
+      createdAt: exp.createdAt || now(),
+    };
+  });
+  const expectation = expectations[0];
   const rawInstallments = finance && Array.isArray(finance.installments) ? finance.installments : [];
   const installments = rawInstallments.map(p=>{
     if(!p || typeof p !== 'object') return null;
@@ -3093,7 +3108,7 @@ function normalizeFinance(finance, honorarios={}){
       createdAt: p.createdAt || now(),
     };
   }).filter(Boolean);
-  return {expectation, installments, installmentsLocked: finance && finance.installmentsLocked === true};
+  return {expectation, expectations, expectationsLocked, installments, installmentsLocked: finance && finance.installmentsLocked === true};
 }
 function normalizeClient(c){
   if(!c || typeof c !== 'object') return null;
@@ -4321,21 +4336,20 @@ function financeFeeModeOptions(selected){
 }
 function tabHonorarios(c){
   const finance = c.finance || normalizeFinance(null, c.honorarios || {});
-  const exp = finance.expectation;
+  const expectations = Array.isArray(finance.expectations) && finance.expectations.length ? finance.expectations : [finance.expectation];
   const summary = calcFinanceSummary(c);
   const alerts = getFinanceAlerts([c]);
   const expFee = summary.expFee;
   const expMine = summary.expMine;
-  const expLocked = exp.locked === true;
+  const expLocked = finance.expectationsLocked === true;
   const installmentsLocked = finance.installmentsLocked === true;
   const expDisabled = expLocked ? 'disabled' : '';
   const instDisabled = installmentsLocked ? 'disabled' : '';
-  const confidence = exp.confidence || 'media';
-  const confidenceOptions = [
+  const confidenceOptions = selected => [
     ['baixa','Baixa'],
     ['media','Média'],
     ['alta','Alta']
-  ].map(([value,label])=>`<option value="${value}" ${confidence===value?'selected':''}>${label}</option>`).join('');
+  ].map(([value,label])=>`<option value="${value}" ${selected===value?'selected':''}>${label}</option>`).join('');
   const expectedClientBase = summary.confirmedClient || summary.expClient;
   const expectedFeeBase = summary.confirmedFees || summary.expFee;
   const expectedMineBase = summary.confirmedMine || summary.expMine;
@@ -4357,6 +4371,30 @@ function tabHonorarios(c){
         </div>
       `).join('')}
     </div>` : '';
+  const expectationRows = expectations.map((exp,index)=>{
+    const expMode = normalizeFeeMode(exp.feeMode);
+    const amounts = calculateFinanceAmounts(exp.estimatedClientReceipt, expMode, exp.feePercent, exp.mySharePercent);
+    return `
+      <div class="finance-expectation-item ${expLocked?'locked':''}" data-expectation="${exp.id}">
+        <div class="finance-expectation-item-head">
+          <input class="fi" id="fin-exp-desc-${exp.id}" value="${esc(exp.description||`Pagamento previsto ${index+1}`)}" placeholder="Ex: 1º pagamento previsto" ${expDisabled}>
+          ${expectations.length>1 ? `<button class="finance-remove" onclick="removeFinanceExpectation('${c.id}','${exp.id}')" title="Remover pagamento previsto" ${expDisabled}>×</button>` : ''}
+        </div>
+        <div class="finance-expectation">
+          <div class="fl"><span class="fl-label">Valor estimado do pagamento</span><input class="fi" id="fin-exp-client-${exp.id}" value="${esc(exp.estimatedClientReceipt||'')}" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateFinanceExpectationPreview('${exp.id}')" ${expDisabled}></div>
+          <div class="fl"><span class="fl-label">Modelo dos honorários</span><div class="finance-fee-controls ${expMode===FEE_MODE_FULL?'full':''}"><select class="fi-select" id="fin-exp-fee-mode-${exp.id}" onchange="updateFinanceExpectationMode('${exp.id}')" ${expDisabled}>${financeFeeModeOptions(expMode)}</select><input class="fi" id="fin-exp-fee-percent-${exp.id}" value="${esc(exp.feePercent||formatFinancePercent(DEFAULT_FEE_PERCENT,DEFAULT_FEE_PERCENT))}" placeholder="30%" aria-label="Percentual dos honorários" oninput="formatPercentInput(this); updateFinanceExpectationPreview('${exp.id}')" ${expMode===FEE_MODE_FULL?'hidden':''} ${expDisabled}></div></div>
+          <div class="fl"><span class="fl-label">Minha parte</span><input class="fi" id="fin-exp-share-percent-${exp.id}" value="${esc(exp.mySharePercent||formatPercent(DEFAULT_MY_SHARE_PERCENT))}" placeholder="50%" oninput="formatPercentInput(this); updateFinanceExpectationPreview('${exp.id}')" ${expDisabled}></div>
+          <div class="fl"><span class="fl-label">Data provável</span><input class="fi" id="fin-exp-date-${exp.id}" type="date" value="${esc(exp.expectedDate||'')}" ${expDisabled}></div>
+          <div class="fl"><span class="fl-label">Certeza</span><select class="fi-select" id="fin-exp-confidence-${exp.id}" ${expDisabled}>${confidenceOptions(exp.confidence||'media')}</select></div>
+        </div>
+        <div class="finance-preview">
+          <span>Cliente ficará com: <strong id="fin-exp-client-net-${exp.id}">${formatMoneyValue(amounts.clientNet)}</strong></span>
+          <span>Honorários previstos: <strong id="fin-exp-fee-${exp.id}">${formatMoneyValue(amounts.fee)}</strong></span>
+          <span>Minha parte prevista: <strong id="fin-exp-mine-${exp.id}">${formatMoneyValue(amounts.mine)}</strong></span>
+        </div>
+        <textarea class="fi finance-note" id="fin-exp-notes-${exp.id}" rows="2" placeholder="Observação sobre este pagamento..." ${expDisabled}>${esc(exp.notes||'')}</textarea>
+      </div>`;
+  }).join('');
   const rows = finance.installments.length ? finance.installments.map(p=>{
     const status = financeInstallmentStatus(p);
     const feeMode = normalizeFeeMode(p.feeMode);
@@ -4406,23 +4444,12 @@ function tabHonorarios(c){
       <div class="finance-section-head">
         <div class="case-section-title">Expectativa de recebimento</div>
         <div class="finance-section-actions">
+          <button class="btn-s g" onclick="addFinanceExpectation('${c.id}')" ${expDisabled}>+ Adicionar pagamento</button>
           <button class="btn-s p" onclick="saveFinanceExpectation('${c.id}')" ${expLocked?'disabled':''}>Salvar expectativa</button>
           <button class="btn-s g" onclick="editFinanceExpectation('${c.id}')" ${expLocked?'':'disabled'}>Editar</button>
         </div>
       </div>
-      <div class="finance-expectation ${expLocked?'locked':''}">
-        <div class="fl"><span class="fl-label">Valor estimado do pagamento</span><input class="fi" id="fin-exp-client" value="${esc(exp.estimatedClientReceipt||'')}" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateFinanceExpectationPreview()" ${expDisabled}></div>
-        <div class="fl"><span class="fl-label">Modelo dos honorários</span><div class="finance-fee-controls ${normalizeFeeMode(exp.feeMode)===FEE_MODE_FULL?'full':''}"><select class="fi-select" id="fin-exp-fee-mode" onchange="updateFinanceExpectationMode()" ${expDisabled}>${financeFeeModeOptions(exp.feeMode)}</select><input class="fi" id="fin-exp-fee-percent" value="${esc(exp.feePercent||formatFinancePercent(DEFAULT_FEE_PERCENT,DEFAULT_FEE_PERCENT))}" placeholder="30%" aria-label="Percentual dos honorários" oninput="formatPercentInput(this); updateFinanceExpectationPreview()" ${normalizeFeeMode(exp.feeMode)===FEE_MODE_FULL?'hidden':''} ${expDisabled}></div></div>
-        <div class="fl"><span class="fl-label">Minha parte</span><input class="fi" id="fin-exp-share-percent" value="${esc(exp.mySharePercent||formatPercent(DEFAULT_MY_SHARE_PERCENT))}" placeholder="50%" oninput="formatPercentInput(this); updateFinanceExpectationPreview()" ${expDisabled}></div>
-        <div class="fl"><span class="fl-label">Data provável</span><input class="fi" id="fin-exp-date" type="date" value="${esc(exp.expectedDate||'')}" ${expDisabled}></div>
-        <div class="fl"><span class="fl-label">Certeza</span><select class="fi-select" id="fin-exp-confidence" ${expDisabled}>${confidenceOptions}</select></div>
-      </div>
-      <div class="finance-preview">
-        <span>Cliente ficará com: <strong id="fin-exp-client-net">${formatMoneyValue(Math.max(summary.expClient-expFee,0))}</strong></span>
-        <span>Honorários previstos: <strong id="fin-exp-fee">${formatMoneyValue(expFee)}</strong></span>
-        <span>Minha parte prevista: <strong id="fin-exp-mine">${formatMoneyValue(expMine)}</strong></span>
-      </div>
-      <textarea class="fi finance-note ${expLocked?'locked':''}" id="fin-exp-notes" rows="2" placeholder="Observação sobre expectativa..." ${expDisabled}>${esc(exp.notes||'')}</textarea>
+      <div class="finance-expectations">${expectationRows}</div>
     </div>
     <div class="case-section">
       <div class="finance-section-head">
@@ -4465,28 +4492,28 @@ function updateHonorariosCalc(){
   const percent = parsePercent(percentEl.value);
   if(causa && percent) honEl.value = formatMoney(causa * percent / 100);
 }
-function updateFinanceExpectationPreview(){
-  const clientEl = document.getElementById('fin-exp-client');
-  const modeEl = document.getElementById('fin-exp-fee-mode');
-  const feeEl = document.getElementById('fin-exp-fee-percent');
-  const shareEl = document.getElementById('fin-exp-share-percent');
-  const clientNetPreview = document.getElementById('fin-exp-client-net');
-  const feePreview = document.getElementById('fin-exp-fee');
-  const minePreview = document.getElementById('fin-exp-mine');
+function updateFinanceExpectationPreview(expectationId){
+  const clientEl = document.getElementById('fin-exp-client-'+expectationId);
+  const modeEl = document.getElementById('fin-exp-fee-mode-'+expectationId);
+  const feeEl = document.getElementById('fin-exp-fee-percent-'+expectationId);
+  const shareEl = document.getElementById('fin-exp-share-percent-'+expectationId);
+  const clientNetPreview = document.getElementById('fin-exp-client-net-'+expectationId);
+  const feePreview = document.getElementById('fin-exp-fee-'+expectationId);
+  const minePreview = document.getElementById('fin-exp-mine-'+expectationId);
   if(!clientEl || !modeEl || !feeEl || !shareEl || !clientNetPreview || !feePreview || !minePreview) return;
   const amounts = calculateFinanceAmounts(clientEl.value, modeEl.value, feeEl.value, shareEl.value);
   clientNetPreview.textContent = formatMoneyValue(amounts.clientNet);
   feePreview.textContent = formatMoneyValue(amounts.fee);
   minePreview.textContent = formatMoneyValue(amounts.mine);
 }
-function updateFinanceExpectationMode(){
-  const modeEl = document.getElementById('fin-exp-fee-mode');
-  const percentEl = document.getElementById('fin-exp-fee-percent');
+function updateFinanceExpectationMode(expectationId){
+  const modeEl = document.getElementById('fin-exp-fee-mode-'+expectationId);
+  const percentEl = document.getElementById('fin-exp-fee-percent-'+expectationId);
   if(!modeEl || !percentEl) return;
   const full = normalizeFeeMode(modeEl.value) === FEE_MODE_FULL;
   percentEl.hidden = full;
   modeEl.parentElement?.classList.toggle('full', full);
-  updateFinanceExpectationPreview();
+  updateFinanceExpectationPreview(expectationId);
 }
 function updateFinanceInstallmentPreview(installmentId){
   const clientEl = document.getElementById('fin-client-'+installmentId);
@@ -4524,24 +4551,33 @@ function updateNewClientHonorariosCalc(){
   calcEl.value = honEl.value.includes('%') && causa && percent ? formatMoney(causa * percent / 100) : '';
 }
 function syncFinanceFormToClient(c){
-  if(!c || !document.getElementById('fin-exp-client')) return false;
-  const expClient = document.getElementById('fin-exp-client').value;
-  const expFeeMode = normalizeFeeMode(document.getElementById('fin-exp-fee-mode').value);
-  const expFeePercent = document.getElementById('fin-exp-fee-percent').value;
-  const expSharePercent = document.getElementById('fin-exp-share-percent').value;
+  if(!c || !document.querySelector('[data-expectation]')) return false;
   const finance = c.finance || normalizeFinance(null, c.honorarios || {});
-  const expectationLocked = finance.expectation && finance.expectation.locked === true;
+  const expectationsLocked = finance.expectationsLocked === true;
   const installmentsLocked = finance.installmentsLocked === true;
-  finance.expectation = {
-    estimatedClientReceipt: formatMoney(expClient),
-    feeMode: expFeeMode,
-    feePercent: formatFinancePercent(expFeePercent, DEFAULT_FEE_PERCENT),
-    mySharePercent: formatFinancePercent(expSharePercent, DEFAULT_MY_SHARE_PERCENT),
-    expectedDate: document.getElementById('fin-exp-date').value,
-    confidence: document.getElementById('fin-exp-confidence').value,
-    notes: document.getElementById('fin-exp-notes').value,
-    locked: expectationLocked,
-  };
+  const currentExpectations = Array.isArray(finance.expectations) && finance.expectations.length ? finance.expectations : [finance.expectation].filter(Boolean);
+  finance.expectations = currentExpectations.map((exp,index)=>{
+    const id = exp.id || uid();
+    const clientAmount = document.getElementById('fin-exp-client-'+id)?.value ?? exp.estimatedClientReceipt ?? '';
+    const feeMode = normalizeFeeMode(document.getElementById('fin-exp-fee-mode-'+id)?.value || exp.feeMode);
+    const feePercent = document.getElementById('fin-exp-fee-percent-'+id)?.value ?? exp.feePercent;
+    const sharePercent = document.getElementById('fin-exp-share-percent-'+id)?.value ?? exp.mySharePercent;
+    return {
+      ...exp,
+      id,
+      description: document.getElementById('fin-exp-desc-'+id)?.value.trim() || exp.description || `Pagamento previsto ${index+1}`,
+      estimatedClientReceipt: formatMoney(clientAmount),
+      feeMode,
+      feePercent: formatFinancePercent(feePercent, DEFAULT_FEE_PERCENT),
+      mySharePercent: formatFinancePercent(sharePercent, DEFAULT_MY_SHARE_PERCENT),
+      expectedDate: document.getElementById('fin-exp-date-'+id)?.value || '',
+      confidence: document.getElementById('fin-exp-confidence-'+id)?.value || 'media',
+      notes: document.getElementById('fin-exp-notes-'+id)?.value || '',
+      createdAt: exp.createdAt || now(),
+    };
+  });
+  finance.expectationsLocked = expectationsLocked;
+  finance.expectation = finance.expectations[0];
   finance.installmentsLocked = installmentsLocked;
   finance.installments = (finance.installments||[]).map(p=>{
     const clientAmount = formatMoney(document.getElementById('fin-client-'+p.id)?.value || p.clientAmount || '');
@@ -4567,11 +4603,13 @@ function syncFinanceFormToClient(c){
     };
   });
   c.finance = finance;
-  c.honorarios.valorCausa = finance.expectation.estimatedClientReceipt;
-  const expectationAmounts = calculateFinanceAmounts(finance.expectation.estimatedClientReceipt, finance.expectation.feeMode, finance.expectation.feePercent, finance.expectation.mySharePercent);
-  c.honorarios.percentual = finance.expectation.feeMode === FEE_MODE_FULL ? '100%' : finance.expectation.feePercent;
-  c.honorarios.valorHonorarios = formatMoney(expectationAmounts.fee);
-  c.honorarios.observacao = finance.expectation.notes;
+  const expectationAmounts = finance.expectations.map(exp=>calculateFinanceAmounts(exp.estimatedClientReceipt, exp.feeMode, exp.feePercent, exp.mySharePercent));
+  c.honorarios.valorCausa = formatMoney(expectationAmounts.reduce((sum,item)=>sum+item.total,0));
+  c.honorarios.percentual = finance.expectations.length===1
+    ? (finance.expectation.feeMode === FEE_MODE_FULL ? '100%' : finance.expectation.feePercent)
+    : 'Variável';
+  c.honorarios.valorHonorarios = formatMoney(expectationAmounts.reduce((sum,item)=>sum+item.fee,0));
+  c.honorarios.observacao = finance.expectations.map(exp=>exp.notes).filter(Boolean).join(' | ');
   return true;
 }
 function saveHonorarios(clientId){
@@ -4588,8 +4626,7 @@ function saveFinanceExpectation(clientId){
   if(!c) return;
   syncFinanceFormToClient(c);
   if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
-  if(!c.finance.expectation) c.finance.expectation = normalizeFinance(null, c.honorarios || {}).expectation;
-  c.finance.expectation.locked = true;
+  c.finance.expectationsLocked = true;
   addHistory(c,'Expectativa financeira salva','','default');
   save();
   renderPanelBody();
@@ -4599,10 +4636,43 @@ function editFinanceExpectation(clientId){
   const c = clients.find(x=>x.id===clientId);
   if(!c) return;
   if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
-  if(!c.finance.expectation) c.finance.expectation = normalizeFinance(null, c.honorarios || {}).expectation;
-  c.finance.expectation.locked = false;
+  c.finance.expectationsLocked = false;
   save();
   renderPanelBody();
+}
+function addFinanceExpectation(clientId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c) return;
+  syncFinanceFormToClient(c);
+  if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
+  if(c.finance.expectationsLocked) return;
+  if(!Array.isArray(c.finance.expectations)) c.finance.expectations = [c.finance.expectation].filter(Boolean);
+  c.finance.expectations.push({
+    id:uid(),
+    description:`Pagamento previsto ${c.finance.expectations.length+1}`,
+    estimatedClientReceipt:'',
+    feeMode:FEE_MODE_PERCENTAGE,
+    feePercent:formatFinancePercent(DEFAULT_FEE_PERCENT, DEFAULT_FEE_PERCENT),
+    mySharePercent:formatFinancePercent(DEFAULT_MY_SHARE_PERCENT, DEFAULT_MY_SHARE_PERCENT),
+    expectedDate:'',
+    confidence:'media',
+    notes:'',
+    createdAt:now(),
+  });
+  c.finance.expectation = c.finance.expectations[0];
+  renderPanelBody();
+}
+function removeFinanceExpectation(clientId, expectationId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c || !c.finance) return;
+  syncFinanceFormToClient(c);
+  if(c.finance.expectationsLocked || !Array.isArray(c.finance.expectations) || c.finance.expectations.length<=1) return;
+  c.finance.expectations = c.finance.expectations.filter(exp=>exp.id!==expectationId);
+  c.finance.expectation = c.finance.expectations[0];
+  addHistory(c,'Pagamento previsto removido','','warn');
+  save();
+  renderPanelBody();
+  renderBoard();
 }
 function saveFinanceInstallments(clientId){
   const c = clients.find(x=>x.id===clientId);
