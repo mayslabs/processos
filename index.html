@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-07-29-coluna-pagamento-v2">
+<meta name="app-build" content="2026-08-03-financeiro-flexivel">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-07-29-coluna-pagamento-v2';
+  const build = '2026-08-03-financeiro-flexivel';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1919,15 +1919,20 @@ button.nav-kpi{cursor:pointer}
 .finance-metric-sub strong{color:#1A2740;font-weight:600}
 .finance-pending-note{margin-top:10px;border:1px solid #E4EDF5;background:#F8FBFE;border-radius:8px;padding:10px 12px;color:#536176;font-size:12px;line-height:1.45}
 .finance-pending-note strong{color:#1A2740;font-weight:600}
-.finance-expectation{grid-template-columns:1.18fr .72fr .72fr .9fr .68fr!important;align-items:end!important}
+.finance-expectation{grid-template-columns:1.12fr 1.1fr .72fr .9fr .68fr!important;align-items:end!important}
 .finance-expectation .fl{display:grid;gap:6px;align-content:end}
 .finance-expectation .fi,.finance-expectation .fi-select{height:36px!important;margin:0!important}
+.finance-fee-controls{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(72px,.75fr);gap:6px;min-width:0}
+.finance-fee-controls.full{grid-template-columns:1fr}
+.finance-fee-controls.installment{grid-template-columns:1fr;align-content:start}
+.finance-fee-controls .fi,.finance-fee-controls .fi-select{width:100%;min-width:0;margin:0!important}
+.finance-fee-controls [hidden]{display:none!important}
 .finance-table-head{grid-template-columns:1.2fr .8fr .9fr .72fr .72fr!important}
-.finance-row-main{grid-template-columns:1.2fr .8fr .9fr .72fr .72fr!important}
+.finance-row-main{grid-template-columns:1.2fr .8fr .9fr .82fr .72fr!important;align-items:start!important}
 .finance-row{border-radius:8px!important;background:#FFF!important}
 .finance-table-head,.finance-row{min-width:680px}
 .finance-installments{overflow:auto}
-.finance-row-calc{grid-template-columns:repeat(2,minmax(0,1fr)) auto!important}
+.finance-row-calc{grid-template-columns:repeat(3,minmax(0,1fr)) auto!important}
 .finance-row.locked input,.finance-row.locked textarea,.finance-row.locked select,.finance-expectation.locked input,.finance-expectation.locked select,.finance-note.locked{background:#F7FAFC!important;color:#536176!important}
 .finance-alert.upcoming{background:#F8F5FF!important;border-color:#DED6FF!important;color:#5F4BA8!important}
 .finance-section-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
@@ -2284,7 +2289,7 @@ const COL_SHORT_LABELS = {
   aguardando_pagamento: 'Aguardando pagamento',
   finalizado: 'Finalizado',
 };
-const DATA_SCHEMA_VERSION = 2;
+const DATA_SCHEMA_VERSION = 3;
 const PRESET_COLORS = ['#FCA5A5','#FCD34D','#86EFAC','#93C5FD','#C4B5FD','#F9A8D4','#CBD5E1','#67E8F9'];
 const BENEFIT_OPTIONS = ['BPC - Deficiência','BPC - Idoso','Salário-maternidade rural','Salário-maternidade urbano','Auxílio-doença','Auxílio-acidente','Aposentadoria por invalidez','Aposentadoria por tempo de contribuição','Aposentadoria por idade','Aposentadoria rural','Pensão por morte','Outro'];
 const PERSONAL_PROCESS_OPTIONS = ['Consumidor','Cível','Inventário','Previdenciário','Imobiliário','Trabalhista','Outro'];
@@ -2299,6 +2304,8 @@ const WORKSPACE_TITLES = Object.fromEntries(WORKSPACES.map(w=>[w.id,w.title]));
 const DEFAULT_WORKSPACE_ID = 'leticia';
 const DEFAULT_FEE_PERCENT = 30;
 const DEFAULT_MY_SHARE_PERCENT = 50;
+const FEE_MODE_PERCENTAGE = 'percentage';
+const FEE_MODE_FULL = 'full';
 const AUTH_INACTIVITY_MS = 60 * 60 * 1000;
 const AUTH_ACTIVITY_EVENTS = ['pointerdown','pointermove','keydown','scroll','touchstart'];
 
@@ -2371,6 +2378,25 @@ function formatPercent(value){
   const n = parsePercent(value);
   if(!n) return '';
   return `${String(n).replace('.',',')}%`;
+}
+function percentOrDefault(value, fallback){
+  return String(value??'').trim() === '' ? fallback : parsePercent(value);
+}
+function formatFinancePercent(value, fallback){
+  const n = percentOrDefault(value, fallback);
+  return `${String(n).replace('.',',')}%`;
+}
+function normalizeFeeMode(value){
+  return value === FEE_MODE_FULL ? FEE_MODE_FULL : FEE_MODE_PERCENTAGE;
+}
+function calculateFinanceAmounts(amount, feeMode, feePercent, mySharePercent){
+  const total = parseMoney(amount);
+  const mode = normalizeFeeMode(feeMode);
+  const fee = mode === FEE_MODE_FULL
+    ? total
+    : total * percentOrDefault(feePercent, DEFAULT_FEE_PERCENT) / 100;
+  const mine = fee * percentOrDefault(mySharePercent, DEFAULT_MY_SHARE_PERCENT) / 100;
+  return {total, fee, mine, clientNet:Math.max(total-fee, 0)};
 }
 function formatMoneyValue(value){
   const n = typeof value === 'number' ? value : parseMoney(value);
@@ -2497,11 +2523,13 @@ function isPastDate(dateStr){
 function calcFinanceSummary(c){
   const finance = c.finance || normalizeFinance(null, c.honorarios || {});
   const exp = finance.expectation || {};
-  const expClient = parseMoney(exp.estimatedClientReceipt);
-  const expFee = expClient * (parsePercent(exp.feePercent) || DEFAULT_FEE_PERCENT) / 100;
-  const expMine = expFee * (parsePercent(exp.mySharePercent) || DEFAULT_MY_SHARE_PERCENT) / 100;
+  const expAmounts = calculateFinanceAmounts(exp.estimatedClientReceipt, exp.feeMode, exp.feePercent, exp.mySharePercent);
+  const expClient = expAmounts.total;
+  const expFee = expAmounts.fee;
+  const expMine = expAmounts.mine;
   const installments = finance.installments || [];
   const confirmedClient = installments.reduce((sum,p)=>sum+parseMoney(p.clientAmount),0);
+  const confirmedClientNet = installments.reduce((sum,p)=>sum+parseMoney(p.clientNetAmount),0);
   const confirmedFees = installments.reduce((sum,p)=>sum+parseMoney(p.feeAmount),0);
   const confirmedMine = installments.reduce((sum,p)=>sum+parseMoney(p.myShareAmount),0);
   const clientReceived = installments.reduce((sum,p)=>sum+(p.clientReceived?parseMoney(p.clientAmount):0),0);
@@ -2509,7 +2537,7 @@ function calcFinanceSummary(c){
   const mineReceived = installments.reduce((sum,p)=>sum+(p.myShareReceived?parseMoney(p.myShareAmount):0),0);
   return {
     expClient, expFee, expMine,
-    confirmedClient, confirmedFees, confirmedMine,
+    confirmedClient, confirmedClientNet, confirmedFees, confirmedMine,
     clientReceived,
     feesReceived, mineReceived,
     pendingClient: Math.max(confirmedClient - clientReceived, 0),
@@ -2520,6 +2548,10 @@ function calcFinanceSummary(c){
 function financeInstallmentStatus(p){
   if(p.myShareReceived) return {key:'done', label:'Recebido'};
   if(p.feeReceived) return {key:'share', label:'Repasse'};
+  if(normalizeFeeMode(p.feeMode) === FEE_MODE_FULL){
+    if(isPastDate(p.expectedDate)) return {key:'late', label:'Confirmar'};
+    return {key:'pending', label:'Pendente'};
+  }
   if(p.clientReceived) return {key:'charge', label:'Cobrar'};
   if(isPastDate(p.expectedDate)) return {key:'late', label:'Confirmar'};
   return {key:'pending', label:'Pendente'};
@@ -2531,15 +2563,28 @@ function getFinanceAlerts(clientList=clients){
       if(!p || p.myShareReceived) return;
       const status = financeInstallmentStatus(p);
       if(status.key==='late'){
-        items.push({clientId:c.id, clientName:c.name, installment:p, title:'Confirmar recebimento', detail:'Pagamento previsto passou. Verifique se o cliente recebeu.', date:p.expectedDate, tone:'late'});
+        const detail = normalizeFeeMode(p.feeMode) === FEE_MODE_FULL
+          ? 'A data da parcela integral passou. Verifique se os honorários foram recebidos.'
+          : 'Pagamento previsto passou. Verifique se o cliente recebeu.';
+        items.push({clientId:c.id, clientName:c.name, installment:p, title:'Confirmar recebimento', detail, date:p.expectedDate, tone:'late'});
       } else if(status.key==='charge'){
         items.push({clientId:c.id, clientName:c.name, installment:p, title:'Honorários em aberto', detail:'Cliente recebeu. Honorários ainda não foram marcados como recebidos.', date:p.expectedDate, tone:'charge'});
       } else if(status.key==='share'){
         items.push({clientId:c.id, clientName:c.name, installment:p, title:'Minha parte em aberto', detail:'Honorários recebidos. Sua parte ainda não foi marcada como recebida.', date:p.expectedDate, tone:'share'});
       } else if(status.key==='pending'){
         const s = dayStatus(p.expectedDate);
-        if(s==='urgent' || s==='warning'){
-          items.push({clientId:c.id, clientName:c.name, installment:p, title:'Pagamento próximo', detail:'Data prevista para o cliente receber está se aproximando.', date:p.expectedDate, tone:'upcoming'});
+        if(p.expectedDate){
+          const full = normalizeFeeMode(p.feeMode) === FEE_MODE_FULL;
+          const near = s==='urgent' || s==='warning';
+          items.push({
+            clientId:c.id,
+            clientName:c.name,
+            installment:p,
+            title:full ? 'Parcela integral prevista' : (near ? 'Pagamento próximo' : 'Pagamento previsto'),
+            detail:full ? 'Esta parcela será destinada integralmente aos honorários.' : (near ? 'A data prevista para o cliente receber está se aproximando.' : 'Pagamento confirmado para acompanhamento.'),
+            date:p.expectedDate,
+            tone:near ? 'upcoming' : 'scheduled'
+          });
         }
       }
     });
@@ -2756,8 +2801,9 @@ function parseSavedKanban(raw){
         return {clients: parsedClients, globalTags: extractGlobalTags(parsedClients), globalTasks: [], migrated: true};
       }
       const parsedClients = (parsed.clients||[]).map(normalizeClient).filter(Boolean);
-      const migrated = Number(parsed.schemaVersion||0) < DATA_SCHEMA_VERSION;
-      if(migrated) migratePaymentStage(parsedClients);
+      const savedVersion = Number(parsed.schemaVersion||0);
+      const migrated = savedVersion < DATA_SCHEMA_VERSION;
+      if(savedVersion < 2) migratePaymentStage(parsedClients);
       return {
         clients: parsedClients,
         globalTags: parsed.globalTags||extractGlobalTags(parsedClients),
@@ -2771,8 +2817,9 @@ function parseSavedKanban(raw){
   }
   if(raw && typeof raw === 'object'){
     const parsedClients = (raw.clients||[]).map(normalizeClient).filter(Boolean);
-    const migrated = Number(raw.schemaVersion||0) < DATA_SCHEMA_VERSION;
-    if(migrated) migratePaymentStage(parsedClients);
+    const savedVersion = Number(raw.schemaVersion||0);
+    const migrated = savedVersion < DATA_SCHEMA_VERSION;
+    if(savedVersion < 2) migratePaymentStage(parsedClients);
     return {clients: parsedClients, globalTags: raw.globalTags||extractGlobalTags(parsedClients), globalTasks: normalizeGlobalTasks(raw.globalTasks), migrated};
   }
   return {clients: [], globalTags: [], globalTasks: [], migrated: false};
@@ -3003,31 +3050,37 @@ function normalizeGlobalTasks(list){
 }
 function normalizeFinance(finance, honorarios={}){
   const baseExpectation = finance && finance.expectation && typeof finance.expectation === 'object' ? finance.expectation : {};
-  const legacyPercent = parsePercent(honorarios.percentual) || DEFAULT_FEE_PERCENT;
+  const legacyPercent = percentOrDefault(honorarios.percentual, DEFAULT_FEE_PERCENT);
   const legacyBase = parseMoney(honorarios.valorCausa);
+  const expectationMode = normalizeFeeMode(baseExpectation.feeMode);
   const expectation = {
     estimatedClientReceipt: formatMoney(baseExpectation.estimatedClientReceipt || legacyBase || ''),
     expectedDate: baseExpectation.expectedDate || '',
     confidence: baseExpectation.confidence || 'media',
-    feePercent: formatPercent(baseExpectation.feePercent || legacyPercent || DEFAULT_FEE_PERCENT),
-    mySharePercent: formatPercent(baseExpectation.mySharePercent || DEFAULT_MY_SHARE_PERCENT),
+    feeMode: expectationMode,
+    feePercent: formatFinancePercent(baseExpectation.feePercent, legacyPercent),
+    mySharePercent: formatFinancePercent(baseExpectation.mySharePercent, DEFAULT_MY_SHARE_PERCENT),
     notes: baseExpectation.notes || honorarios.observacao || '',
     locked: baseExpectation.locked === true,
   };
   const rawInstallments = finance && Array.isArray(finance.installments) ? finance.installments : [];
   const installments = rawInstallments.map(p=>{
     if(!p || typeof p !== 'object') return null;
-    const feePercent = formatPercent(p.feePercent || legacyPercent || DEFAULT_FEE_PERCENT);
-    const mySharePercent = formatPercent(p.mySharePercent || DEFAULT_MY_SHARE_PERCENT);
+    const feeMode = normalizeFeeMode(p.feeMode);
+    const feePercent = formatFinancePercent(p.feePercent, legacyPercent);
+    const mySharePercent = formatFinancePercent(p.mySharePercent, DEFAULT_MY_SHARE_PERCENT);
     const clientAmount = formatMoney(p.clientAmount || '');
-    const feeAmount = formatMoney(parseMoney(clientAmount) * parsePercent(feePercent) / 100);
-    const myShareAmount = formatMoney(parseMoney(feeAmount) * parsePercent(mySharePercent) / 100);
+    const amounts = calculateFinanceAmounts(clientAmount, feeMode, feePercent, mySharePercent);
+    const feeAmount = formatMoney(amounts.fee);
+    const myShareAmount = formatMoney(amounts.mine);
     const leticiaShareAmount = formatMoney(parseMoney(feeAmount) - parseMoney(myShareAmount));
     return {
       id: p.id || uid(),
       description: p.description || '',
       expectedDate: p.expectedDate || '',
       clientAmount,
+      clientNetAmount: formatMoney(amounts.clientNet),
+      feeMode,
       feePercent,
       feeAmount,
       mySharePercent,
@@ -4260,6 +4313,12 @@ function saveCredentials(clientId){
 }
 
 // ── TAB: HONORÁRIOS ──
+function financeFeeModeOptions(selected){
+  const mode = normalizeFeeMode(selected);
+  return `
+    <option value="${FEE_MODE_PERCENTAGE}" ${mode===FEE_MODE_PERCENTAGE?'selected':''}>Percentual</option>
+    <option value="${FEE_MODE_FULL}" ${mode===FEE_MODE_FULL?'selected':''}>Integral (100%)</option>`;
+}
 function tabHonorarios(c){
   const finance = c.finance || normalizeFinance(null, c.honorarios || {});
   const exp = finance.expectation;
@@ -4300,25 +4359,34 @@ function tabHonorarios(c){
     </div>` : '';
   const rows = finance.installments.length ? finance.installments.map(p=>{
     const status = financeInstallmentStatus(p);
-    const feeAmount = formatMoney(parseMoney(p.clientAmount) * (parsePercent(p.feePercent) || DEFAULT_FEE_PERCENT) / 100);
-    const myShareAmount = formatMoney(parseMoney(feeAmount) * (parsePercent(p.mySharePercent) || DEFAULT_MY_SHARE_PERCENT) / 100);
+    const feeMode = normalizeFeeMode(p.feeMode);
+    const amounts = calculateFinanceAmounts(p.clientAmount, feeMode, p.feePercent, p.mySharePercent);
+    const feeAmount = formatMoneyValue(amounts.fee);
+    const myShareAmount = formatMoneyValue(amounts.mine);
+    const clientNetAmount = formatMoneyValue(amounts.clientNet);
     return `
       <div class="finance-row ${status.key} ${installmentsLocked?'locked':''}" data-installment="${p.id}">
         <div class="finance-row-main">
           <input class="fi finance-desc" id="fin-desc-${p.id}" value="${esc(p.description)}" placeholder="Ex: 1º pagamento INSS" ${instDisabled}>
           <input class="fi finance-date" id="fin-date-${p.id}" type="date" value="${esc(p.expectedDate)}" ${instDisabled}>
           <input class="fi finance-money" id="fin-client-${p.id}" value="${esc(p.clientAmount)}" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateFinanceInstallmentPreview('${p.id}')" ${instDisabled}>
-          <input class="fi finance-percent" id="fin-fee-percent-${p.id}" value="${esc(p.feePercent)}" placeholder="30%" oninput="formatPercentInput(this); updateFinanceInstallmentPreview('${p.id}')" ${instDisabled}>
+          <div class="finance-fee-controls installment">
+            <select class="fi-select" id="fin-fee-mode-${p.id}" onchange="updateFinanceInstallmentMode('${p.id}')" ${instDisabled}>${financeFeeModeOptions(feeMode)}</select>
+            <input class="fi finance-percent" id="fin-fee-percent-${p.id}" value="${esc(p.feePercent)}" placeholder="30%" aria-label="Percentual dos honorários" oninput="formatPercentInput(this); updateFinanceInstallmentPreview('${p.id}')" ${feeMode===FEE_MODE_FULL?'hidden':''} ${instDisabled}>
+          </div>
           <input class="fi finance-percent" id="fin-share-percent-${p.id}" value="${esc(p.mySharePercent)}" placeholder="50%" oninput="formatPercentInput(this); updateFinanceInstallmentPreview('${p.id}')" ${instDisabled}>
         </div>
         <div class="finance-row-calc">
-          <div><span>Honorários</span><strong id="fin-fee-${p.id}">${esc(feeAmount)||'R$ 0,00'}</strong></div>
-          <div><span>Minha parte</span><strong id="fin-mine-${p.id}">${esc(myShareAmount)||'R$ 0,00'}</strong></div>
+          <div><span>Cliente fica</span><strong id="fin-client-net-${p.id}">${clientNetAmount}</strong></div>
+          <div><span>Honorários</span><strong id="fin-fee-${p.id}">${feeAmount}</strong></div>
+          <div><span>Minha parte</span><strong id="fin-mine-${p.id}">${myShareAmount}</strong></div>
           <span class="finance-status ${status.key}">${status.label}</span>
         </div>
         <div class="finance-checks">
-          <label><input type="checkbox" ${p.clientReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','clientReceived',this.checked)" ${instDisabled}> Cliente recebeu</label>
-          <label><input type="checkbox" ${p.feeReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','feeReceived',this.checked)" ${instDisabled}> Honorários recebidos</label>
+          ${feeMode===FEE_MODE_FULL
+            ? `<label><input type="checkbox" ${p.feeReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','feeReceived',this.checked)" ${instDisabled}> Parcela integral recebida</label>`
+            : `<label><input type="checkbox" ${p.clientReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','clientReceived',this.checked)" ${instDisabled}> Cliente recebeu</label>
+               <label><input type="checkbox" ${p.feeReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','feeReceived',this.checked)" ${instDisabled}> Honorários recebidos</label>`}
           <label><input type="checkbox" ${p.myShareReceived?'checked':''} onchange="toggleFinanceInstallmentStatus('${c.id}','${p.id}','myShareReceived',this.checked)" ${instDisabled}> Minha parte recebida</label>
           <button class="finance-remove" onclick="removeFinanceInstallment('${c.id}','${p.id}')" title="Remover parcela" ${instDisabled}>×</button>
         </div>
@@ -4343,13 +4411,14 @@ function tabHonorarios(c){
         </div>
       </div>
       <div class="finance-expectation ${expLocked?'locked':''}">
-        <div class="fl"><span class="fl-label">Valor estimado do cliente</span><input class="fi" id="fin-exp-client" value="${esc(exp.estimatedClientReceipt||'')}" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateFinanceExpectationPreview()" ${expDisabled}></div>
-        <div class="fl"><span class="fl-label">Honorários</span><input class="fi" id="fin-exp-fee-percent" value="${esc(exp.feePercent||formatPercent(DEFAULT_FEE_PERCENT))}" placeholder="30%" oninput="formatPercentInput(this); updateFinanceExpectationPreview()" ${expDisabled}></div>
+        <div class="fl"><span class="fl-label">Valor estimado do pagamento</span><input class="fi" id="fin-exp-client" value="${esc(exp.estimatedClientReceipt||'')}" placeholder="R$ 0,00" oninput="formatMoneyInput(this); updateFinanceExpectationPreview()" ${expDisabled}></div>
+        <div class="fl"><span class="fl-label">Modelo dos honorários</span><div class="finance-fee-controls ${normalizeFeeMode(exp.feeMode)===FEE_MODE_FULL?'full':''}"><select class="fi-select" id="fin-exp-fee-mode" onchange="updateFinanceExpectationMode()" ${expDisabled}>${financeFeeModeOptions(exp.feeMode)}</select><input class="fi" id="fin-exp-fee-percent" value="${esc(exp.feePercent||formatFinancePercent(DEFAULT_FEE_PERCENT,DEFAULT_FEE_PERCENT))}" placeholder="30%" aria-label="Percentual dos honorários" oninput="formatPercentInput(this); updateFinanceExpectationPreview()" ${normalizeFeeMode(exp.feeMode)===FEE_MODE_FULL?'hidden':''} ${expDisabled}></div></div>
         <div class="fl"><span class="fl-label">Minha parte</span><input class="fi" id="fin-exp-share-percent" value="${esc(exp.mySharePercent||formatPercent(DEFAULT_MY_SHARE_PERCENT))}" placeholder="50%" oninput="formatPercentInput(this); updateFinanceExpectationPreview()" ${expDisabled}></div>
         <div class="fl"><span class="fl-label">Data provável</span><input class="fi" id="fin-exp-date" type="date" value="${esc(exp.expectedDate||'')}" ${expDisabled}></div>
         <div class="fl"><span class="fl-label">Certeza</span><select class="fi-select" id="fin-exp-confidence" ${expDisabled}>${confidenceOptions}</select></div>
       </div>
       <div class="finance-preview">
+        <span>Cliente ficará com: <strong id="fin-exp-client-net">${formatMoneyValue(Math.max(summary.expClient-expFee,0))}</strong></span>
         <span>Honorários previstos: <strong id="fin-exp-fee">${formatMoneyValue(expFee)}</strong></span>
         <span>Minha parte prevista: <strong id="fin-exp-mine">${formatMoneyValue(expMine)}</strong></span>
       </div>
@@ -4361,12 +4430,13 @@ function tabHonorarios(c){
         <div class="finance-section-actions">
           <button class="btn-s g" onclick="addFinanceInstallment('${c.id}')" ${instDisabled}>+ Adicionar parcela</button>
           <button class="btn-s g" onclick="addMaternityFinanceModel('${c.id}')" ${instDisabled}>Modelo salário-maternidade</button>
+          <button class="btn-s g" onclick="addFullFeeInstallmentModel('${c.id}')" ${instDisabled}>3 parcelas integrais</button>
           <button class="btn-s p" onclick="saveFinanceInstallments('${c.id}')" ${installmentsLocked?'disabled':''}>Salvar parcelas</button>
           <button class="btn-s g" onclick="editFinanceInstallments('${c.id}')" ${installmentsLocked?'':'disabled'}>Editar</button>
         </div>
       </div>
       <div class="finance-table-head">
-        <span>Parcela</span><span>Data</span><span>Cliente recebe</span><span>Honorários</span><span>Minha parte</span>
+        <span>Parcela</span><span>Data</span><span>Valor da parcela</span><span>Modelo dos honorários</span><span>Minha parte</span>
       </div>
       <div class="finance-installments">${rows}</div>
     </div>
@@ -4397,27 +4467,47 @@ function updateHonorariosCalc(){
 }
 function updateFinanceExpectationPreview(){
   const clientEl = document.getElementById('fin-exp-client');
+  const modeEl = document.getElementById('fin-exp-fee-mode');
   const feeEl = document.getElementById('fin-exp-fee-percent');
   const shareEl = document.getElementById('fin-exp-share-percent');
+  const clientNetPreview = document.getElementById('fin-exp-client-net');
   const feePreview = document.getElementById('fin-exp-fee');
   const minePreview = document.getElementById('fin-exp-mine');
-  if(!clientEl || !feeEl || !shareEl || !feePreview || !minePreview) return;
-  const fee = parseMoney(clientEl.value) * (parsePercent(feeEl.value) || DEFAULT_FEE_PERCENT) / 100;
-  const mine = fee * (parsePercent(shareEl.value) || DEFAULT_MY_SHARE_PERCENT) / 100;
-  feePreview.textContent = formatMoneyValue(fee);
-  minePreview.textContent = formatMoneyValue(mine);
+  if(!clientEl || !modeEl || !feeEl || !shareEl || !clientNetPreview || !feePreview || !minePreview) return;
+  const amounts = calculateFinanceAmounts(clientEl.value, modeEl.value, feeEl.value, shareEl.value);
+  clientNetPreview.textContent = formatMoneyValue(amounts.clientNet);
+  feePreview.textContent = formatMoneyValue(amounts.fee);
+  minePreview.textContent = formatMoneyValue(amounts.mine);
+}
+function updateFinanceExpectationMode(){
+  const modeEl = document.getElementById('fin-exp-fee-mode');
+  const percentEl = document.getElementById('fin-exp-fee-percent');
+  if(!modeEl || !percentEl) return;
+  const full = normalizeFeeMode(modeEl.value) === FEE_MODE_FULL;
+  percentEl.hidden = full;
+  modeEl.parentElement?.classList.toggle('full', full);
+  updateFinanceExpectationPreview();
 }
 function updateFinanceInstallmentPreview(installmentId){
   const clientEl = document.getElementById('fin-client-'+installmentId);
+  const feeModeEl = document.getElementById('fin-fee-mode-'+installmentId);
   const feePercentEl = document.getElementById('fin-fee-percent-'+installmentId);
   const sharePercentEl = document.getElementById('fin-share-percent-'+installmentId);
+  const clientNetEl = document.getElementById('fin-client-net-'+installmentId);
   const feeEl = document.getElementById('fin-fee-'+installmentId);
   const mineEl = document.getElementById('fin-mine-'+installmentId);
-  if(!clientEl || !feePercentEl || !sharePercentEl || !feeEl || !mineEl) return;
-  const fee = parseMoney(clientEl.value) * (parsePercent(feePercentEl.value) || DEFAULT_FEE_PERCENT) / 100;
-  const mine = fee * (parsePercent(sharePercentEl.value) || DEFAULT_MY_SHARE_PERCENT) / 100;
-  feeEl.textContent = formatMoneyValue(fee);
-  mineEl.textContent = formatMoneyValue(mine);
+  if(!clientEl || !feeModeEl || !feePercentEl || !sharePercentEl || !clientNetEl || !feeEl || !mineEl) return;
+  const amounts = calculateFinanceAmounts(clientEl.value, feeModeEl.value, feePercentEl.value, sharePercentEl.value);
+  clientNetEl.textContent = formatMoneyValue(amounts.clientNet);
+  feeEl.textContent = formatMoneyValue(amounts.fee);
+  mineEl.textContent = formatMoneyValue(amounts.mine);
+}
+function updateFinanceInstallmentMode(installmentId){
+  const modeEl = document.getElementById('fin-fee-mode-'+installmentId);
+  const percentEl = document.getElementById('fin-fee-percent-'+installmentId);
+  if(!modeEl || !percentEl) return;
+  percentEl.hidden = normalizeFeeMode(modeEl.value) === FEE_MODE_FULL;
+  updateFinanceInstallmentPreview(installmentId);
 }
 function formatNewClientHonorariosInput(input){
   if(input.value.includes('%')) formatPercentInput(input);
@@ -4436,6 +4526,7 @@ function updateNewClientHonorariosCalc(){
 function syncFinanceFormToClient(c){
   if(!c || !document.getElementById('fin-exp-client')) return false;
   const expClient = document.getElementById('fin-exp-client').value;
+  const expFeeMode = normalizeFeeMode(document.getElementById('fin-exp-fee-mode').value);
   const expFeePercent = document.getElementById('fin-exp-fee-percent').value;
   const expSharePercent = document.getElementById('fin-exp-share-percent').value;
   const finance = c.finance || normalizeFinance(null, c.honorarios || {});
@@ -4443,8 +4534,9 @@ function syncFinanceFormToClient(c){
   const installmentsLocked = finance.installmentsLocked === true;
   finance.expectation = {
     estimatedClientReceipt: formatMoney(expClient),
-    feePercent: formatPercent(expFeePercent) || formatPercent(DEFAULT_FEE_PERCENT),
-    mySharePercent: formatPercent(expSharePercent) || formatPercent(DEFAULT_MY_SHARE_PERCENT),
+    feeMode: expFeeMode,
+    feePercent: formatFinancePercent(expFeePercent, DEFAULT_FEE_PERCENT),
+    mySharePercent: formatFinancePercent(expSharePercent, DEFAULT_MY_SHARE_PERCENT),
     expectedDate: document.getElementById('fin-exp-date').value,
     confidence: document.getElementById('fin-exp-confidence').value,
     notes: document.getElementById('fin-exp-notes').value,
@@ -4453,15 +4545,19 @@ function syncFinanceFormToClient(c){
   finance.installmentsLocked = installmentsLocked;
   finance.installments = (finance.installments||[]).map(p=>{
     const clientAmount = formatMoney(document.getElementById('fin-client-'+p.id)?.value || p.clientAmount || '');
-    const feePercent = formatPercent(document.getElementById('fin-fee-percent-'+p.id)?.value || p.feePercent || DEFAULT_FEE_PERCENT);
-    const mySharePercent = formatPercent(document.getElementById('fin-share-percent-'+p.id)?.value || p.mySharePercent || DEFAULT_MY_SHARE_PERCENT);
-    const feeAmount = formatMoney(parseMoney(clientAmount) * (parsePercent(feePercent)||DEFAULT_FEE_PERCENT) / 100);
-    const myShareAmount = formatMoney(parseMoney(feeAmount) * (parsePercent(mySharePercent)||DEFAULT_MY_SHARE_PERCENT) / 100);
+    const feeMode = normalizeFeeMode(document.getElementById('fin-fee-mode-'+p.id)?.value || p.feeMode);
+    const feePercent = formatFinancePercent(document.getElementById('fin-fee-percent-'+p.id)?.value ?? p.feePercent, DEFAULT_FEE_PERCENT);
+    const mySharePercent = formatFinancePercent(document.getElementById('fin-share-percent-'+p.id)?.value ?? p.mySharePercent, DEFAULT_MY_SHARE_PERCENT);
+    const amounts = calculateFinanceAmounts(clientAmount, feeMode, feePercent, mySharePercent);
+    const feeAmount = formatMoney(amounts.fee);
+    const myShareAmount = formatMoney(amounts.mine);
     return {
       ...p,
       description: document.getElementById('fin-desc-'+p.id)?.value.trim() || p.description || 'Parcela',
       expectedDate: document.getElementById('fin-date-'+p.id)?.value || '',
       clientAmount,
+      clientNetAmount: formatMoney(amounts.clientNet),
+      feeMode,
       feePercent,
       feeAmount,
       mySharePercent,
@@ -4472,8 +4568,9 @@ function syncFinanceFormToClient(c){
   });
   c.finance = finance;
   c.honorarios.valorCausa = finance.expectation.estimatedClientReceipt;
-  c.honorarios.percentual = finance.expectation.feePercent;
-  c.honorarios.valorHonorarios = formatMoney(parseMoney(finance.expectation.estimatedClientReceipt) * parsePercent(finance.expectation.feePercent) / 100);
+  const expectationAmounts = calculateFinanceAmounts(finance.expectation.estimatedClientReceipt, finance.expectation.feeMode, finance.expectation.feePercent, finance.expectation.mySharePercent);
+  c.honorarios.percentual = finance.expectation.feeMode === FEE_MODE_FULL ? '100%' : finance.expectation.feePercent;
+  c.honorarios.valorHonorarios = formatMoney(expectationAmounts.fee);
   c.honorarios.observacao = finance.expectation.notes;
   return true;
 }
@@ -4537,9 +4634,11 @@ function addFinanceInstallment(clientId){
     description: '',
     expectedDate: '',
     clientAmount: '',
-    feePercent: formatPercent(DEFAULT_FEE_PERCENT),
+    clientNetAmount: '',
+    feeMode: FEE_MODE_PERCENTAGE,
+    feePercent: formatFinancePercent(DEFAULT_FEE_PERCENT, DEFAULT_FEE_PERCENT),
     feeAmount: '',
-    mySharePercent: formatPercent(DEFAULT_MY_SHARE_PERCENT),
+    mySharePercent: formatFinancePercent(DEFAULT_MY_SHARE_PERCENT, DEFAULT_MY_SHARE_PERCENT),
     myShareAmount: '',
     leticiaShareAmount: '',
     clientReceived: false,
@@ -4563,9 +4662,11 @@ function addMaternityFinanceModel(clientId){
       description: label,
       expectedDate: '',
       clientAmount: '',
-      feePercent: formatPercent(DEFAULT_FEE_PERCENT),
+      clientNetAmount: '',
+      feeMode: FEE_MODE_PERCENTAGE,
+      feePercent: formatFinancePercent(DEFAULT_FEE_PERCENT, DEFAULT_FEE_PERCENT),
       feeAmount: '',
-      mySharePercent: formatPercent(DEFAULT_MY_SHARE_PERCENT),
+      mySharePercent: formatFinancePercent(DEFAULT_MY_SHARE_PERCENT, DEFAULT_MY_SHARE_PERCENT),
       myShareAmount: '',
       leticiaShareAmount: '',
       clientReceived: false,
@@ -4576,6 +4677,35 @@ function addMaternityFinanceModel(clientId){
     });
   });
   addHistory(c,'Modelo salário-maternidade aplicado','Parcelas financeiras criadas para preenchimento.','default');
+  renderPanelBody();
+}
+function addFullFeeInstallmentModel(clientId){
+  const c = clients.find(x=>x.id===clientId);
+  if(!c) return;
+  syncFinanceFormToClient(c);
+  if(!c.finance) c.finance = normalizeFinance(null, c.honorarios || {});
+  if(c.finance.installmentsLocked) return;
+  ['1ª parcela integral','2ª parcela integral','3ª parcela integral'].forEach(label=>{
+    c.finance.installments.push({
+      id:uid(),
+      description:label,
+      expectedDate:'',
+      clientAmount:'',
+      clientNetAmount:'',
+      feeMode:FEE_MODE_FULL,
+      feePercent:formatFinancePercent(DEFAULT_FEE_PERCENT, DEFAULT_FEE_PERCENT),
+      feeAmount:'',
+      mySharePercent:formatFinancePercent(DEFAULT_MY_SHARE_PERCENT, DEFAULT_MY_SHARE_PERCENT),
+      myShareAmount:'',
+      leticiaShareAmount:'',
+      clientReceived:false,
+      feeReceived:false,
+      myShareReceived:false,
+      notes:'',
+      createdAt:now(),
+    });
+  });
+  addHistory(c,'Modelo de parcelas integrais aplicado','Três parcelas integrais criadas para preenchimento.','default');
   renderPanelBody();
 }
 function removeFinanceInstallment(clientId, installmentId){
@@ -4597,6 +4727,9 @@ function toggleFinanceInstallmentStatus(clientId, installmentId, field, checked)
   const p = c && c.finance ? c.finance.installments.find(x=>x.id===installmentId) : null;
   if(!p) return;
   p[field] = checked;
+  if(normalizeFeeMode(p.feeMode) === FEE_MODE_FULL && field==='feeReceived'){
+    p.clientReceived = checked;
+  }
   if(field==='clientReceived' && !checked){
     p.feeReceived = false;
     p.myShareReceived = false;
