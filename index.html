@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-pagamentos-futuros-primeiro">
+<meta name="app-build" content="2026-10-15-contagens-laterais-corretas">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-10-15-pagamentos-futuros-primeiro';
+  const build = '2026-10-15-contagens-laterais-corretas';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -5516,14 +5516,9 @@ function renderKanbanDeadlineAlerts(clientList=clients){
   const scheduleItems = getScheduleItems(clientList);
   const hearings = scheduleItems.filter(t=>isHearingTask(t));
   const expertises = scheduleItems.filter(t=>isExpertiseTask(t));
-  const attentionCount = items => items.filter(t=>{
-    if(!t.deadline) return false;
-    const s = dayStatus(t.deadline);
-    return s==='overdue'||s==='urgent'||s==='warning';
-  }).length;
   const countLabel = (items, fallback, singular='pendente', plural='pendentes') => {
     if(!items.length) return fallback;
-    const n = attentionCount(items) || items.length;
+    const n = items.length;
     return `${n} ${n===1?singular:plural}`;
   };
   const block = (title,count,items,cls,empty) => `<section class="kanban-alert-block">
