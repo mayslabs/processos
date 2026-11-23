@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-10-15-contagens-laterais-corretas">
+<meta name="app-build" content="2026-11-23-compromissos-por-data">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-10-15-contagens-laterais-corretas';
+  const build = '2026-11-23-compromissos-por-data';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -1707,6 +1707,8 @@ body{
 .kanban-alert-item.expertise.overdue{box-shadow:inset 3px 0 0 #D64555!important}
 .kanban-alert-client{font-size:12px!important;font-weight:500!important;color:var(--final-text)!important;display:flex!important;align-items:flex-start!important;gap:6px!important}
 .sidebar-overdue-icon{margin-left:auto;color:#D64555;font-size:10px;line-height:1.2;font-weight:600;flex:0 0 auto;white-space:nowrap}
+.sidebar-kind-row{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.sidebar-kind-label{display:inline-flex;align-items:center;min-height:20px;padding:2px 6px;border:1px solid rgba(17,27,47,.14);border-radius:4px;color:var(--final-text);font-size:10px;font-weight:500;line-height:1.2}
 .kanban-alert-desc{font-size:11px!important;font-weight:400!important;color:var(--final-text)!important}
 .sidebar-waiting-badge{display:inline-flex!important;align-items:center;gap:7px;width:max-content;max-width:100%;margin-top:2px;padding:4px 8px;border:1px solid #D8D0FA;border-radius:999px;background:#F3F0FF;color:#6550A5!important;font-size:10px!important;font-weight:600!important;line-height:1.2}
 .sidebar-waiting-badge::before{content:'';width:6px;height:6px;flex:0 0 auto;border-radius:50%;background:#8F7DDB;box-shadow:0 0 0 3px #E8E2FF}
@@ -2424,8 +2426,11 @@ function compareUpcomingBeforeOverdue(a,b){
   const aBucket = bucket(aDate);
   const bBucket = bucket(bDate);
   if(aBucket!==bBucket) return aBucket-bBucket;
-  if(aBucket===1) return bDate.localeCompare(aDate);
-  if(aDate!==bDate) return aDate.localeCompare(bDate);
+  if(aDate!==bDate){
+    return aBucket===1 ? bDate.localeCompare(aDate) : aDate.localeCompare(bDate);
+  }
+  const timeOrder = String(a.time||'99:99').localeCompare(String(b.time||'99:99'));
+  if(timeOrder) return timeOrder;
   return String(a.clientName||'').localeCompare(String(b.clientName||''));
 }
 function esc(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
@@ -5503,44 +5508,48 @@ function normalizeClientTagsForDisplay(c){
 function renderKanbanDeadlineAlerts(clientList=clients){
   const el = document.getElementById('kanban-alerts');
   if(!el) return;
-  const deadlines = getProcessDeadlineItems(clientList);
-  const tasks = getSidebarTaskItems(clientList).filter(t=>!t.done);
-  const paymentTasks = getPaymentDeadlineItems(clientList).map(t=>({...t, sidebarKind:'paymentTask'}));
+  const deadlines = getProcessDeadlineItems(clientList).map(item=>({...item, sidebarType:'deadline'}));
+  const tasks = getSidebarTaskItems(clientList).map(item=>({...item, sidebarType:'task'}));
+  const paymentTasks = getPaymentDeadlineItems(clientList).map(item=>({...item, sidebarType:'payment'}));
   const financePayments = getFinanceAlerts(clientList).map(item=>({
     ...item,
+    sidebarType:'payment',
     sidebarKind:'finance',
     deadline:item.date || '',
     description:`${item.title}: ${item.installment && item.installment.description ? item.installment.description : 'Parcela'}`,
   }));
-  const payments = paymentTasks.concat(financePayments).sort(compareUpcomingBeforeOverdue);
-  const scheduleItems = getScheduleItems(clientList);
-  const hearings = scheduleItems.filter(t=>isHearingTask(t));
-  const expertises = scheduleItems.filter(t=>isExpertiseTask(t));
-  const countLabel = (items, fallback, singular='pendente', plural='pendentes') => {
-    if(!items.length) return fallback;
-    const n = items.length;
-    return `${n} ${n===1?singular:plural}`;
-  };
-  const block = (title,count,items,cls,empty) => `<section class="kanban-alert-block">
-    <div class="kanban-alert-head"><div class="kanban-alert-title">${title}</div><div class="kanban-alert-count">${count}</div></div>
-    <div class="kanban-alert-row">${items.length ? items.map(t=>{
-      const overdue = t.deadline && dayStatus(t.deadline)==='overdue';
-      const overdueLabel = cls==='task' && t.waitingExternal ? 'Acompanhamento vencido' : cls==='task' ? 'Atrasada' : cls==='hearing' || cls==='expertise' ? 'Data expirada' : 'Vencido';
-      return `<div class="kanban-alert-item ${cls}${overdue?' overdue':''}${t.sidebarKind==='finance'?` finance ${t.tone||''}`:''}" onclick="${t.clientId?`openPanel('${t.clientId}');${t.sidebarKind==='finance'?`setTimeout(()=>document.querySelector('[data-tab=honorarios]')?.click(),0);`:''}`:''}">
-      <div class="kanban-alert-client">${esc(t.clientName||'Tarefa')}${overdue?`<span class="sidebar-overdue-icon" title="${overdueLabel}" aria-label="${overdueLabel}">⚠ ${overdueLabel}</span>`:''}</div>
-      <div class="kanban-alert-desc">${esc(t.description||'Pendência')}</div>
-      ${t.waitingExternal?`<div class="sidebar-waiting-badge">Aguardando: ${esc(waitingOnLabel(t.waitingOn))}</div>`:''}
-      <div class="kanban-alert-date">${t.deadline?`${t.sidebarKind==='finance' ? 'Financeiro' : t.waitingExternal ? 'Acompanhamento' : taskKindLabel(t)}: ${fmtTaskDate(t)}`:'Sem data'}</div>
+  const scheduleItems = getScheduleItems(clientList).map(item=>({
+    ...item,
+    sidebarType:isHearingTask(item) ? 'hearing' : 'expertise',
+  }));
+  const items = deadlines.concat(tasks, paymentTasks, financePayments, scheduleItems).sort(compareUpcomingBeforeOverdue);
+  const groups = [
+    {title:'Próximos', items:items.filter(item=>item.deadline && dayStatus(item.deadline)!=='overdue')},
+    {title:'Vencidos', items:items.filter(item=>item.deadline && dayStatus(item.deadline)==='overdue')},
+    {title:'Sem data', items:items.filter(item=>!item.deadline)},
+  ];
+  const typeLabels = {deadline:'Prazo', task:'Tarefa', payment:'Pagamento', hearing:'Audiência', expertise:'Perícia'};
+  const renderItem = item => {
+    const type = item.sidebarType;
+    const overdue = item.deadline && dayStatus(item.deadline)==='overdue';
+    let overdueLabel = 'Vencido';
+    if(type==='task') overdueLabel = item.waitingExternal ? 'Acompanhamento vencido' : 'Atrasada';
+    if(type==='hearing' || type==='expertise') overdueLabel = 'Data expirada';
+    const dateLabel = item.waitingExternal ? 'Acompanhamento' : typeLabels[type];
+    return `<div class="kanban-alert-item ${type}${overdue?' overdue':''}${item.sidebarKind==='finance'?` finance ${item.tone||''}`:''}" onclick="${item.clientId?`openPanel('${item.clientId}');${item.sidebarKind==='finance'?`setTimeout(()=>document.querySelector('[data-tab=honorarios]')?.click(),0);`:''}`:''}">
+      <div class="sidebar-kind-row"><span class="sidebar-kind-label">${typeLabels[type]}</span>${overdue?`<span class="sidebar-overdue-icon" title="${overdueLabel}" aria-label="${overdueLabel}">⚠ ${overdueLabel}</span>`:''}</div>
+      <div class="kanban-alert-client">${esc(item.clientName||'Tarefa')}</div>
+      <div class="kanban-alert-desc">${esc(item.description||'Pendência')}</div>
+      ${item.waitingExternal?`<div class="sidebar-waiting-badge">Aguardando: ${esc(waitingOnLabel(item.waitingOn))}</div>`:''}
+      <div class="kanban-alert-date">${item.deadline?`${dateLabel}: ${esc(fmtTaskDate(item))}`:'Sem data'}</div>
     </div>`;
-    }).join('') : `<div class="kanban-alert-empty">${empty}</div>`}</div>
-  </section>`;
+  };
   el.className = 'kanban-alerts';
-  el.innerHTML =
-    block('Prazos', countLabel(deadlines,'Tudo em dia','prazo','prazos'), deadlines, 'deadline', 'Nenhum prazo ativo.') +
-    block('Tarefas', countLabel(tasks,'Sem pendência'), tasks, 'task', 'Nenhuma tarefa pendente.') +
-    block('Pagamento', countLabel(payments,'Sem cobrança','cobrança','cobranças'), payments, 'payment', 'Nenhum pagamento para cobrar.') +
-    block('Audiência', countLabel(hearings,'Sem audiência','audiência','audiências'), hearings, 'hearing', 'Nenhuma audiência marcada.') +
-    block('Perícia', countLabel(expertises,'Sem perícia','perícia','perícias'), expertises, 'expertise', 'Nenhuma perícia marcada.');
+  el.innerHTML = groups.filter(group=>group.items.length).map(group=>`
+    <section class="kanban-alert-block">
+      <div class="kanban-alert-head"><div class="kanban-alert-title">${group.title}</div><div class="kanban-alert-count">${sidebarCount(group.items.length,'item','itens')}</div></div>
+      <div class="kanban-alert-row">${group.items.map(renderItem).join('')}</div>
+    </section>`).join('') || '<div class="kanban-alert-empty">Nenhum compromisso pendente.</div>';
 }
 function openPanel(id){
   activeClientId = id;
