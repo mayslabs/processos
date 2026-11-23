@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="2026-11-23-compromissos-por-data">
+<meta name="app-build" content="2026-11-23-prioridade-vencidos">
 <title>Processos Previdenciários</title>
 <script>
 (() => {
-  const build = '2026-11-23-compromissos-por-data';
+  const build = '2026-11-23-prioridade-vencidos';
   if(!/^https?:$/.test(location.protocol)) return;
   const params = new URLSearchParams(location.search);
   if(params.get('build') === build) return;
@@ -5522,11 +5522,16 @@ function renderKanbanDeadlineAlerts(clientList=clients){
     ...item,
     sidebarType:isHearingTask(item) ? 'hearing' : 'expertise',
   }));
-  const items = deadlines.concat(tasks, paymentTasks, financePayments, scheduleItems).sort(compareUpcomingBeforeOverdue);
+  const items = deadlines.concat(tasks, paymentTasks, financePayments, scheduleItems).sort((a,b)=>{
+    const dateOrder = (a.deadline||'9999-99-99').localeCompare(b.deadline||'9999-99-99');
+    if(dateOrder) return dateOrder;
+    return compareUpcomingBeforeOverdue(a,b);
+  });
   const groups = [
+    {title:'Vencidos', items:items.filter(item=>item.sidebarType!=='payment' && item.deadline && dayStatus(item.deadline)==='overdue')},
     {title:'Próximos', items:items.filter(item=>item.deadline && dayStatus(item.deadline)!=='overdue')},
-    {title:'Vencidos', items:items.filter(item=>item.deadline && dayStatus(item.deadline)==='overdue')},
     {title:'Sem data', items:items.filter(item=>!item.deadline)},
+    {title:'Pagamentos vencidos', items:items.filter(item=>item.sidebarType==='payment' && item.deadline && dayStatus(item.deadline)==='overdue')},
   ];
   const typeLabels = {deadline:'Prazo', task:'Tarefa', payment:'Pagamento', hearing:'Audiência', expertise:'Perícia'};
   const renderItem = item => {
